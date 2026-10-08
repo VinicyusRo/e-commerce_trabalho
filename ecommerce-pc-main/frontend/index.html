@@ -9,11 +9,26 @@
     <header id="cabecalho"></header>
 
     <main>
-        <nav id="categorias" class="categorias"></nav>
+        <!-- Banner de destaque (escondido quando há busca ou filtro) -->
+        <section id="destaque" class="destaque">
+            <div class="destaque-texto">
+                <span class="destaque-etiqueta">Prévia 3D interativa</span>
+                <h1>Veja cada peça em 3D antes de comprar</h1>
+                <p>Gire, aproxime e confira placas de vídeo, processadores, memórias e SSDs direto no navegador.</p>
+                <a class="botao primario" href="#produtos-titulo">Ver produtos</a>
+            </div>
+            <ul class="destaque-vantagens">
+                <li><strong>Visualização 3D</strong><span>em todos os produtos</span></li>
+                <li><strong>Estoque em tempo real</strong><span>direto do banco de dados</span></li>
+                <li><strong>Compra segura</strong><span>com login e pedido protegido</span></li>
+            </ul>
+        </section>
 
-        <h1 id="titulo-lista">Produtos</h1>
+        <nav id="categorias" class="categorias" aria-label="Categorias"></nav>
+
+        <h2 id="titulo-lista" class="titulo-secao">Produtos</h2>
         <p id="mensagem"></p>
-        <section id="produtos" class="grade"></section>
+        <section id="produtos" class="grade" aria-labelledby="titulo-lista"></section>
     </main>
 
     <script type="module" src="/src/pages/home.js"></script>

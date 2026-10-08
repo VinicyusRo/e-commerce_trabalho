@@ -1,4 +1,5 @@
 import { totalDeItens } from '../carrinho.js';
+import { ICONES } from './icones.js';
 
 // Monta o cabeçalho em qualquer página que tenha <header id="cabecalho">
 export function montarCabecalho() {
@@ -6,20 +7,30 @@ export function montarCabecalho() {
     if (!alvo) return;
 
     const logado = localStorage.getItem('token') !== null;
+    const itens = totalDeItens();
 
     alvo.innerHTML = `
-        <a class="logo" href="/">PC Store</a>
+        <a class="logo" href="/">
+            <span class="logo-icone" aria-hidden="true"></span>
+            <span>PC<span class="logo-destaque">Store</span></span>
+        </a>
 
-        <form class="busca" action="/" method="get">
-            <input type="search" name="busca" placeholder="Buscar produtos...">
+        <form class="busca" action="/" method="get" role="search">
+            <span class="busca-icone" aria-hidden="true">${ICONES.busca}</span>
+            <input type="search" name="busca" placeholder="Buscar placas de vídeo, processadores..."
+                   aria-label="Buscar produtos">
             <button type="submit">Buscar</button>
         </form>
 
         <nav>
-            <a href="/carrinho.html">Carrinho (${totalDeItens()})</a>
+            <a class="nav-link" href="/carrinho.html">
+                ${ICONES.carrinho}
+                <span>Carrinho</span>
+                ${itens > 0 ? `<span class="contador-carrinho">${itens}</span>` : ''}
+            </a>
             ${logado
-                ? '<a href="/conta.html">Minha conta</a>'
-                : '<a href="/login.html">Entrar</a>'}
+                ? `<a class="nav-link" href="/conta.html">${ICONES.usuario}<span>Minha conta</span></a>`
+                : `<a class="nav-link" href="/login.html">${ICONES.usuario}<span>Entrar</span></a>`}
         </nav>
     `;
 

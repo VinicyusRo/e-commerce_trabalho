@@ -4,7 +4,7 @@
 // Endereço do backend:
 //  - no seu computador fica vazio e o Vite repassa /api para localhost:3000
 //  - online (Vercel), vem da variável VITE_API_URL, ex.: https://meu-backend.onrender.com
-const BASE_API = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+const BASE_API = (import.meta.env?.VITE_API_URL ?? '').replace(/\/$/, '');
 
 export async function api(caminho, opcoes = {}) {
     const token = localStorage.getItem('token');

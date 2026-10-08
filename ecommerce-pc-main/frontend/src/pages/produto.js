@@ -74,7 +74,7 @@ function desenharModelo3D(p) {
     btnTelaCheia.hidden = !p.modelo_3d;
 
     const visualizador = criarVisualizador(document.getElementById('visualizador'), {
-        corFundo: 0x1e1e1e,
+        corFundo: 0x131720,
         autoRotacao: true,     // gira sozinho até o usuário mexer
     });
 

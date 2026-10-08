@@ -41,7 +41,7 @@ async function iniciar() {
         return;
     }
 
-    const visualizador = criarVisualizador(container);
+    const visualizador = criarVisualizador(container, { corFundo: 0x131720 });
 
     document
         .getElementById('btn-reset')
