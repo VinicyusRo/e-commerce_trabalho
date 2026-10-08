@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar compra - PC Store</title>
+</head>
+<body>
+    <header id="cabecalho"></header>
+
+    <main>
+        <h1>Finalizar compra</h1>
+        <p id="mensagem"></p>
+
+        <section id="resumo"></section>
+
+        <section id="enderecos">
+            <h2>Endereço de entrega</h2>
+            <div id="lista-enderecos"></div>
+
+            <details id="novo-endereco">
+                <summary>Cadastrar novo endereço</summary>
+                <form id="form-endereco" class="formulario">
+                    <label>Rua <input name="rua" required></label>
+                    <label>Número <input name="numero" required></label>
+                    <label>Cidade <input name="cidade" required></label>
+                    <label>Estado (UF) <input name="estado" maxlength="2" required></label>
+                    <label>CEP <input name="cep" required></label>
+                    <p id="erro-endereco" class="sem-estoque"></p>
+                    <button type="submit" class="botao">Salvar endereço</button>
+                </form>
+            </details>
+        </section>
+
+        <p id="erro-pedido" class="sem-estoque"></p>
+        <button id="btn-finalizar" class="botao primario">Confirmar pedido</button>
+    </main>
+
+    <script type="module" src="/src/pages/checkout.js"></script>
+</body>
+</html>

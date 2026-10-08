@@ -1,0 +1,208 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/**
+ * Libera da GPU as geometrias, materiais e texturas de um objeto 3D.
+ */
+function liberarObjeto(objeto) {
+    objeto.traverse((no) => {
+        if (no.geometry) no.geometry.dispose();
+
+        if (no.material) {
+            const materiais = Array.isArray(no.material) ? no.material : [no.material];
+            materiais.forEach((material) => {
+                // Texturas ficam como propriedades do material (map, normalMap...)
+                for (const valor of Object.values(material)) {
+                    if (valor && valor.isTexture) valor.dispose();
+                }
+                material.dispose();
+            });
+        }
+    });
+}
+
+/**
+ * Cria um visualizador 3D dentro de um elemento HTML.
+ * @param {HTMLElement} container - onde o canvas será desenhado
+ */
+export function criarVisualizador(container) {
+
+    // NOVO: garante que o container seja a referência para o aviso por cima
+    if (getComputedStyle(container).position === 'static') {
+        container.style.position = 'relative';
+    }
+
+    let destruido = false;
+
+    // ---------- Cena, câmera, renderizador ----------
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x202020);
+
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    // ---------- NOVO: aviso na tela (carregando / erro) ----------
+    const aviso = document.createElement('div');
+    aviso.style.cssText = `
+        position: absolute; inset: 0;
+        display: none; align-items: center; justify-content: center;
+        color: #fff; font-family: sans-serif; font-size: 18px;
+        text-align: center; padding: 20px; pointer-events: none;
+    `;
+    container.appendChild(aviso);
+
+    function mostrarAviso(texto, cor = '#fff') {
+        aviso.textContent = texto;
+        aviso.style.color = cor;
+        aviso.style.display = 'flex';
+    }
+
+    function esconderAviso() {
+        aviso.style.display = 'none';
+    }
+
+    // ---------- Controles ----------
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    // ---------- Iluminação ----------
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+    const luz = new THREE.DirectionalLight(0xffffff, 1.5);
+    luz.position.set(5, 5, 5);
+    scene.add(luz);
+
+    // ---------- Tamanho acompanha o container ----------
+    function ajustarTamanho() {
+        const largura = container.clientWidth;
+        const altura = container.clientHeight;
+        if (largura === 0 || altura === 0) return;
+
+        renderer.setSize(largura, altura);
+        camera.aspect = largura / altura;
+        camera.updateProjectionMatrix();
+    }
+
+    const observador = new ResizeObserver(ajustarTamanho);
+    observador.observe(container);
+    ajustarTamanho();
+
+    // ---------- Enquadramento automático ----------
+    let modeloAtual = null;
+    const vistaInicial = {
+        posicao: new THREE.Vector3(),
+        alvo: new THREE.Vector3()
+    };
+
+    function enquadrarModelo(modelo) {
+        const caixa = new THREE.Box3().setFromObject(modelo);
+        const centro = caixa.getCenter(new THREE.Vector3());
+        modelo.position.sub(centro);
+
+        const tamanho = caixa.getSize(new THREE.Vector3());
+        const raio = tamanho.length() / 2;
+
+        const fovVertical = THREE.MathUtils.degToRad(camera.fov);
+        const fovHorizontal = 2 * Math.atan(Math.tan(fovVertical / 2) * camera.aspect);
+        const fovMenor = Math.min(fovVertical, fovHorizontal);
+        const distancia = (raio / Math.sin(fovMenor / 2)) * 1.1;
+
+        const direcao = new THREE.Vector3(1, 0.6, 1).normalize();
+        camera.position.copy(direcao).multiplyScalar(distancia);
+
+        camera.near = distancia / 100;
+        camera.far = distancia * 100;
+        camera.updateProjectionMatrix();
+
+        controls.target.set(0, 0, 0);
+        controls.minDistance = raio * 0.5;
+        controls.maxDistance = distancia * 3;
+        controls.update();
+
+        vistaInicial.posicao.copy(camera.position);
+        vistaInicial.alvo.copy(controls.target);
+    }
+
+    // ---------- Interface pública ----------
+    const loader = new GLTFLoader();
+
+    async function carregarModelo(url) {
+        mostrarAviso('Carregando modelo...');
+
+        try {
+            const gltf = await loader.loadAsync(url, (progresso) => {
+                // total pode ser 0 se o servidor não informar o tamanho do arquivo
+                if (progresso.total > 0) {
+                    const porcentagem = Math.round((progresso.loaded / progresso.total) * 100);
+                    mostrarAviso(`Carregando modelo... ${porcentagem}%`);
+                }
+            });
+
+            // Se o visualizador foi destruído durante o download, descarta o resultado
+            if (destruido) {
+                liberarObjeto(gltf.scene);
+                return;
+            }
+
+            // Se já havia um modelo, remove e libera ele da GPU
+            if (modeloAtual) {
+                scene.remove(modeloAtual);
+                liberarObjeto(modeloAtual);
+            }
+
+            modeloAtual = gltf.scene;
+            scene.add(modeloAtual);
+            enquadrarModelo(modeloAtual);
+            esconderAviso();
+
+        } catch (erro) {
+            if (!destruido) {
+                mostrarAviso('Não foi possível carregar o modelo 3D.', '#ff8080');
+            }
+            throw erro; // quem chamou ainda pode tratar o erro
+        }
+    }
+
+    function resetarCamera() {
+        camera.position.copy(vistaInicial.posicao);
+        controls.target.copy(vistaInicial.alvo);
+        controls.update();
+    }
+
+    // NOVO: desmonta tudo e libera a memória
+    function destruir() {
+        if (destruido) return;
+        destruido = true;
+
+        renderer.setAnimationLoop(null);   // para o loop
+        observador.disconnect();           // para de observar o container
+        controls.dispose();                // remove os eventos do mouse
+
+        if (modeloAtual) {
+            scene.remove(modeloAtual);
+            liberarObjeto(modeloAtual);
+            modeloAtual = null;
+        }
+
+        scene.environment.dispose();
+        pmrem.dispose();
+        renderer.dispose();
+
+        renderer.domElement.remove();      // tira o canvas da página
+        aviso.remove();
+    }
+
+    // ---------- Loop de renderização ----------
+    renderer.setAnimationLoop(() => {
+        controls.update();
+        renderer.render(scene, camera);
+    });
+
+    return { carregarModelo, resetarCamera, destruir };
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador 3D - PC Store</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            font-family: system-ui, sans-serif;
+            background: #202020;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #barra {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 16px;
+            background: #222;
+            border-bottom: 1px solid #333;
+            color: #fff;
+        }
+
+        #barra a { color: #6cb4ff; text-decoration: none; }
+        #titulo-produto { font-weight: bold; }
+
+        /* O visualizador ocupa o espaço que sobra abaixo da barra */
+        #visualizador {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+        }
+
+        #btn-reset {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 10;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        #erro-pagina {
+            display: none;
+            position: absolute;
+            inset: 0;
+            align-items: center;
+            justify-content: center;
+            color: #ff8080;
+            font-size: 18px;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="barra">
+        <a id="btn-voltar" href="/">← Voltar</a>
+        <span id="titulo-produto"></span>
+    </div>
+
+    <div id="visualizador">
+        <button id="btn-reset">Resetar vista</button>
+    </div>
+
+    <div id="erro-pagina"></div>
+
+    <script type="module" src="/src/pages/visualizador.js"></script>
+</body>
+</html>
