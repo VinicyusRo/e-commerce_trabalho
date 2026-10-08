@@ -1257,3 +1257,30 @@ article.cartao .preco { margin-bottom: 12px; }
 /* "Continuar comprando" da notinha: botão secundário, não link */
 .botao-secundario { margin-top: 10px; background: transparent; }
 .botao-secundario:hover { border-color: var(--destaque); color: var(--destaque); background: var(--destaque-fundo); }
+
+/* =====================================================
+   Botões da página do produto: mesmo tamanho, uma linha só
+   ===================================================== */
+.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.acoes .botao,
+.acoes .botao.primario {
+    min-width: 0;
+    height: 52px;
+    padding: 0 18px;
+    font-size: 16px;
+    white-space: nowrap;
+}
+.acoes .botao svg { width: 20px; height: 20px; flex: none; }
+.acoes .botao:not(.primario) { background: transparent; }
+.acoes .botao:not(.primario):hover:not(:disabled) { border-color: var(--destaque); color: var(--destaque); background: var(--destaque-fundo); }
+
+@media (max-width: 700px) {
+    /* No celular um embaixo do outro, ocupando a largura toda */
+    .acoes { grid-template-columns: 1fr; }
+}
+
+/* "Ver produto" dos cards do carrinho e dos carrosséis */
+.botao-ver { margin-top: 4px; }
+.botao-ver svg { width: 16px; height: 16px; transition: transform .15s; }
+.cartao:hover .botao-ver { border-color: var(--destaque); color: var(--destaque); background: var(--destaque-fundo); }
+.cartao:hover .botao-ver svg { transform: translateX(3px); }

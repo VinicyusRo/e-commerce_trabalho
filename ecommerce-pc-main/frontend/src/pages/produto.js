@@ -7,7 +7,7 @@ import { adicionarAoCarrinho, lerCarrinho } from '../carrinho.js';
 import { criarVisualizador } from '../viewer/viewer.js';
 import { exibirModeloDoProduto, textoSeloModelo, elementoCreditos } from '../viewer/modelo-produto.js';
 import { montarCarrossel } from '../componentes/carrossel.js';
-import { ativarBotoesAdicionar } from '../componentes/cartao-produto.js';
+import { ICONES } from '../componentes/icones.js';
 
 montarCabecalho();
 ativarBotaoVoltar();
@@ -35,7 +35,7 @@ function desenharProduto(p) {
                 Comprar agora
             </button>
             <button class="botao" id="btn-carrinho" ${disponivel ? '' : 'disabled'}>
-                Adicionar ao carrinho
+                ${ICONES.carrinho} Adicionar ao carrinho
             </button>
         </div>
         <p id="aviso-carrinho"></p>
@@ -111,7 +111,6 @@ function desenharModelo3D(p) {
 // Dois carrosséis embaixo: mesma categoria e o resto da loja
 async function carregarCarrosseis(atual) {
     const todos = await api('/produtos');
-    const mapa = new Map(todos.map((p) => [p.id, p]));
 
     const mesmaCategoria = todos.filter((p) => p.categoria_id === atual.categoria_id && p.id !== atual.id);
     const outros = todos.filter((p) => p.categoria_id !== atual.categoria_id);
@@ -122,8 +121,6 @@ async function carregarCarrosseis(atual) {
     montarCarrossel(secaoCategoria, { titulo: `Mais em ${atual.categoria}`, produtos: mesmaCategoria });
     montarCarrossel(secaoOutros, { titulo: 'Outros produtos da loja', produtos: outros });
 
-    ativarBotoesAdicionar(secaoCategoria, mapa);
-    ativarBotoesAdicionar(secaoOutros, mapa);
 }
 
 async function iniciar() {

@@ -4,7 +4,7 @@ import { ativarBotaoVoltar } from '../componentes/voltar.js';
 import { api } from '../api/api.js';
 import { formatarPreco, escapar } from '../utils.js';
 import {
-    lerCarrinho, alterarQuantidade, removerDoCarrinho, adicionarAoCarrinho,
+    lerCarrinho, alterarQuantidade, removerDoCarrinho,
 } from '../carrinho.js';
 import { confirmar } from '../componentes/confirmar.js';
 import { cartaoProduto } from '../componentes/cartao-produto.js';
@@ -192,16 +192,6 @@ elItens.addEventListener('change', (e) => {
         alterarQuantidade(id, quantidade);
         desenhar();
     }
-});
-
-// Botão "Adicionar" dos produtos sugeridos
-elRecomendados.addEventListener('click', (e) => {
-    const botao = e.target.closest('button[data-adicionar]');
-    if (!botao) return;
-    const id = Number(botao.dataset.adicionar);
-    const p = catalogo.get(id);
-    if (p && quantidadeAtual(id) < p.estoque) adicionarAoCarrinho(id);
-    desenhar();
 });
 
 // ---------- Início ----------
