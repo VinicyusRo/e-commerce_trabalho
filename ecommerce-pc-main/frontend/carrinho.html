@@ -11,8 +11,17 @@
     <main>
         <h1>Carrinho</h1>
         <p id="mensagem"></p>
-        <section id="itens"></section>
-        <section id="resumo"></section>
+
+        <!-- Itens à esquerda, "notinha" com o total à direita -->
+        <div class="carrinho-layout">
+            <section id="itens" class="carrinho-itens" aria-label="Itens do carrinho"></section>
+            <aside id="resumo" class="nota" aria-label="Resumo do pedido"></aside>
+        </div>
+
+        <section id="secao-recomendados" class="recomendados" hidden>
+            <h2>Você também pode gostar</h2>
+            <div id="recomendados" class="grade"></div>
+        </section>
     </main>
 
     <script type="module" src="/src/pages/carrinho.js"></script>

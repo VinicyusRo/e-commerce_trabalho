@@ -21,11 +21,17 @@
             <details id="novo-endereco">
                 <summary>Cadastrar novo endereço</summary>
                 <form id="form-endereco" class="formulario">
-                    <label>Rua <input name="rua" required></label>
-                    <label>Número <input name="numero" required></label>
-                    <label>Cidade <input name="cidade" required></label>
-                    <label>Estado (UF) <input name="estado" maxlength="2" required></label>
-                    <label>CEP <input name="cep" required></label>
+                    <label>CEP
+                        <input name="cep" id="campo-cep" required inputmode="numeric"
+                               maxlength="9" placeholder="00000-000" autocomplete="postal-code">
+                        <small id="status-cep" class="dica-campo">Digite o CEP para preencher o endereço automaticamente.</small>
+                    </label>
+                    <label>Rua <input name="rua" required autocomplete="address-line1"></label>
+                    <div class="linha-campos">
+                        <label>Número <input name="numero" id="campo-numero" required></label>
+                        <label>Estado (UF) <input name="estado" maxlength="2" required></label>
+                    </div>
+                    <label>Cidade <input name="cidade" required autocomplete="address-level2"></label>
                     <p id="erro-endereco" class="sem-estoque"></p>
                     <button type="submit" class="botao">Salvar endereço</button>
                 </form>

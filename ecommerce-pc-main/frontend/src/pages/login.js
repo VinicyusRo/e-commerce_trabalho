@@ -1,8 +1,10 @@
 import '../estilo.css';
 import { montarCabecalho } from '../componentes/cabecalho.js';
 import { api } from '../api/api.js';
+import { ativarMostrarSenha } from '../componentes/mostrar-senha.js';
 
 montarCabecalho();
+ativarMostrarSenha();   // botão de "olho" no campo de senha
 
 const form = document.getElementById('formulario');
 const elTitulo = document.getElementById('titulo');
@@ -19,6 +21,8 @@ function atualizarModo() {
     elBotao.textContent = modoCadastro ? 'Cadastrar' : 'Entrar';
     elAlternar.textContent = modoCadastro ? 'Já tem conta? Entrar' : 'Não tem conta? Cadastre-se';
     elCampoNome.hidden = !modoCadastro;
+    // Ajuda o navegador a sugerir/salvar a senha certa
+    form.senha.autocomplete = modoCadastro ? 'new-password' : 'current-password';
     elErro.textContent = '';
 }
 

@@ -1,9 +1,8 @@
 import '../estilo.css';
 import { montarCabecalho } from '../componentes/cabecalho.js';
 import { api } from '../api/api.js';
-import { formatarPreco, escapar } from '../utils.js';
-import { textoSeloModelo } from '../viewer/modelo-produto.js';
-import { iconeDaCategoria, ICONES } from '../componentes/icones.js';
+import { escapar } from '../utils.js';
+import { cartaoProduto } from '../componentes/cartao-produto.js';
 
 montarCabecalho();
 
@@ -39,30 +38,7 @@ function desenharProdutos(produtos) {
     }
 
     elMensagem.textContent = '';
-    elProdutos.innerHTML = produtos.map((p) => {
-        const selo = textoSeloModelo(p.modelo_3d);
-        const generico = p.modelo_3d?.origem === 'categoria';
-        const estoque = p.estoque > 0
-            ? `<span class="em-estoque">${p.estoque} em estoque</span>`
-            : '<span class="sem-estoque">Esgotado</span>';
-
-        return `
-        <a class="cartao" href="/produto.html?id=${p.id}">
-            <div class="cartao-imagem">
-                ${iconeDaCategoria(p.categoria)}
-                ${selo ? `<span class="selo-3d ${generico ? 'generico' : ''}">${ICONES.cubo}${selo}</span>` : ''}
-            </div>
-            <div class="cartao-corpo">
-                <p class="categoria">${escapar(p.categoria)}</p>
-                <h3>${escapar(p.nome)}</h3>
-                <p class="preco">${formatarPreco(p.preco)}</p>
-                <div class="cartao-rodape">
-                    ${estoque}
-                    <span class="ver-3d">Ver em 3D →</span>
-                </div>
-            </div>
-        </a>`;
-    }).join('');
+    elProdutos.innerHTML = produtos.map((p) => cartaoProduto(p)).join('');
 }
 
 async function iniciar() {

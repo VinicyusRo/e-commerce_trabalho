@@ -74,6 +74,8 @@ formEndereco.addEventListener('submit', async (e) => {
             body: JSON.stringify(Object.fromEntries(new FormData(formEndereco))),
         });
         formEndereco.reset();
+        ultimoCepBuscado = '';
+        mostrarStatusCep('Digite o CEP para preencher o endereço automaticamente.');
         document.getElementById('novo-endereco').open = false;
         await desenharEnderecos();
     } catch (erro) {
@@ -108,6 +110,50 @@ elBotao.addEventListener('click', async () => {
         // Ex.: "Estoque insuficiente para ..." (409 com ROLLBACK no backend)
         elErroPedido.textContent = erro.message;
         elBotao.disabled = false;
+    }
+});
+
+// ---------- CEP: preenche rua, cidade e estado automaticamente ----------
+// Usa o ViaCEP (https://viacep.com.br), serviço gratuito que o navegador
+// chama diretamente; não precisa mudar nada no backend.
+const campoCep = document.getElementById('campo-cep');
+const elStatusCep = document.getElementById('status-cep');
+let ultimoCepBuscado = '';
+
+function mostrarStatusCep(texto, tipo = '') {
+    elStatusCep.textContent = texto;
+    elStatusCep.className = `dica-campo ${tipo}`;
+}
+
+campoCep.addEventListener('input', async () => {
+    // Máscara 00000-000
+    const digitos = campoCep.value.replace(/\D/g, '').slice(0, 8);
+    campoCep.value = digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
+
+    if (digitos.length !== 8 || digitos === ultimoCepBuscado) return;
+    ultimoCepBuscado = digitos;
+
+    mostrarStatusCep('Buscando endereço...');
+    try {
+        const resposta = await fetch(`https://viacep.com.br/ws/${digitos}/json/`);
+        const dados = await resposta.json();
+
+        if (dados.erro) {
+            mostrarStatusCep('CEP não encontrado. Preencha o endereço manualmente.', 'sem-estoque');
+            return;
+        }
+
+        // Rua com o bairro, já que a tabela endereco não tem coluna de bairro
+        const rua = [dados.logradouro, dados.bairro].filter(Boolean).join(' - ');
+        if (rua) formEndereco.rua.value = rua;
+        formEndereco.cidade.value = dados.localidade ?? '';
+        formEndereco.estado.value = dados.uf ?? '';
+
+        mostrarStatusCep('Endereço encontrado! Agora informe o número.', 'em-estoque');
+        // Se o CEP for da cidade toda (sem rua), o foco vai para a rua
+        (rua ? document.getElementById('campo-numero') : formEndereco.rua).focus();
+    } catch {
+        mostrarStatusCep('Não foi possível consultar o CEP. Preencha manualmente.', 'sem-estoque');
     }
 });
 

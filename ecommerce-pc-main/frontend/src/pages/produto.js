@@ -27,7 +27,10 @@ function desenharProduto(p) {
             ${disponivel ? `Em estoque: ${p.estoque} unidades` : 'Indisponível'}
         </p>
         <div class="acoes">
-            <button class="botao primario" id="btn-carrinho" ${disponivel ? '' : 'disabled'}>
+            <button class="botao primario" id="btn-comprar" ${disponivel ? '' : 'disabled'}>
+                Comprar agora
+            </button>
+            <button class="botao" id="btn-carrinho" ${disponivel ? '' : 'disabled'}>
                 Adicionar ao carrinho
             </button>
         </div>
@@ -46,7 +49,8 @@ function desenharProduto(p) {
         elProduto.append(elementoCreditos(p.modelo_3d.creditos));
     }
 
-    document.getElementById('btn-carrinho').addEventListener('click', () => {
+    // Adiciona 1 unidade respeitando o estoque. Devolve true se adicionou.
+    function adicionar() {
         const aviso = document.getElementById('aviso-carrinho');
         const noCarrinho = lerCarrinho()
             .find((i) => i.produto_id === p.id)?.quantidade ?? 0;
@@ -54,11 +58,26 @@ function desenharProduto(p) {
         if (noCarrinho >= p.estoque) {
             aviso.textContent =
                 `Você já tem o máximo disponível no carrinho (${p.estoque}).`;
-            return;
+            return false;
         }
 
         adicionarAoCarrinho(p.id);
-        aviso.innerHTML = 'Adicionado! <a href="/carrinho.html">Ver carrinho</a>';
+        montarCabecalho();   // atualiza o contador do carrinho no topo
+        return true;
+    }
+
+    document.getElementById('btn-carrinho').addEventListener('click', () => {
+        if (adicionar()) {
+            document.getElementById('aviso-carrinho').innerHTML =
+                'Adicionado! <a href="/carrinho.html">Ver carrinho</a>';
+        }
+    });
+
+    // "Comprar agora": coloca no carrinho (se ainda não estiver) e vai direto para ele
+    document.getElementById('btn-comprar').addEventListener('click', () => {
+        const jaNoCarrinho = lerCarrinho().some((i) => i.produto_id === p.id);
+        if (!jaNoCarrinho) adicionar();
+        window.location.href = '/carrinho.html';
     });
 }
 
