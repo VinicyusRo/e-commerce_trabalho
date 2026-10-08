@@ -2,6 +2,7 @@ import '../estilo.css';
 import { montarCabecalho } from '../componentes/cabecalho.js';
 import { api } from '../api/api.js';
 import { formatarPreco, escapar } from '../utils.js';
+import { textoSeloModelo } from '../viewer/modelo-produto.js';
 
 montarCabecalho();
 
@@ -39,7 +40,9 @@ function desenharProdutos(produtos) {
             <h3>${escapar(p.nome)}</h3>
             <p class="categoria">${escapar(p.categoria)}</p>
             <p class="preco">${formatarPreco(p.preco)}</p>
-            ${p.modelo_3d ? '<span class="selo-3d">Visualização 3D</span>' : ''}
+            ${p.modelo_3d
+                ? `<span class="selo-3d ${p.modelo_3d.origem === 'categoria' ? 'generico' : ''}">${textoSeloModelo(p.modelo_3d)}</span>`
+                : ''}
         </a>
     `).join('');
 }

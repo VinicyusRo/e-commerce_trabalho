@@ -3,12 +3,15 @@ import { montarCabecalho } from '../componentes/cabecalho.js';
 import { api } from '../api/api.js';
 import { formatarPreco, escapar } from '../utils.js';
 import { adicionarAoCarrinho, lerCarrinho } from '../carrinho.js';
+import { criarVisualizador } from '../viewer/viewer.js';
+import { exibirModeloDoProduto, textoSeloModelo, elementoCreditos } from '../viewer/modelo-produto.js';
 
 montarCabecalho();
 
 const id = new URLSearchParams(window.location.search).get('id');
 const elMensagem = document.getElementById('mensagem');
 const elProduto = document.getElementById('produto');
+const elPagina = document.getElementById('pagina-produto');
 
 function desenharProduto(p) {
     document.title = `${p.nome} - PC Store`;
@@ -24,9 +27,6 @@ function desenharProduto(p) {
             ${disponivel ? `Em estoque: ${p.estoque} unidades` : 'Indisponível'}
         </p>
         <div class="acoes">
-            ${p.modelo_3d
-                ? `<a class="botao" href="/visualizador.html?id=${p.id}">Visualizar em 3D</a>`
-                : ''}
             <button class="botao primario" id="btn-carrinho" ${disponivel ? '' : 'disabled'}>
                 Adicionar ao carrinho
             </button>
@@ -34,7 +34,19 @@ function desenharProduto(p) {
         <p id="aviso-carrinho"></p>
     `;
 
-        document.getElementById('btn-carrinho').addEventListener('click', () => {
+    // Aviso de modelo genérico e créditos (a licença dos modelos exige)
+    if (p.modelo_3d?.origem === 'categoria') {
+        const aviso = document.createElement('p');
+        aviso.className = 'aviso-generico';
+        aviso.textContent = `A prévia 3D é um modelo genérico da categoria ${p.categoria}. ` +
+            'A aparência real da peça pode ser diferente.';
+        elProduto.append(aviso);
+    }
+    if (p.modelo_3d?.creditos) {
+        elProduto.append(elementoCreditos(p.modelo_3d.creditos));
+    }
+
+    document.getElementById('btn-carrinho').addEventListener('click', () => {
         const aviso = document.getElementById('aviso-carrinho');
         const noCarrinho = lerCarrinho()
             .find((i) => i.produto_id === p.id)?.quantidade ?? 0;
@@ -50,6 +62,29 @@ function desenharProduto(p) {
     });
 }
 
+function desenharModelo3D(p) {
+    const selo = textoSeloModelo(p.modelo_3d);
+    const elSelo = document.getElementById('selo-modelo');
+    elSelo.hidden = !selo;
+    elSelo.textContent = selo ?? '';
+    elSelo.classList.toggle('generico', p.modelo_3d?.origem === 'categoria');
+
+    const btnTelaCheia = document.getElementById('btn-tela-cheia');
+    btnTelaCheia.href = `/visualizador.html?id=${p.id}`;
+    btnTelaCheia.hidden = !p.modelo_3d;
+
+    const visualizador = criarVisualizador(document.getElementById('visualizador'), {
+        corFundo: 0x1e1e1e,
+        autoRotacao: true,     // gira sozinho até o usuário mexer
+    });
+
+    document
+        .getElementById('btn-reset')
+        .addEventListener('click', () => visualizador.resetarCamera());
+
+    exibirModeloDoProduto(visualizador, p.modelo_3d);
+}
+
 async function iniciar() {
     if (!id) {
         elMensagem.textContent = 'Produto não informado.';
@@ -62,6 +97,8 @@ async function iniciar() {
         const produto = await api(`/produtos/${encodeURIComponent(id)}`);
         elMensagem.textContent = '';
         desenharProduto(produto);
+        elPagina.hidden = false;      // mostra antes de criar o visualizador (precisa de tamanho)
+        desenharModelo3D(produto);
     } catch (erro) {
         elMensagem.textContent = erro.message;
     }

@@ -26,10 +26,14 @@ function liberarObjeto(objeto) {
 /**
  * Cria um visualizador 3D dentro de um elemento HTML.
  * @param {HTMLElement} container - onde o canvas será desenhado
+ * @param {object} [opcoes]
+ * @param {number}  [opcoes.corFundo=0x202020]  - cor de fundo da cena
+ * @param {boolean} [opcoes.autoRotacao=false]  - gira o modelo até o usuário mexer
  */
-export function criarVisualizador(container) {
+export function criarVisualizador(container, opcoes = {}) {
+    const { corFundo = 0x202020, autoRotacao = false } = opcoes;
 
-    // NOVO: garante que o container seja a referência para o aviso por cima
+    // Garante que o container seja a referência para o aviso por cima
     if (getComputedStyle(container).position === 'static') {
         container.style.position = 'relative';
     }
@@ -38,15 +42,15 @@ export function criarVisualizador(container) {
 
     // ---------- Cena, câmera, renderizador ----------
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x202020);
+    scene.background = new THREE.Color(corFundo);
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // limita em telas 3x
     container.appendChild(renderer.domElement);
 
-    // ---------- NOVO: aviso na tela (carregando / erro) ----------
+    // ---------- Aviso na tela (carregando / erro) ----------
     const aviso = document.createElement('div');
     aviso.style.cssText = `
         position: absolute; inset: 0;
@@ -69,6 +73,13 @@ export function criarVisualizador(container) {
     // ---------- Controles ----------
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
+    controls.autoRotate = autoRotacao;
+    controls.autoRotateSpeed = 1.5;
+
+    // Quando o usuário começa a arrastar, para a rotação automática
+    controls.addEventListener('start', () => {
+        controls.autoRotate = false;
+    });
 
     // ---------- Iluminação ----------
     const pmrem = new THREE.PMREMGenerator(renderer);
@@ -129,44 +140,78 @@ export function criarVisualizador(container) {
         vistaInicial.alvo.copy(controls.target);
     }
 
+    // Coloca um objeto na cena no lugar do modelo anterior
+    function trocarModelo(objeto) {
+        if (modeloAtual) {
+            scene.remove(modeloAtual);
+            liberarObjeto(modeloAtual);
+        }
+
+        modeloAtual = objeto;
+        scene.add(modeloAtual);
+        enquadrarModelo(modeloAtual);
+        controls.autoRotate = autoRotacao;   // modelo novo volta a girar
+        esconderAviso();
+    }
+
     // ---------- Interface pública ----------
     const loader = new GLTFLoader();
 
+    // Cada carregamento recebe um número. Se o usuário pedir outro modelo
+    // antes do download terminar, o resultado antigo é descartado
+    // (senão um modelo lento poderia aparecer por cima do mais novo).
+    let ultimoPedido = 0;
+
+    /** Carrega um arquivo .glb/.gltf pela URL. */
     async function carregarModelo(url) {
+        const pedido = ++ultimoPedido;
         mostrarAviso('Carregando modelo...');
 
         try {
             const gltf = await loader.loadAsync(url, (progresso) => {
                 // total pode ser 0 se o servidor não informar o tamanho do arquivo
-                if (progresso.total > 0) {
+                if (progresso.total > 0 && pedido === ultimoPedido) {
                     const porcentagem = Math.round((progresso.loaded / progresso.total) * 100);
                     mostrarAviso(`Carregando modelo... ${porcentagem}%`);
                 }
             });
 
-            // Se o visualizador foi destruído durante o download, descarta o resultado
-            if (destruido) {
+            // Destruído durante o download, ou já pediram outro modelo: descarta
+            if (destruido || pedido !== ultimoPedido) {
                 liberarObjeto(gltf.scene);
                 return;
             }
 
-            // Se já havia um modelo, remove e libera ele da GPU
-            if (modeloAtual) {
-                scene.remove(modeloAtual);
-                liberarObjeto(modeloAtual);
-            }
-
-            modeloAtual = gltf.scene;
-            scene.add(modeloAtual);
-            enquadrarModelo(modeloAtual);
-            esconderAviso();
+            trocarModelo(gltf.scene);
 
         } catch (erro) {
-            if (!destruido) {
+            if (!destruido && pedido === ultimoPedido) {
                 mostrarAviso('Não foi possível carregar o modelo 3D.', '#ff8080');
             }
             throw erro; // quem chamou ainda pode tratar o erro
         }
+    }
+
+    /** Mostra um objeto 3D já pronto (ex.: um modelo gerado por código). */
+    function mostrarObjeto(objeto) {
+        ++ultimoPedido;              // cancela qualquer download em andamento
+        if (destruido) {
+            liberarObjeto(objeto);
+            return;
+        }
+        trocarModelo(objeto);
+    }
+
+    /** Remove o modelo atual e mostra uma mensagem no lugar. */
+    function limpar(mensagem = '') {
+        ++ultimoPedido;
+        if (modeloAtual) {
+            scene.remove(modeloAtual);
+            liberarObjeto(modeloAtual);
+            modeloAtual = null;
+        }
+        if (mensagem) mostrarAviso(mensagem, '#aab');
+        else esconderAviso();
     }
 
     function resetarCamera() {
@@ -175,7 +220,7 @@ export function criarVisualizador(container) {
         controls.update();
     }
 
-    // NOVO: desmonta tudo e libera a memória
+    // Desmonta tudo e libera a memória
     function destruir() {
         if (destruido) return;
         destruido = true;
@@ -199,10 +244,19 @@ export function criarVisualizador(container) {
     }
 
     // ---------- Loop de renderização ----------
-    renderer.setAnimationLoop(() => {
+    // O setAnimationLoop entrega o tempo atual em ms; dt = segundos desde o quadro anterior
+    let tempoAnterior = null;
+
+    renderer.setAnimationLoop((tempo) => {
+        const dt = tempoAnterior === null ? 0 : Math.min((tempo - tempoAnterior) / 1000, 0.1);
+        tempoAnterior = tempo;
+
+        // Modelos podem ter animação própria (ex.: ventoinhas girando)
+        modeloAtual?.userData.atualizar?.(dt);
+
         controls.update();
         renderer.render(scene, camera);
     });
 
-    return { carregarModelo, resetarCamera, destruir };
+    return { carregarModelo, mostrarObjeto, limpar, resetarCamera, destruir };
 }

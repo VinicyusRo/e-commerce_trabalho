@@ -1,5 +1,6 @@
 import { criarVisualizador } from '../viewer/viewer.js';
 import { api } from '../api/api.js';
+import { exibirModeloDoProduto } from '../viewer/modelo-produto.js';
 
 const container = document.getElementById('visualizador');
 const elTitulo = document.getElementById('titulo-produto');
@@ -31,7 +32,9 @@ async function iniciar() {
     }
 
     // textContent (e não innerHTML): o nome vem do banco
-    elTitulo.textContent = produto.nome;
+    elTitulo.textContent = produto.modelo_3d?.origem === 'categoria'
+        ? `${produto.nome} (prévia genérica da categoria)`
+        : produto.nome;
 
     if (!produto.modelo_3d) {
         mostrarErro('Este produto não possui modelo 3D.');
@@ -44,10 +47,8 @@ async function iniciar() {
         .getElementById('btn-reset')
         .addEventListener('click', () => visualizador.resetarCamera());
 
-    // O caminho do banco é relativo ("modelos/..."), então prefixamos com "/"
-    visualizador
-        .carregarModelo(`/${produto.modelo_3d}`)
-        .catch((erro) => console.error('Erro ao carregar o modelo:', erro));
+    // Arquivo .glb ou modelo gerado por código (ver modelo-produto.js)
+    exibirModeloDoProduto(visualizador, produto.modelo_3d);
 }
 
 iniciar();

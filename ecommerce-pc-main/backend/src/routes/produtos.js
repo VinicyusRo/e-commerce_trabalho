@@ -3,6 +3,9 @@ import { pool } from '../db.js';
 
 const router = Router();
 
+// A view vw_produto_catalogo (database/schema.sql) já resolve qual
+// modelo 3D usar: o do produto ou, se não houver, o da categoria.
+// preco::float8 converte NUMERIC para número (o driver pg devolveria texto).
 const SELECT_PRODUTO = `
     SELECT p.id,
            p.nome,
@@ -10,13 +13,30 @@ const SELECT_PRODUTO = `
            p.preco::float8 AS preco,
            p.estoque,
            p.imagem,
-           c.id   AS categoria_id,
-           c.nome AS categoria,
-           m.arquivo AS modelo_3d
-    FROM produto p
-    JOIN categoria c ON c.id = p.categoria_id
-    LEFT JOIN modelo_3d m ON m.produto_id = p.id
+           p.categoria_id,
+           p.categoria,
+           p.modelo_arquivo,
+           p.modelo_formato,
+           p.modelo_creditos,
+           p.modelo_origem
+    FROM vw_produto_catalogo p
 `;
+
+// Junta as colunas modelo_* num objeto só (ou null se não houver modelo)
+function formatarProduto(linha) {
+    const { modelo_arquivo, modelo_formato, modelo_creditos, modelo_origem, ...produto } = linha;
+
+    produto.modelo_3d = modelo_arquivo
+        ? {
+              arquivo:  modelo_arquivo,   // caminho do .glb ou nome do gerador procedural
+              formato:  modelo_formato,   // 'glb', 'gltf' ou 'procedural'
+              creditos: modelo_creditos,
+              origem:   modelo_origem,    // 'produto' ou 'categoria'
+          }
+        : null;
+
+    return produto;
+}
 
 // GET /api/produtos            → todos
 // GET /api/produtos?categoria=1 → filtra por categoria
@@ -49,7 +69,7 @@ router.get('/', async (req, res) => {
         `${SELECT_PRODUTO} ${where} ORDER BY p.id`,
         valores
     );
-    res.json(resultado.rows);
+    res.json(resultado.rows.map(formatarProduto));
 });
 
 // GET /api/produtos/:id  → um produto
@@ -66,7 +86,7 @@ router.get('/:id', async (req, res) => {
         return res.status(404).json({ erro: 'Produto não encontrado' });
     }
 
-    res.json(resultado.rows[0]);
+    res.json(formatarProduto(resultado.rows[0]));
 });
 
 export default router;

@@ -11,7 +11,22 @@
     <main>
         <p><a href="/">← Voltar para a loja</a></p>
         <p id="mensagem"></p>
-        <article id="produto" class="produto"></article>
+
+        <div id="pagina-produto" class="produto-layout" hidden>
+            <!-- Prévia 3D (o canvas é criado pelo viewer.js) -->
+            <section class="produto-3d">
+                <div id="visualizador" class="visualizador-embutido">
+                    <div class="visualizador-acoes">
+                        <span id="selo-modelo" class="selo-3d" hidden></span>
+                        <a id="btn-tela-cheia" class="botao pequeno" href="#">Tela cheia</a>
+                        <button id="btn-reset" class="botao pequeno" type="button">Resetar vista</button>
+                    </div>
+                </div>
+                <p class="dica-3d">Arraste para girar · role para aproximar</p>
+            </section>
+
+            <article id="produto" class="produto"></article>
+        </div>
     </main>
 
     <script type="module" src="/src/pages/produto.js"></script>
