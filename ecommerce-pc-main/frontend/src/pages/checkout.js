@@ -1,11 +1,13 @@
 import '../estilo.css';
 import { montarCabecalho } from '../componentes/cabecalho.js';
+import { ativarBotaoVoltar } from '../componentes/voltar.js';
 import { api } from '../api/api.js';
 import { formatarPreco, escapar } from '../utils.js';
 import { lerCarrinho, limparCarrinho } from '../carrinho.js';
 import { CAMPOS_ENDERECO_HTML, ativarBuscaCep, enderecoHTML } from '../componentes/endereco.js';
 
 montarCabecalho();
+ativarBotaoVoltar();
 
 // Sem login, vai para a tela de login e volta para cá depois
 if (!localStorage.getItem('token')) {

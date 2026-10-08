@@ -1204,3 +1204,56 @@ article.cartao .preco { margin-bottom: 12px; }
     .linha-campos { grid-template-columns: 1fr; }
     .linha-cidade { grid-template-columns: 1fr 80px; }
 }
+
+/* Celular: impede que o canvas do 3D "empurre" a página para os lados */
+.produto-layout > * { min-width: 0; }
+.visualizador-embutido canvas { max-width: 100%; }
+@media (max-width: 900px) {
+    .produto-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+    /* No celular o cabeçalho mostra só ícones, mas o avatar do usuário continua */
+    .nav-link .avatar { display: inline-grid !important; }
+}
+
+/* =====================================================
+   Botão "Voltar" (produto, carrinho, conta, checkout)
+   ===================================================== */
+.botao-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 18px;
+    padding: 8px 16px 8px 10px;
+    border: 1px solid var(--borda-forte);
+    border-radius: 999px;
+    background: var(--superficie);
+    color: var(--texto);
+    font-size: 14px;
+    font-weight: 600;
+    transition: border-color .15s, background .15s, color .15s;
+}
+
+.botao-voltar svg {
+    width: 18px;
+    height: 18px;
+    transition: transform .15s;
+}
+
+.botao-voltar:hover {
+    text-decoration: none;
+    border-color: var(--destaque);
+    background: var(--destaque-fundo);
+    color: var(--destaque);
+}
+
+.botao-voltar:hover svg { transform: translateX(-3px); }
+
+.botao-voltar:focus-visible { outline: 2px solid var(--destaque); outline-offset: 2px; }
+
+/* Na página de produto o título fica logo abaixo, sem o espaço do h1 */
+.botao-voltar + h1 { margin-top: 4px; }
+
+/* "Continuar comprando" da notinha: botão secundário, não link */
+.botao-secundario { margin-top: 10px; background: transparent; }
+.botao-secundario:hover { border-color: var(--destaque); color: var(--destaque); background: var(--destaque-fundo); }

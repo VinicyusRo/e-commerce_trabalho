@@ -1,5 +1,6 @@
 import '../estilo.css';
 import { montarCabecalho } from '../componentes/cabecalho.js';
+import { ativarBotaoVoltar } from '../componentes/voltar.js';
 import { api } from '../api/api.js';
 import { formatarPreco, escapar } from '../utils.js';
 import {
@@ -8,6 +9,8 @@ import {
 import { confirmar } from '../componentes/confirmar.js';
 import { cartaoProduto } from '../componentes/cartao-produto.js';
 import { iconeDaCategoria, ICONES } from '../componentes/icones.js';
+
+ativarBotaoVoltar();
 
 const elMensagem = document.getElementById('mensagem');
 const elItens = document.getElementById('itens');
@@ -85,7 +88,7 @@ function desenharResumo(carrinho) {
             <strong>${formatarPreco(total)}</strong>
         </div>
         <a class="botao primario botao-largo" href="/checkout.html">Finalizar compra</a>
-        <a class="continuar" href="/">← Continuar comprando</a>
+        <a class="botao botao-largo botao-secundario" href="/">Continuar comprando</a>
     `;
 }
 

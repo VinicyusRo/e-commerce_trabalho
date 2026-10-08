@@ -1,5 +1,6 @@
 import '../estilo.css';
 import { montarCabecalho } from '../componentes/cabecalho.js';
+import { ativarBotaoVoltar } from '../componentes/voltar.js';
 import { api } from '../api/api.js';
 import { formatarPreco, escapar } from '../utils.js';
 import { limparCarrinho } from '../carrinho.js';
@@ -7,6 +8,7 @@ import { confirmar } from '../componentes/confirmar.js';
 import { enderecoHTML, abrirJanelaEndereco } from '../componentes/endereco.js';
 
 montarCabecalho();
+ativarBotaoVoltar();
 
 if (!localStorage.getItem('token')) {
     window.location.href = '/login.html?voltar=/conta.html';

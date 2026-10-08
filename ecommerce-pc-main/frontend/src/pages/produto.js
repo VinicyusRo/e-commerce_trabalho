@@ -1,5 +1,6 @@
 import '../estilo.css';
 import { montarCabecalho } from '../componentes/cabecalho.js';
+import { ativarBotaoVoltar } from '../componentes/voltar.js';
 import { api } from '../api/api.js';
 import { formatarPreco, escapar } from '../utils.js';
 import { adicionarAoCarrinho, lerCarrinho } from '../carrinho.js';
@@ -9,6 +10,7 @@ import { montarCarrossel } from '../componentes/carrossel.js';
 import { ativarBotoesAdicionar } from '../componentes/cartao-produto.js';
 
 montarCabecalho();
+ativarBotaoVoltar();
 
 const id = new URLSearchParams(window.location.search).get('id');
 const elMensagem = document.getElementById('mensagem');
