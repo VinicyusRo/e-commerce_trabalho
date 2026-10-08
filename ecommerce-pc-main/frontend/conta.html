@@ -8,20 +8,27 @@
 <body>
     <header id="cabecalho"></header>
 
-    <main>
-        <h1>Minha conta</h1>
+    <main class="conta">
+        <p id="sucesso" class="aviso-sucesso"></p>
         <p id="mensagem"></p>
-        <p id="sucesso" class="em-estoque"></p>
 
-        <section id="dados"></section>
+        <!-- Nome, e-mail e botão sair (preenchido pelo conta.js) -->
+        <section id="perfil" class="perfil" hidden></section>
 
-        <h2>Endereços</h2>
-        <section id="enderecos"></section>
+        <section class="conta-secao">
+            <div class="secao-topo">
+                <h2>Meus pedidos</h2>
+            </div>
+            <div id="conta-pedidos" class="lista-pedidos"></div>
+        </section>
 
-        <h2>Meus pedidos</h2>
-        <section id="pedidos"></section>
-
-        <p><button id="btn-sair" class="botao">Sair</button></p>
+        <section class="conta-secao">
+            <div class="secao-topo">
+                <h2>Endereços</h2>
+                <button id="btn-novo-endereco" class="botao pequeno" type="button">+ Novo endereço</button>
+            </div>
+            <div id="conta-enderecos" class="grade-enderecos"></div>
+        </section>
     </main>
 
     <script type="module" src="/src/pages/conta.js"></script>

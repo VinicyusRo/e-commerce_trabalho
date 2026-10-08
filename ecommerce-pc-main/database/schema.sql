@@ -91,9 +91,15 @@ CREATE TABLE endereco (
                 REFERENCES usuario(id) ON DELETE CASCADE,
     rua         VARCHAR(150) NOT NULL,
     numero      VARCHAR(10)  NOT NULL,
+    complemento VARCHAR(60),                    -- opcional: apto, bloco...
+    bairro      VARCHAR(80),
     cidade      VARCHAR(80)  NOT NULL,
     estado      CHAR(2)      NOT NULL,
-    cep         CHAR(8)      NOT NULL
+    cep         CHAR(8)      NOT NULL,
+    -- "Exclusão lógica": um endereço já usado em pedidos não pode ser
+    -- apagado (a FK do pedido impede), então ele só é marcado como inativo
+    -- e some da lista do cliente, mas o histórico do pedido continua certo.
+    ativo       BOOLEAN      NOT NULL DEFAULT TRUE
 );
 
 

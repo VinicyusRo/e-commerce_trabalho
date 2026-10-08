@@ -37,7 +37,7 @@ router.post('/', async (req, res) => {
 
         // O endereço precisa ser do usuário logado
         const endereco = await cliente.query(
-            'SELECT id FROM endereco WHERE id = $1 AND usuario_id = $2',
+            'SELECT id FROM endereco WHERE id = $1 AND usuario_id = $2 AND ativo',
             [endereco_id, req.usuarioId]
         );
         if (endereco.rows.length === 0) {
@@ -111,19 +111,94 @@ router.post('/', async (req, res) => {
     }
 });
 
-// GET /api/pedidos → pedidos do usuário logado, com total calculado
+// GET /api/pedidos → pedidos do usuário logado, com itens, endereço e total
+// json_agg junta os itens de cada pedido numa lista dentro da própria linha.
 router.get('/', async (req, res) => {
     const resultado = await pool.query(
         `SELECT p.id, p.data, p.status,
-                SUM(i.quantidade * i.preco_unitario)::float8 AS total
+                SUM(i.quantidade * i.preco_unitario)::float8 AS total,
+                json_agg(
+                    json_build_object(
+                        'produto_id',     i.produto_id,
+                        'nome',           pr.nome,
+                        'quantidade',     i.quantidade,
+                        'preco_unitario', i.preco_unitario::float8
+                    ) ORDER BY pr.nome
+                ) AS itens,
+                json_build_object(
+                    'rua', e.rua, 'numero', e.numero, 'complemento', e.complemento,
+                    'bairro', e.bairro, 'cidade', e.cidade, 'estado', e.estado, 'cep', e.cep
+                ) AS endereco
          FROM pedido p
          JOIN item_pedido i ON i.pedido_id = p.id
+         JOIN produto pr    ON pr.id = i.produto_id
+         JOIN endereco e    ON e.id = p.endereco_id
          WHERE p.usuario_id = $1
-         GROUP BY p.id
+         GROUP BY p.id, e.id
          ORDER BY p.data DESC`,
         [req.usuarioId]
     );
     res.json(resultado.rows);
+});
+
+// Só dá para cancelar enquanto o pedido não saiu para entrega
+const STATUS_CANCELAVEIS = ['pendente', 'pago'];
+
+// POST /api/pedidos/:id/cancelar
+// Numa transação: muda o status para 'cancelado' e devolve as unidades ao estoque.
+router.post('/:id/cancelar', async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(400).json({ erro: 'ID inválido' });
+    }
+
+    const cliente = await pool.connect();
+    try {
+        await cliente.query('BEGIN');
+
+        // FOR UPDATE: trava o pedido para não ser cancelado duas vezes ao mesmo tempo
+        const pedido = await cliente.query(
+            'SELECT status FROM pedido WHERE id = $1 AND usuario_id = $2 FOR UPDATE',
+            [id, req.usuarioId]
+        );
+
+        if (pedido.rows.length === 0) {
+            await cliente.query('ROLLBACK');
+            return res.status(404).json({ erro: 'Pedido não encontrado' });
+        }
+
+        const { status } = pedido.rows[0];
+        if (!STATUS_CANCELAVEIS.includes(status)) {
+            await cliente.query('ROLLBACK');
+            return res.status(409).json({
+                erro: status === 'cancelado'
+                    ? 'Este pedido já foi cancelado'
+                    : `Pedidos com status "${status}" não podem mais ser cancelados`,
+            });
+        }
+
+        await cliente.query(
+            "UPDATE pedido SET status = 'cancelado' WHERE id = $1",
+            [id]
+        );
+
+        // Devolve ao estoque a quantidade de cada item (UPDATE com FROM = UPDATE com JOIN)
+        await cliente.query(
+            `UPDATE produto pr
+             SET estoque = pr.estoque + i.quantidade
+             FROM item_pedido i
+             WHERE i.pedido_id = $1 AND pr.id = i.produto_id`,
+            [id]
+        );
+
+        await cliente.query('COMMIT');
+        res.json({ id, status: 'cancelado' });
+    } catch (erro) {
+        await cliente.query('ROLLBACK');
+        throw erro;
+    } finally {
+        cliente.release();
+    }
 });
 
 export default router;

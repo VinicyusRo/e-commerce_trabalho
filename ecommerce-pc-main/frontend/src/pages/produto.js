@@ -5,6 +5,8 @@ import { formatarPreco, escapar } from '../utils.js';
 import { adicionarAoCarrinho, lerCarrinho } from '../carrinho.js';
 import { criarVisualizador } from '../viewer/viewer.js';
 import { exibirModeloDoProduto, textoSeloModelo, elementoCreditos } from '../viewer/modelo-produto.js';
+import { montarCarrossel } from '../componentes/carrossel.js';
+import { ativarBotoesAdicionar } from '../componentes/cartao-produto.js';
 
 montarCabecalho();
 
@@ -104,6 +106,24 @@ function desenharModelo3D(p) {
     exibirModeloDoProduto(visualizador, p.modelo_3d);
 }
 
+// Dois carrosséis embaixo: mesma categoria e o resto da loja
+async function carregarCarrosseis(atual) {
+    const todos = await api('/produtos');
+    const mapa = new Map(todos.map((p) => [p.id, p]));
+
+    const mesmaCategoria = todos.filter((p) => p.categoria_id === atual.categoria_id && p.id !== atual.id);
+    const outros = todos.filter((p) => p.categoria_id !== atual.categoria_id);
+
+    const secaoCategoria = document.getElementById('carrossel-categoria');
+    const secaoOutros = document.getElementById('carrossel-outros');
+
+    montarCarrossel(secaoCategoria, { titulo: `Mais em ${atual.categoria}`, produtos: mesmaCategoria });
+    montarCarrossel(secaoOutros, { titulo: 'Outros produtos da loja', produtos: outros });
+
+    ativarBotoesAdicionar(secaoCategoria, mapa);
+    ativarBotoesAdicionar(secaoOutros, mapa);
+}
+
 async function iniciar() {
     if (!id) {
         elMensagem.textContent = 'Produto não informado.';
@@ -118,6 +138,7 @@ async function iniciar() {
         desenharProduto(produto);
         elPagina.hidden = false;      // mostra antes de criar o visualizador (precisa de tamanho)
         desenharModelo3D(produto);
+        carregarCarrosseis(produto).catch((erro) => console.error('Carrosséis:', erro));
     } catch (erro) {
         elMensagem.textContent = erro.message;
     }

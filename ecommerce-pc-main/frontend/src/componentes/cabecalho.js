@@ -1,5 +1,16 @@
 import { totalDeItens } from '../carrinho.js';
 import { ICONES } from './icones.js';
+import { escapar } from '../utils.js';
+
+// Primeiro nome do usuário logado (salvo no login), ex.: "Vinicyus"
+function primeiroNome() {
+    try {
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        return usuario?.nome?.trim().split(/\s+/)[0] || 'Minha conta';
+    } catch {
+        return 'Minha conta';
+    }
+}
 
 // Monta o cabeçalho em qualquer página que tenha <header id="cabecalho">
 export function montarCabecalho() {
@@ -29,7 +40,10 @@ export function montarCabecalho() {
                 ${itens > 0 ? `<span class="contador-carrinho">${itens}</span>` : ''}
             </a>
             ${logado
-                ? `<a class="nav-link" href="/conta.html">${ICONES.usuario}<span>Minha conta</span></a>`
+                ? `<a class="nav-link nav-usuario" href="/conta.html" title="Minha conta">
+                       <span class="avatar" aria-hidden="true">${escapar(primeiroNome().charAt(0).toUpperCase())}</span>
+                       <span>${escapar(primeiroNome())}</span>
+                   </a>`
                 : `<a class="nav-link" href="/login.html">${ICONES.usuario}<span>Entrar</span></a>`}
         </nav>
     `;

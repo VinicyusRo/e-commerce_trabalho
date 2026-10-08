@@ -3,6 +3,7 @@ import { montarCabecalho } from '../componentes/cabecalho.js';
 import { api } from '../api/api.js';
 import { formatarPreco, escapar } from '../utils.js';
 import { lerCarrinho, limparCarrinho } from '../carrinho.js';
+import { CAMPOS_ENDERECO_HTML, ativarBuscaCep, enderecoHTML } from '../componentes/endereco.js';
 
 montarCabecalho();
 
@@ -18,6 +19,10 @@ const elErroPedido = document.getElementById('erro-pedido');
 const elBotao = document.getElementById('btn-finalizar');
 const formEndereco = document.getElementById('form-endereco');
 const elErroEndereco = document.getElementById('erro-endereco');
+
+// Campos do endereço (CEP, rua, número, complemento, bairro, cidade, UF)
+document.getElementById('campos-endereco').outerHTML = CAMPOS_ENDERECO_HTML;
+const buscaCep = ativarBuscaCep(formEndereco);
 
 async function desenharResumo() {
     const carrinho = lerCarrinho();
@@ -59,8 +64,7 @@ async function desenharEnderecos() {
     elLista.innerHTML = enderecos.map((e, i) => `
         <label class="opcao-endereco">
             <input type="radio" name="endereco" value="${e.id}" ${i === 0 ? 'checked' : ''}>
-            ${escapar(e.rua)}, ${escapar(e.numero)} — ${escapar(e.cidade)}/${escapar(e.estado)}
-            — CEP ${escapar(e.cep)}
+            <span class="endereco-texto">${enderecoHTML(e)}</span>
         </label>
     `).join('');
 }
@@ -74,8 +78,7 @@ formEndereco.addEventListener('submit', async (e) => {
             body: JSON.stringify(Object.fromEntries(new FormData(formEndereco))),
         });
         formEndereco.reset();
-        ultimoCepBuscado = '';
-        mostrarStatusCep('Digite o CEP para preencher o endereço automaticamente.');
+        buscaCep.limpar();
         document.getElementById('novo-endereco').open = false;
         await desenharEnderecos();
     } catch (erro) {
@@ -110,50 +113,6 @@ elBotao.addEventListener('click', async () => {
         // Ex.: "Estoque insuficiente para ..." (409 com ROLLBACK no backend)
         elErroPedido.textContent = erro.message;
         elBotao.disabled = false;
-    }
-});
-
-// ---------- CEP: preenche rua, cidade e estado automaticamente ----------
-// Usa o ViaCEP (https://viacep.com.br), serviço gratuito que o navegador
-// chama diretamente; não precisa mudar nada no backend.
-const campoCep = document.getElementById('campo-cep');
-const elStatusCep = document.getElementById('status-cep');
-let ultimoCepBuscado = '';
-
-function mostrarStatusCep(texto, tipo = '') {
-    elStatusCep.textContent = texto;
-    elStatusCep.className = `dica-campo ${tipo}`;
-}
-
-campoCep.addEventListener('input', async () => {
-    // Máscara 00000-000
-    const digitos = campoCep.value.replace(/\D/g, '').slice(0, 8);
-    campoCep.value = digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
-
-    if (digitos.length !== 8 || digitos === ultimoCepBuscado) return;
-    ultimoCepBuscado = digitos;
-
-    mostrarStatusCep('Buscando endereço...');
-    try {
-        const resposta = await fetch(`https://viacep.com.br/ws/${digitos}/json/`);
-        const dados = await resposta.json();
-
-        if (dados.erro) {
-            mostrarStatusCep('CEP não encontrado. Preencha o endereço manualmente.', 'sem-estoque');
-            return;
-        }
-
-        // Rua com o bairro, já que a tabela endereco não tem coluna de bairro
-        const rua = [dados.logradouro, dados.bairro].filter(Boolean).join(' - ');
-        if (rua) formEndereco.rua.value = rua;
-        formEndereco.cidade.value = dados.localidade ?? '';
-        formEndereco.estado.value = dados.uf ?? '';
-
-        mostrarStatusCep('Endereço encontrado! Agora informe o número.', 'em-estoque');
-        // Se o CEP for da cidade toda (sem rua), o foco vai para a rua
-        (rua ? document.getElementById('campo-numero') : formEndereco.rua).focus();
-    } catch {
-        mostrarStatusCep('Não foi possível consultar o CEP. Preencha manualmente.', 'sem-estoque');
     }
 });
 
