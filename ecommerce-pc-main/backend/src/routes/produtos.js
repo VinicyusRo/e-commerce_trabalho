@@ -26,7 +26,8 @@ const SELECT_PRODUTO = `
            p.potencia_w,
            p.video_integrado,
            p.soquetes_cooler,
-           p.especificacoes
+           p.especificacoes,
+           p.destaque
     FROM vw_produto_catalogo p
 `;
 
@@ -83,8 +84,10 @@ router.get('/', async (req, res) => {
 
     const where = condicoes.length > 0 ? `WHERE ${condicoes.join(' AND ')}` : '';
 
+    // Ordem do catálogo: os personalizados (destaque, migração 09), depois
+    // os que têm foto e por fim o resto, cada grupo na ordem de cadastro
     const resultado = await pool.query(
-        `${SELECT_PRODUTO} ${where} ORDER BY p.id`,
+        `${SELECT_PRODUTO} ${where} ORDER BY p.destaque DESC, (p.imagem IS NOT NULL) DESC, p.id`,
         valores
     );
     res.json(resultado.rows.map(formatarProduto));

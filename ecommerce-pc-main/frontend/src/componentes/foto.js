@@ -16,6 +16,7 @@ export function urlImagem(imagem) {
 /** Foto com a fonte, quando ela vem de outro site (ex.: Pichau). */
 export function fonteDaImagem(imagem) {
     if (imagem?.startsWith('imagens/produtos/')) return 'Pichau';   // fotos baixadas pelo script
+    if (imagem?.startsWith('imagens/kabum/')) return 'KaBuM';       // fotos dos produtos com modelo 3D fiel
     if (!imagem || !/^https?:\/\//.test(imagem)) return null;
     if (imagem.includes('pichau.com.br')) return 'Pichau';
     return new URL(imagem).hostname;

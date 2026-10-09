@@ -228,23 +228,45 @@ main {
 
 .destaque-vantagens {
     list-style: none;
-    margin: 0;
+    margin: 22px 0 0;
     padding: 0;
-    display: grid;
-    gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    color: var(--texto-2);
+    font-size: 13px;
 }
+.destaque-vantagens li::before { content: '✓'; margin-right: 6px; color: var(--destaque); font-weight: 700; }
 
-.destaque-vantagens li {
+/* ---------- Vitrine: os produtos passam um de cada vez ---------- */
+.vitrine { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.vitrine-janela { overflow: hidden; border-radius: var(--raio); border: 1px solid var(--borda); }
+.vitrine-trilho { display: flex; transition: transform .6s cubic-bezier(.4, 0, .2, 1); touch-action: pan-y; }
+.vitrine-slide {
+    flex: 0 0 100%;
     display: flex;
     flex-direction: column;
-    padding: 14px 18px;
-    border-radius: var(--raio-peq);
+    color: var(--texto);
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--borda);
 }
-
-.destaque-vantagens strong { font-size: 15px; }
-.destaque-vantagens span { color: var(--texto-2); font-size: 13px; }
+.vitrine-slide:hover { text-decoration: none; }
+.vitrine-foto { position: relative; height: 190px; background: #ffffff; display: grid; place-items: center; color: var(--destaque); }
+.vitrine-foto > svg { width: 64px; height: 64px; }
+.vitrine-foto.tem-foto { --folga-foto: 14px; }
+.vitrine-foto .foto-produto { transition: transform .4s ease; }
+.vitrine-slide:hover .foto-produto { transform: scale(1.04); }
+.vitrine-foto .selo-3d { position: absolute; top: 10px; left: 10px; z-index: 1; background: rgba(12, 16, 24, 0.85); color: #fff; }
+.vitrine-info { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px; }
+.vitrine-info .categoria { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-3); }
+.vitrine-info strong { font-size: 15px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.7em; }
+.vitrine-info .preco { font-size: 20px; font-weight: 800; }
+.vitrine-pontos { display: flex; justify-content: center; gap: 6px; }
+.vitrine-pontos button {
+    width: 8px; height: 8px; padding: 0; border: 0; border-radius: 999px;
+    background: var(--borda); cursor: pointer; transition: width .3s, background .3s;
+}
+.vitrine-pontos button[aria-selected="true"] { width: 22px; background: var(--destaque); }
+@media (prefers-reduced-motion: reduce) { .vitrine-trilho { transition: none; } }
 
 /* =====================================================
    Categorias (filtros)
@@ -1295,20 +1317,29 @@ article.cartao .preco { margin-bottom: 12px; }
    ===================================================== */
 .tem-foto > svg { display: none; }
 
+/* A foto fica presa dentro da caixa (posição absoluta): assim uma foto
+   grande nunca estica a caixa nem passa por cima do preço. */
+.tem-foto { position: relative; overflow: hidden; }
 .foto-produto {
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    top: var(--folga-foto, 6px);
+    left: var(--folga-foto, 6px);
+    width: calc(100% - 2 * var(--folga-foto, 6px));
+    height: calc(100% - 2 * var(--folga-foto, 6px));
     object-fit: contain;
 }
 
 .cartao-imagem.tem-foto {
-    padding: 14px;
-    background: linear-gradient(180deg, #f4f6f9, #dfe4ea);   /* fotos de loja têm fundo branco */
+    --folga-foto: 12px;
+    background: #ffffff;          /* fotos de loja têm fundo branco: a caixa some em volta da foto */
 }
+.cartao-imagem .selo-3d { z-index: 1; }
+/* sobre a foto clara o selo fica escuro, para dar para ler */
+.cartao-imagem.tem-foto .selo-3d { background: rgba(12, 16, 24, 0.85); color: #ffffff; }
 .cartao-imagem.tem-foto .foto-produto { transition: transform .25s ease; }
 .cartao:hover .cartao-imagem.tem-foto .foto-produto { transform: scale(1.05); }
 
-.linha-icone.tem-foto { padding: 6px; background: #eef1f5; }
+.linha-icone.tem-foto { background: #eef1f5; }
 
 /* Abas 3D / Foto na página do produto */
 .abas-midia {
@@ -1520,7 +1551,7 @@ article.cartao .preco { margin-bottom: 12px; }
     overflow: hidden;
 }
 .opcao-imagem svg { width: 40px; height: 40px; }
-.opcao-imagem.tem-foto { padding: 6px; background: #eef1f5; }
+.opcao-imagem.tem-foto { background: #eef1f5; }
 
 .opcao-corpo { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
 .opcao-nome { font-weight: 600; font-size: 14px; line-height: 1.35; padding-right: 22px; }

@@ -19,12 +19,17 @@
                     <a class="botao primario" href="#titulo-lista">Ver produtos</a>
                     <a class="botao" href="/monte-seu-pc.html">Monte seu PC</a>
                 </div>
+                <ul class="destaque-vantagens">
+                    <li>Visualização 3D</li>
+                    <li>Estoque em tempo real</li>
+                    <li>Compra segura</li>
+                </ul>
             </div>
-            <ul class="destaque-vantagens">
-                <li><strong>Visualização 3D</strong><span>em todos os produtos</span></li>
-                <li><strong>Estoque em tempo real</strong><span>direto do banco de dados</span></li>
-                <li><strong>Compra segura</strong><span>com login e pedido protegido</span></li>
-            </ul>
+            <!-- Vitrine: produtos passando sozinhos (preenchida pelo home.js) -->
+            <div id="vitrine" class="vitrine" aria-roledescription="carrossel" aria-label="Produtos em destaque" hidden>
+                <div class="vitrine-janela"><div id="vitrine-trilho" class="vitrine-trilho"></div></div>
+                <div id="vitrine-pontos" class="vitrine-pontos" role="tablist" aria-label="Escolher produto"></div>
+            </div>
         </section>
 
         <nav id="categorias" class="categorias" aria-label="Categorias"></nav>

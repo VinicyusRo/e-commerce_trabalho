@@ -260,7 +260,10 @@ function desenharEscolha(etapa) {
     const daCategoria = produtos.filter((p) => p.categoria === etapa.categoria);
     const servem = daCategoria.filter((p) => combina(etapa, p));
     const ocultas = daCategoria.length - servem.length;
-    servem.sort((a, b) => (ordem === 'menor' ? a.preco - b.preco : b.preco - a.preco));
+    // personalizados primeiro, depois os que têm foto; dentro de cada grupo, pelo preço
+    const grupo = (p) => (p.destaque ? 0 : p.imagem ? 1 : 2);
+    servem.sort((a, b) => (grupo(a) - grupo(b))
+        || (ordem === 'menor' ? a.preco - b.preco : b.preco - a.preco));
 
     let dica = '';
     if (etapa.id === 'fonte' && sel.cpu) {
