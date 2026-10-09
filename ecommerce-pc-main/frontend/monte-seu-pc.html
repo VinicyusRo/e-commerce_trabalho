@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monte seu PC - PC Store</title>
+</head>
+<body>
+    <header id="cabecalho"></header>
+
+    <main class="montagem">
+        <div class="montagem-topo">
+            <div>
+                <h1>Monte seu PC</h1>
+                <p class="montagem-sub">Escolha peça por peça. A cada passo mostramos só o que combina com o que você já escolheu.</p>
+            </div>
+            <div class="montagem-botoes">
+                <button id="btn-modo" class="botao pequeno" type="button" hidden>Visualizador 3D</button>
+                <button id="btn-recomecar" class="botao pequeno" type="button">Recomeçar</button>
+                <button id="btn-sair" class="botao pequeno botao-sair" type="button">Sair do Monte seu PC</button>
+            </div>
+        </div>
+
+        <!-- Passos (preenchido pelo monte.js) -->
+        <ol id="passos" class="passos" aria-label="Passos da montagem"></ol>
+        <p id="mensagem"></p>
+
+        <!-- Escolha do modo: com ou sem o visualizador 3D -->
+        <section id="escolha-modo" class="escolha-modo" hidden>
+            <h2>Como você quer montar?</h2>
+            <div class="modos">
+                <button type="button" class="modo" data-modo="3d">
+                    <span class="modo-titulo">Com visualizador 3D</span>
+                    <span class="modo-texto">Veja cada peça entrar no lugar: a placa-mãe na bandeja, o processador no soquete, a placa de vídeo no slot...</span>
+                    <span class="modo-nota">Recomendado no computador</span>
+                </button>
+                <button type="button" class="modo" data-modo="lista">
+                    <span class="modo-titulo">Só a lista</span>
+                    <span class="modo-texto">O formulário passo a passo, sem 3D. Mais leve e rápido.</span>
+                    <span class="modo-nota">Bom para celular ou internet lenta</span>
+                </button>
+            </div>
+        </section>
+
+        <div id="montagem-layout" class="montagem-layout">
+            <!-- Etapa atual: o "formulário" -->
+            <form id="etapa" class="etapa" aria-live="polite"></form>
+
+            <div class="coluna-direita">
+                <!-- Bancada 3D (só no modo com visualizador) -->
+                <div id="bancada" class="bancada" hidden>
+                    <p class="bancada-dica">Arraste para girar · role para aproximar</p>
+                </div>
+                <!-- Resumo da montagem -->
+                <aside id="resumo-montagem" class="nota resumo-montagem" aria-label="Sua montagem"></aside>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="/src/pages/monte.js"></script>
+</body>
+</html>

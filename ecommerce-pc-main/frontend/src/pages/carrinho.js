@@ -9,6 +9,7 @@ import {
 import { confirmar } from '../componentes/confirmar.js';
 import { cartaoProduto } from '../componentes/cartao-produto.js';
 import { iconeDaCategoria, ICONES } from '../componentes/icones.js';
+import { fotoHTML } from '../componentes/foto.js';
 
 ativarBotaoVoltar();
 
@@ -38,8 +39,9 @@ function desenharItens(carrinho) {
         }
 
         return `<div class="linha-carrinho">
-            <a class="linha-icone" href="/produto.html?id=${p.id}" aria-hidden="true" tabindex="-1">
+            <a class="linha-icone ${p.imagem ? 'tem-foto' : ''}" href="/produto.html?id=${p.id}" aria-hidden="true" tabindex="-1">
                 ${iconeDaCategoria(p.categoria)}
+                ${fotoHTML(p)}
             </a>
             <div class="info">
                 <a class="nome" href="/produto.html?id=${p.id}">${escapar(p.nome)}</a>
@@ -202,6 +204,10 @@ async function iniciar() {
         const produtos = await api('/produtos');
         catalogo = new Map(produtos.map((p) => [p.id, p]));
         desenhar();
+        // Aviso vindo do "Monte seu PC" (ex.: peça que bateu no limite do estoque)
+        let aviso = null;
+        try { aviso = sessionStorage.getItem('aviso-montagem'); sessionStorage.removeItem('aviso-montagem'); } catch { /* ok */ }
+        if (aviso) elMensagem.insertAdjacentHTML('afterbegin', `<span class="aviso-montagem">${escapar(aviso)}</span>`);
     } catch (erro) {
         elMensagem.textContent = `Erro ao carregar: ${erro.message}`;
     }

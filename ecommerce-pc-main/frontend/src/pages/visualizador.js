@@ -48,7 +48,7 @@ async function iniciar() {
         .addEventListener('click', () => visualizador.resetarCamera());
 
     // Arquivo .glb ou modelo gerado por código (ver modelo-produto.js)
-    exibirModeloDoProduto(visualizador, produto.modelo_3d);
+    exibirModeloDoProduto(visualizador, produto.modelo_3d, produto);
 }
 
 iniciar();

@@ -1,21 +1,23 @@
 import { formatarPreco, escapar } from '../utils.js';
-import { textoSeloModelo } from '../viewer/modelo-produto.js';
+import { textoSeloModelo, temModeloFiel } from '../viewer/modelo-produto.js';
 import { iconeDaCategoria, ICONES } from './icones.js';
+import { fotoHTML } from './foto.js';
 
 /**
  * HTML do card de um produto (usado na página inicial e no carrinho).
  * comBotao = true → card com um botão "Ver produto" embaixo.
  */
 export function cartaoProduto(p, { comBotao = false } = {}) {
-    const selo = textoSeloModelo(p.modelo_3d);
-    const generico = p.modelo_3d?.origem === 'categoria';
+    const selo = textoSeloModelo(p.modelo_3d, p);
+    const generico = p.modelo_3d?.origem === 'categoria' && !temModeloFiel(p.modelo_3d, p);
     const estoque = p.estoque > 0
         ? `<span class="em-estoque">${p.estoque} em estoque</span>`
         : '<span class="sem-estoque">Esgotado</span>';
 
     const imagem = `
-        <div class="cartao-imagem">
+        <div class="cartao-imagem ${p.imagem ? 'tem-foto' : ''}">
             ${iconeDaCategoria(p.categoria)}
+            ${fotoHTML(p)}
             ${selo ? `<span class="selo-3d ${generico ? 'generico' : ''}">${ICONES.cubo}${selo}</span>` : ''}
         </div>`;
 

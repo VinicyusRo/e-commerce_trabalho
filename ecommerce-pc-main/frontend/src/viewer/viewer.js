@@ -29,9 +29,12 @@ function liberarObjeto(objeto) {
  * @param {object} [opcoes]
  * @param {number}  [opcoes.corFundo=0x202020]  - cor de fundo da cena
  * @param {boolean} [opcoes.autoRotacao=false]  - gira o modelo até o usuário mexer
+ * @param {boolean} [opcoes.fundoTransparente=false] - deixa ver o fundo da página
+ * @param {number}  [opcoes.folga=1.1]          - margem do enquadramento (1.1 = 10%)
+ * @param {function} [opcoes.aoTocar]           - chamada com o objeto 3D tocado (ou null)
  */
 export function criarVisualizador(container, opcoes = {}) {
-    const { corFundo = 0x202020, autoRotacao = false } = opcoes;
+    const { corFundo = 0x202020, autoRotacao = false, fundoTransparente = false, folga = 1.1, aoTocar = null } = opcoes;
 
     // Garante que o container seja a referência para o aviso por cima
     if (getComputedStyle(container).position === 'static') {
@@ -42,11 +45,11 @@ export function criarVisualizador(container, opcoes = {}) {
 
     // ---------- Cena, câmera, renderizador ----------
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(corFundo);
+    if (!fundoTransparente) scene.background = new THREE.Color(corFundo);
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: fundoTransparente });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // limita em telas 3x
     container.appendChild(renderer.domElement);
 
@@ -122,9 +125,10 @@ export function criarVisualizador(container, opcoes = {}) {
         const fovVertical = THREE.MathUtils.degToRad(camera.fov);
         const fovHorizontal = 2 * Math.atan(Math.tan(fovVertical / 2) * camera.aspect);
         const fovMenor = Math.min(fovVertical, fovHorizontal);
-        const distancia = (raio / Math.sin(fovMenor / 2)) * 1.1;
+        const distancia = (raio / Math.sin(fovMenor / 2)) * folga;
 
-        const direcao = new THREE.Vector3(1, 0.6, 1).normalize();
+        // O modelo pode pedir outro ângulo (ex.: gabinete, vidro do lado esquerdo)
+        const direcao = new THREE.Vector3(...(modelo.userData.direcaoCamera ?? [1, 0.6, 1])).normalize();
         camera.position.copy(direcao).multiplyScalar(distancia);
 
         camera.near = distancia / 100;
@@ -152,6 +156,36 @@ export function criarVisualizador(container, opcoes = {}) {
         enquadrarModelo(modeloAtual);
         controls.autoRotate = autoRotacao;   // modelo novo volta a girar
         esconderAviso();
+    }
+
+    // ---------- Toque na peça (raycasting) ----------
+    // Um "toque" é apertar e soltar quase no mesmo lugar e rápido;
+    // assim arrastar para girar a câmera não conta como toque.
+    if (aoTocar) {
+        const raycaster = new THREE.Raycaster();
+        let inicio = null;
+
+        renderer.domElement.addEventListener('pointerdown', (e) => {
+            inicio = { x: e.clientX, y: e.clientY, t: performance.now() };
+        });
+
+        renderer.domElement.addEventListener('pointerup', (e) => {
+            if (!inicio || !modeloAtual) return;
+            const moveu = Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y);
+            const demorou = performance.now() - inicio.t;
+            inicio = null;
+            if (moveu > 8 || demorou > 500) return;
+
+            // Posição do toque em coordenadas normalizadas (-1 a 1)
+            const ret = renderer.domElement.getBoundingClientRect();
+            const ponto = new THREE.Vector2(
+                ((e.clientX - ret.left) / ret.width) * 2 - 1,
+                -((e.clientY - ret.top) / ret.height) * 2 + 1
+            );
+            raycaster.setFromCamera(ponto, camera);
+            const acertos = raycaster.intersectObject(modeloAtual, true);
+            aoTocar(acertos.length ? acertos[0].object : null);
+        });
     }
 
     // ---------- Interface pública ----------
@@ -243,11 +277,18 @@ export function criarVisualizador(container, opcoes = {}) {
         aviso.remove();
     }
 
+    // Pausa o desenho quando o visualizador está escondido (economiza GPU)
+    let pausado = false;
+    function pausar() { pausado = true; }
+    function retomar() { pausado = false; tempoAnterior = null; }
+    function obterModelo() { return modeloAtual; }
+
     // ---------- Loop de renderização ----------
     // O setAnimationLoop entrega o tempo atual em ms; dt = segundos desde o quadro anterior
     let tempoAnterior = null;
 
     renderer.setAnimationLoop((tempo) => {
+        if (pausado) return;
         const dt = tempoAnterior === null ? 0 : Math.min((tempo - tempoAnterior) / 1000, 0.1);
         tempoAnterior = tempo;
 
@@ -258,5 +299,5 @@ export function criarVisualizador(container, opcoes = {}) {
         renderer.render(scene, camera);
     });
 
-    return { carregarModelo, mostrarObjeto, limpar, resetarCamera, destruir };
+    return { carregarModelo, mostrarObjeto, limpar, resetarCamera, destruir, pausar, retomar, obterModelo, controles: controls };
 }

@@ -24,6 +24,7 @@ export default defineConfig({
                 checkout:     resolve(pasta, 'checkout.html'),
                 login:        resolve(pasta, 'login.html'),
                 conta:        resolve(pasta, 'conta.html'),
+                montagem:     resolve(pasta, 'monte-seu-pc.html'),
             },
         },
     },

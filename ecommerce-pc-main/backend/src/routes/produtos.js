@@ -18,13 +18,31 @@ const SELECT_PRODUTO = `
            p.modelo_arquivo,
            p.modelo_formato,
            p.modelo_creditos,
-           p.modelo_origem
+           p.modelo_origem,
+           p.soquete,
+           p.memoria,
+           p.formato_placa,
+           p.consumo_w,
+           p.potencia_w,
+           p.video_integrado,
+           p.soquetes_cooler,
+           p.especificacoes
     FROM vw_produto_catalogo p
 `;
 
 // Junta as colunas modelo_* num objeto só (ou null se não houver modelo)
+// e os dados técnicos em "tecnico" (usado no Monte seu PC)
 function formatarProduto(linha) {
-    const { modelo_arquivo, modelo_formato, modelo_creditos, modelo_origem, ...produto } = linha;
+    const {
+        modelo_arquivo, modelo_formato, modelo_creditos, modelo_origem,
+        soquete, memoria, formato_placa, consumo_w, potencia_w, video_integrado, soquetes_cooler,
+        ...produto
+    } = linha;
+
+    const tecnico = { soquete, memoria, formato: formato_placa, consumo_w, potencia_w, video_integrado, soquetes_cooler };
+    // Só manda os campos preenchidos; produto sem nenhum fica com tecnico = null
+    for (const chave of Object.keys(tecnico)) if (tecnico[chave] === null) delete tecnico[chave];
+    produto.tecnico = Object.keys(tecnico).length > 0 ? tecnico : null;
 
     produto.modelo_3d = modelo_arquivo
         ? {

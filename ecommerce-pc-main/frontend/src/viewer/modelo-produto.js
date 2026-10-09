@@ -1,4 +1,5 @@
 import { gerarModeloProcedural, existeModeloProcedural } from './modelos-procedurais.js';
+import { parametrosDoProduto, modeloFiel } from './parametros.js';
 
 /**
  * Mostra no visualizador o modelo 3D de um produto, do jeito que a API devolve:
@@ -7,7 +8,7 @@ import { gerarModeloProcedural, existeModeloProcedural } from './modelos-procedu
  * - formato 'glb'/'gltf' → baixa o arquivo (caminho relativo à pasta public)
  * - formato 'procedural' → gera o modelo por código (modelos-procedurais.js)
  */
-export function exibirModeloDoProduto(visualizador, modelo) {
+export function exibirModeloDoProduto(visualizador, modelo, produto = null) {
     if (!modelo) {
         visualizador.limpar('Este produto ainda não tem prévia 3D.');
         return;
@@ -19,7 +20,8 @@ export function exibirModeloDoProduto(visualizador, modelo) {
             visualizador.limpar('Prévia 3D indisponível.');
             return;
         }
-        visualizador.mostrarObjeto(gerarModeloProcedural(modelo.arquivo));
+        // Com o produto, o modelo genérico ganha a cara dele (modelagem paramétrica)
+        visualizador.mostrarObjeto(gerarModeloProcedural(modelo.arquivo, parametrosDoProduto(modelo.arquivo, produto)));
         return;
     }
 
@@ -29,9 +31,15 @@ export function exibirModeloDoProduto(visualizador, modelo) {
         .catch((erro) => console.error('Erro ao carregar o modelo:', erro));
 }
 
+/** O produto tem modelo 3D fiel (feito a partir das fotos dele)? */
+export function temModeloFiel(modelo, produto) {
+    return Boolean(modelo?.formato === 'procedural' && modeloFiel(modelo.arquivo, produto));
+}
+
 /** Texto curto para o selo: "3D do produto" ou "3D genérico". */
-export function textoSeloModelo(modelo) {
+export function textoSeloModelo(modelo, produto = null) {
     if (!modelo) return null;
+    if (temModeloFiel(modelo, produto)) return '3D deste produto';
     return modelo.origem === 'produto' ? '3D do produto' : '3D genérico';
 }
 

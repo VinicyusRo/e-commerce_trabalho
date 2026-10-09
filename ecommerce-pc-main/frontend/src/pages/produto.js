@@ -5,9 +5,11 @@ import { api } from '../api/api.js';
 import { formatarPreco, escapar } from '../utils.js';
 import { adicionarAoCarrinho, lerCarrinho } from '../carrinho.js';
 import { criarVisualizador } from '../viewer/viewer.js';
-import { exibirModeloDoProduto, textoSeloModelo, elementoCreditos } from '../viewer/modelo-produto.js';
+import { exibirModeloDoProduto, textoSeloModelo, temModeloFiel, elementoCreditos } from '../viewer/modelo-produto.js';
+import { encontrarParte, destacarParte } from '../viewer/modelos-procedurais.js';
 import { montarCarrossel } from '../componentes/carrossel.js';
 import { ICONES } from '../componentes/icones.js';
+import { urlImagem, fonteDaImagem } from '../componentes/foto.js';
 
 montarCabecalho();
 ativarBotaoVoltar();
@@ -42,11 +44,20 @@ function desenharProduto(p) {
     `;
 
     // Aviso de modelo genérico e créditos (a licença dos modelos exige)
-    if (p.modelo_3d?.origem === 'categoria') {
+    if (temModeloFiel(p.modelo_3d, p)) {
+        const aviso = document.createElement('p');
+        aviso.className = 'aviso-generico fiel';
+        aviso.textContent = 'A prévia 3D foi modelada a partir das fotos deste produto (formato, cores e detalhes). ' +
+            'Logos e nomes de marca não foram reproduzidos.';
+        elProduto.append(aviso);
+    } else if (p.modelo_3d?.origem === 'categoria') {
         const aviso = document.createElement('p');
         aviso.className = 'aviso-generico';
-        aviso.textContent = `A prévia 3D é um modelo genérico da categoria ${p.categoria}. ` +
-            'A aparência real da peça pode ser diferente.';
+        aviso.textContent = p.modelo_3d.arquivo === 'gpu'
+            ? 'A prévia 3D é um modelo genérico ajustado a esta placa (ventoinhas, cor, tamanho e conectores). ' +
+              'O desenho real da marca é diferente.'
+            : `A prévia 3D é um modelo genérico da categoria ${p.categoria}. ` +
+              'A aparência real da peça pode ser diferente.';
         elProduto.append(aviso);
     }
     if (p.modelo_3d?.creditos) {
@@ -86,26 +97,106 @@ function desenharProduto(p) {
 }
 
 function desenharModelo3D(p) {
-    const selo = textoSeloModelo(p.modelo_3d);
+    const selo = textoSeloModelo(p.modelo_3d, p);
     const elSelo = document.getElementById('selo-modelo');
     elSelo.hidden = !selo;
     elSelo.textContent = selo ?? '';
-    elSelo.classList.toggle('generico', p.modelo_3d?.origem === 'categoria');
+    elSelo.classList.toggle('generico', p.modelo_3d?.origem === 'categoria' && !temModeloFiel(p.modelo_3d, p));
 
     const btnTelaCheia = document.getElementById('btn-tela-cheia');
     btnTelaCheia.href = `/visualizador.html?id=${p.id}`;
     btnTelaCheia.hidden = !p.modelo_3d;
 
+    // Vista explodida: tocar numa parte mostra o nome e para que serve
+    const elInfo = document.getElementById('info-parte');
+    let parteAtual = null;
+    function mostrarParte(grupo) {
+        if (parteAtual) destacarParte(parteAtual, null);
+        parteAtual = grupo;
+        elInfo.hidden = !grupo;
+        if (!grupo) return;
+        destacarParte(grupo, 0x2bc3ff);
+        const { nome, descricao } = grupo.userData.parte;
+        elInfo.innerHTML = `<strong>${escapar(nome)}</strong><span>${escapar(descricao)}</span>`;
+    }
+
     const visualizador = criarVisualizador(document.getElementById('visualizador'), {
         corFundo: 0x131720,
         autoRotacao: true,     // gira sozinho até o usuário mexer
+        aoTocar: (objeto) => { if (explodido) mostrarParte(objeto ? encontrarParte(objeto) : null); },
     });
 
     document
         .getElementById('btn-reset')
         .addEventListener('click', () => visualizador.resetarCamera());
 
-    exibirModeloDoProduto(visualizador, p.modelo_3d);
+    exibirModeloDoProduto(visualizador, p.modelo_3d, p);
+
+    // Botão "Ver por dentro": só para modelos com partes (os gerados por código)
+    const btnExplodir = document.getElementById('btn-explodir');
+    let explodido = false;
+    btnExplodir.hidden = !visualizador.obterModelo()?.userData.explodir;
+    btnExplodir.addEventListener('click', () => {
+        explodido = !explodido;
+        visualizador.obterModelo()?.userData.explodir?.(explodido);
+        visualizador.controles.autoRotate = !explodido;
+        btnExplodir.textContent = explodido ? 'Juntar as partes' : 'Ver por dentro';
+        btnExplodir.classList.toggle('ligado', explodido);
+        mostrarParte(null);
+        document.querySelector('.dica-3d').textContent = explodido
+            ? 'Toque numa parte para saber o que ela faz'
+            : 'Arraste para girar · role para aproximar';
+    });
+    ativarAbaFoto(p, visualizador);
+}
+
+// Abas "3D" e "Foto" em cima do visualizador (só aparecem se houver foto)
+function ativarAbaFoto(p, visualizador) {
+    const url = urlImagem(p.imagem);
+    if (!url) return;
+
+    const abas = document.getElementById('abas-midia');
+    const figura = document.getElementById('foto-grande');
+    const fonte = fonteDaImagem(p.imagem);
+
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = p.nome;
+    img.referrerPolicy = 'no-referrer';
+    figura.append(img);
+    if (fonte) {
+        const legenda = document.createElement('figcaption');
+        legenda.textContent = `Foto: ${fonte} (referência)`;
+        figura.append(legenda);
+    }
+
+    // Foto quebrada: some com as abas e fica só o 3D
+    img.addEventListener('error', () => {
+        abas.hidden = true;
+        mostrar('3d');
+    });
+
+    function mostrar(aba) {
+        const foto = aba === 'foto';
+        figura.hidden = !foto;
+        if (foto) visualizador.pausar(); else visualizador.retomar();
+        for (const botao of abas.querySelectorAll('[data-aba]')) {
+            botao.setAttribute('aria-selected', String(botao.dataset.aba === aba));
+        }
+        // Botões que só fazem sentido no 3D
+        for (const elId of ['selo-modelo', 'btn-tela-cheia', 'btn-reset', 'btn-explodir']) {
+            document.getElementById(elId).classList.toggle('escondido-foto', foto);
+        }
+        document.querySelector('.dica-3d')?.classList.toggle('escondido-foto', foto);
+    }
+
+    abas.addEventListener('click', (e) => {
+        const aba = e.target.closest('[data-aba]')?.dataset.aba;
+        if (aba) mostrar(aba);
+    });
+    abas.hidden = false;
+    // Produto sem prévia 3D (ex.: placas-mãe): abre direto na foto
+    if (!p.modelo_3d) mostrar('foto');
 }
 
 // Dois carrosséis embaixo: mesma categoria e o resto da loja

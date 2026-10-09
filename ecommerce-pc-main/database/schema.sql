@@ -6,6 +6,8 @@
 -- Permite rodar o script várias vezes: apaga as tabelas antigas.
 -- A ordem é das tabelas "filhas" para as "pais", por causa das FKs.
 DROP VIEW  IF EXISTS vw_produto_catalogo;
+DROP TABLE IF EXISTS cooler_soquete  CASCADE;
+DROP TABLE IF EXISTS produto_tecnico CASCADE;
 DROP TABLE IF EXISTS item_pedido CASCADE;
 DROP TABLE IF EXISTS pedido      CASCADE;
 DROP TABLE IF EXISTS endereco    CASCADE;
@@ -63,6 +65,7 @@ CREATE TABLE produto (
     preco         NUMERIC(10,2) NOT NULL CHECK (preco >= 0),
     estoque       INTEGER       NOT NULL DEFAULT 0 CHECK (estoque >= 0),
     imagem        VARCHAR(255),
+    especificacoes JSONB,               -- características que variam por categoria (migração 06)
     categoria_id  INTEGER       NOT NULL
                   REFERENCES categoria(id) ON DELETE RESTRICT,
     modelo_3d_id  INTEGER
@@ -148,6 +151,32 @@ CREATE INDEX idx_item_pedido_produto  ON item_pedido(produto_id);
 
 
 -- =====================================================
+-- DADOS TÉCNICOS (usados no "Monte seu PC")
+-- =====================================================
+-- Relação 1:1 com produto: só as peças que têm dados técnicos ganham
+-- uma linha aqui (ex.: um SSD não tem soquete nem potência).
+CREATE TABLE produto_tecnico (
+    produto_id      INTEGER PRIMARY KEY
+                    REFERENCES produto(id) ON DELETE CASCADE,
+    soquete         VARCHAR(10),            -- processador e placa-mãe: AM4, AM5, LGA1700...
+    memoria         VARCHAR(4)              -- placa-mãe e memória
+                    CHECK (memoria IN ('DDR4', 'DDR5')),
+    formato         VARCHAR(5)              -- placa-mãe: tamanho; gabinete: maior tamanho que cabe
+                    CHECK (formato IN ('ITX', 'M-ATX', 'ATX', 'E-ATX')),
+    consumo_w       INTEGER CHECK (consumo_w > 0),    -- processador e placa de vídeo (aproximado)
+    potencia_w      INTEGER CHECK (potencia_w > 0),   -- fonte
+    video_integrado BOOLEAN                           -- processador
+);
+
+-- Relação N:N: um cooler serve em vários soquetes
+CREATE TABLE cooler_soquete (
+    produto_id  INTEGER     NOT NULL REFERENCES produto(id) ON DELETE CASCADE,
+    soquete     VARCHAR(10) NOT NULL,
+    PRIMARY KEY (produto_id, soquete)
+);
+
+
+-- =====================================================
 -- VIEW: produto pronto para o catálogo
 -- Escolhe o modelo 3D assim:
 --   1º o modelo próprio do produto
@@ -170,7 +199,19 @@ SELECT p.id,
        CASE
            WHEN p.modelo_3d_id IS NOT NULL THEN 'produto'
            WHEN c.modelo_3d_id IS NOT NULL THEN 'categoria'
-       END AS modelo_origem
+       END AS modelo_origem,
+       t.soquete,
+       t.memoria,
+       t.formato   AS formato_placa,
+       t.consumo_w,
+       t.potencia_w,
+       t.video_integrado,
+       -- soquetes do cooler numa lista só (subconsulta correlacionada)
+       (SELECT array_agg(cs.soquete ORDER BY cs.soquete)
+        FROM cooler_soquete cs
+        WHERE cs.produto_id = p.id) AS soquetes_cooler,
+       p.especificacoes
 FROM produto p
-JOIN      categoria c ON c.id = p.categoria_id
-LEFT JOIN modelo_3d m ON m.id = COALESCE(p.modelo_3d_id, c.modelo_3d_id);
+JOIN      categoria c       ON c.id = p.categoria_id
+LEFT JOIN modelo_3d m       ON m.id = COALESCE(p.modelo_3d_id, c.modelo_3d_id)
+LEFT JOIN produto_tecnico t ON t.produto_id = p.id;

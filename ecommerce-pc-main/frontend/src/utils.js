@@ -8,5 +8,6 @@ export function formatarPreco(valor) {
 export function escapar(texto) {
     const div = document.createElement('div');
     div.textContent = texto ?? '';
-    return div.innerHTML;
+    // aspas também: o texto pode ir dentro de um atributo (ex.: alt="27" ...")
+    return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }

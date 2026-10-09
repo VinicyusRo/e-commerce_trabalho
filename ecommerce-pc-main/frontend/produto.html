@@ -16,9 +16,18 @@
             <!-- Prévia 3D (o canvas é criado pelo viewer.js) -->
             <section class="produto-3d">
                 <div id="visualizador" class="visualizador-embutido">
+                    <!-- Foto do produto (aba "Foto"), por cima do 3D -->
+                    <figure id="foto-grande" class="foto-grande" hidden></figure>
+                    <!-- Nome e função da parte tocada na vista explodida -->
+                    <div id="info-parte" class="info-parte" hidden></div>
                     <div class="visualizador-acoes">
+                        <div id="abas-midia" class="abas-midia" role="tablist" hidden>
+                            <button type="button" role="tab" data-aba="3d" aria-selected="true">3D</button>
+                            <button type="button" role="tab" data-aba="foto" aria-selected="false">Foto</button>
+                        </div>
                         <span id="selo-modelo" class="selo-3d" hidden></span>
                         <a id="btn-tela-cheia" class="botao pequeno" href="#">Tela cheia</a>
+                        <button id="btn-explodir" class="botao pequeno" type="button" hidden>Ver por dentro</button>
                         <button id="btn-reset" class="botao pequeno" type="button">Resetar vista</button>
                     </div>
                 </div>

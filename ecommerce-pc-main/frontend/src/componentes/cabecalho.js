@@ -34,6 +34,10 @@ export function montarCabecalho() {
         </form>
 
         <nav>
+            <a class="nav-link nav-montar" href="/monte-seu-pc.html">
+                ${ICONES.montar}
+                <span>Monte seu PC</span>
+            </a>
             <a class="nav-link" href="/carrinho.html">
                 ${ICONES.carrinho}
                 <span>Carrinho</span>
