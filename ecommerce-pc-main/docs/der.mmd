@@ -1,0 +1,83 @@
+erDiagram
+    modelo_3d |o--o{ categoria : "modelo padrão"
+    modelo_3d |o--o{ produto : "modelo próprio"
+    categoria ||--o{ produto : "classifica"
+    produto ||--o| produto_tecnico : "dados técnicos (1:1)"
+    produto ||--o{ cooler_soquete : "soquetes do cooler"
+    usuario ||--o{ endereco : "cadastra"
+    usuario ||--o{ pedido : "faz"
+    endereco ||--o{ pedido : "recebe"
+    pedido ||--|{ item_pedido : "contém"
+    produto ||--o{ item_pedido : "aparece em"
+
+    modelo_3d {
+        int id PK
+        varchar nome
+        varchar arquivo UK "nome do gerador procedural"
+        varchar formato UK "procedural, glb ou gltf"
+        int tamanho_kb
+        text creditos
+    }
+    categoria {
+        int id PK
+        varchar nome UK
+        text descricao
+        int modelo_3d_id FK
+    }
+    produto {
+        int id PK
+        varchar nome
+        text descricao
+        numeric preco "CHECK >= 0"
+        int estoque "CHECK >= 0"
+        varchar imagem
+        jsonb especificacoes "periféricos"
+        int categoria_id FK
+        int modelo_3d_id FK
+        boolean destaque
+    }
+    produto_tecnico {
+        int produto_id PK, FK
+        varchar soquete "AM4, AM5, LGA1700..."
+        varchar memoria "DDR4 ou DDR5"
+        varchar formato "ITX, M-ATX, ATX, E-ATX"
+        int consumo_w
+        int potencia_w
+        boolean video_integrado
+    }
+    cooler_soquete {
+        int produto_id PK, FK
+        varchar soquete PK
+    }
+    usuario {
+        int id PK
+        varchar nome
+        varchar email UK
+        varchar senha_hash "bcrypt"
+        date data_cadastro
+    }
+    endereco {
+        int id PK
+        int usuario_id FK
+        varchar rua
+        varchar numero
+        varchar complemento
+        varchar bairro
+        varchar cidade
+        char estado
+        char cep
+        boolean ativo "exclusão lógica"
+    }
+    pedido {
+        int id PK
+        int usuario_id FK
+        int endereco_id FK
+        timestamp data
+        varchar status "pendente, pago, enviado, entregue, cancelado"
+    }
+    item_pedido {
+        int pedido_id PK, FK
+        int produto_id PK, FK
+        int quantidade "CHECK > 0"
+        numeric preco_unitario "preço na hora da compra"
+    }
