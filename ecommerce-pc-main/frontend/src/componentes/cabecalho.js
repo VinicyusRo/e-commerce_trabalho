@@ -3,6 +3,7 @@ import { ICONES } from './icones.js';
 import { escapar } from '../utils.js';
 import { api } from '../api/api.js';
 import { GRUPOS, grupoDaCategoria } from '../grupos.js';
+import { montarRodape } from './rodape.js';
 
 // Atalhos da barra de departamentos (só aparecem se a categoria existir no banco)
 const ATALHOS = ['Placas de vídeo', 'Processadores', 'Monitores', 'Teclados', 'Mouses'];
@@ -94,6 +95,8 @@ export function montarCabecalho() {
     const medir = () => document.documentElement.style.setProperty('--altura-topo', `${alvo.offsetHeight}px`);
     medir();
     window.addEventListener('resize', medir);
+
+    montarRodape();
 }
 
 // Marca o link da página atual na barra de departamentos

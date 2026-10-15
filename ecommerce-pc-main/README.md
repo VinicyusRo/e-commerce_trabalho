@@ -252,6 +252,23 @@ As técnicas usadas incluem formas extrudadas, `InstancedMesh` para pinos e cont
 As rotas `/api/admin` exigem um usuário com `admin = TRUE` (senão respondem 403).
 As rotas de endereços, pedidos e `/auth/eu` exigem o cabeçalho `Authorization: Bearer <token>`.
 
+## Equipe
+
+- Murilo Pacheco
+- Giovanni Oliveira
+- Vinicyus Rodrigues
+- Italo Silva Lira
+- Pierre Silva de Sá
+- Guilherme Augusto
+
 ## Fontes dos dados
 
-Nomes, preços e fotos dos produtos foram tirados da Pichau em 08/10/2026, só como referência para o trabalho acadêmico. As fotos dos 13 produtos em destaque ficam em `frontend/public/imagens/kabum`. Os estoques são fictícios.
+Este é um trabalho acadêmico, sem fins comerciais: nenhum produto é vendido de verdade.
+
+- **Pichau** ([pichau.com.br](https://www.pichau.com.br)): nomes, preços à vista e fotos dos produtos, consultados em 08/10/2026 só como referência. A maioria das fotos aponta para o endereço original no site da Pichau.
+- **KaBuM** ([kabum.com.br](https://www.kabum.com.br)): fotos dos 13 produtos em destaque, usadas para fazer os modelos 3D fiéis. Ficam em `frontend/public/imagens/kabum`.
+- **Modelos 3D baixados**: os créditos e a licença de cada um estão na coluna `creditos` da tabela `modelo_3d`.
+
+Os estoques são fictícios. O site mostra a fonte embaixo de cada foto e repete este aviso no rodapé.
+
+As marcas, nomes de produtos e imagens pertencem aos seus respectivos donos. Se algum detentor de direitos pedir, o conteúdo é retirado.
