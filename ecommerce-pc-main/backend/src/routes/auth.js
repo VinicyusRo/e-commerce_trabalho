@@ -34,7 +34,7 @@ router.post('/cadastro', async (req, res) => {
         const resultado = await pool.query(
             `INSERT INTO usuario (nome, email, senha_hash)
              VALUES ($1, $2, $3)
-             RETURNING id, nome, email`,
+             RETURNING id, nome, email, admin`,
             [nome.trim(), emailNormalizado, senhaHash]
         );
         const usuario = resultado.rows[0];
@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
     }
 
     const resultado = await pool.query(
-        'SELECT id, nome, email, senha_hash FROM usuario WHERE email = $1',
+        'SELECT id, nome, email, admin, senha_hash FROM usuario WHERE email = $1',
         [email.trim().toLowerCase()]
     );
     const usuario = resultado.rows[0];
@@ -74,7 +74,7 @@ router.post('/login', async (req, res) => {
     }
 
     res.json({
-        usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email },
+        usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email, admin: usuario.admin },
         token: gerarToken(usuario.id),
     });
 });
@@ -82,7 +82,7 @@ router.post('/login', async (req, res) => {
 // GET /api/auth/eu  → dados do usuário logado (rota protegida)
 router.get('/eu', exigirLogin, async (req, res) => {
     const resultado = await pool.query(
-        'SELECT id, nome, email, data_cadastro FROM usuario WHERE id = $1',
+        'SELECT id, nome, email, admin, data_cadastro FROM usuario WHERE id = $1',
         [req.usuarioId]
     );
 

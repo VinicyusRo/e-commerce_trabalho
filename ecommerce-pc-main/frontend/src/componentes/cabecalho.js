@@ -12,6 +12,16 @@ function primeiroNome() {
     }
 }
 
+// O link do painel só aparece para administradores. É só aparência:
+// quem protege de verdade é o backend (middleware exigirAdmin).
+function ehAdmin() {
+    try {
+        return JSON.parse(localStorage.getItem('usuario'))?.admin === true;
+    } catch {
+        return false;
+    }
+}
+
 // Monta o cabeçalho em qualquer página que tenha <header id="cabecalho">
 export function montarCabecalho() {
     const alvo = document.getElementById('cabecalho');
@@ -34,6 +44,9 @@ export function montarCabecalho() {
         </form>
 
         <nav>
+            ${logado && ehAdmin()
+                ? `<a class="nav-link nav-admin" href="/admin.html">${ICONES.painel}<span>Painel</span></a>`
+                : ''}
             <a class="nav-link nav-montar" href="/monte-seu-pc.html">
                 ${ICONES.montar}
                 <span>Monte seu PC</span>

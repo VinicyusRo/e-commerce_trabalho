@@ -25,6 +25,7 @@ export default defineConfig({
                 login:        resolve(pasta, 'login.html'),
                 conta:        resolve(pasta, 'conta.html'),
                 montagem:     resolve(pasta, 'monte-seu-pc.html'),
+                admin:        resolve(pasta, 'admin.html'),
             },
         },
     },

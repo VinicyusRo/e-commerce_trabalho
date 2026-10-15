@@ -1807,3 +1807,117 @@ article.cartao .preco { margin-bottom: 12px; }
     .montagem-layout.com-3d .bancada { order: -1; position: relative; top: 0; height: 42vh; }
     .montagem-layout.com-3d .resumo-montagem { order: 1; }
 }
+
+/* =====================================================
+   Painel do administrador (admin.html)
+   ===================================================== */
+.admin { max-width: 1200px; }
+.admin h1 { margin: 4px 0 20px; }
+
+.admin-resumo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+}
+.admin-numero {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 18px;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    background: var(--superficie);
+}
+.admin-numero span { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-3); }
+.admin-numero strong { font-size: 24px; font-weight: 800; color: var(--texto); }
+/* As classes status-* pintam o fundo; aqui só o número fica colorido */
+.admin-numero[class*="status-"] { background: var(--superficie) !important; }
+.admin-numero[class*="status-"] strong { color: inherit; }
+
+.admin-abas { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--borda); }
+.admin-abas button {
+    padding: 10px 16px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--texto-2);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.admin-abas button:hover { color: var(--texto); }
+.admin-abas button[aria-selected="true"] { color: var(--destaque); border-bottom-color: var(--destaque); }
+
+.admin-filtros { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+.admin-filtros label { display: flex; align-items: center; gap: 8px; color: var(--texto-2); font-size: 14px; }
+.admin-filtros input,
+.admin-filtros select,
+.janela-endereco select,
+.janela-endereco textarea {
+    padding: 9px 12px;
+    background: var(--fundo);
+    border: 1px solid var(--borda-forte);
+    border-radius: var(--raio-peq);
+    color: var(--texto);
+    outline: 0;
+}
+.admin-filtros input { flex: 1; min-width: 200px; }
+.admin-filtros input:focus,
+.admin-filtros select:focus,
+.janela-endereco select:focus,
+.janela-endereco textarea:focus { border-color: var(--destaque); box-shadow: 0 0 0 3px var(--destaque-fundo); }
+.janela-endereco textarea { resize: vertical; }
+.botao.pequeno-admin { padding: 9px 16px; font-size: 14px; margin-left: auto; }
+
+.admin-botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.botao-avancar { color: var(--destaque); border-color: rgba(43, 195, 255, 0.45); }
+.botao-avancar:hover { background: var(--destaque-fundo); }
+
+.tabela-rolagem { overflow-x: auto; border: 1px solid var(--borda); border-radius: var(--raio); }
+.tabela-admin { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tabela-admin th,
+.tabela-admin td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--borda); vertical-align: middle; }
+.tabela-admin th { background: var(--superficie); color: var(--texto-3); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+.tabela-admin tr:last-child td { border-bottom: 0; }
+.tabela-admin tbody tr:hover { background: var(--superficie); }
+.tabela-admin a { color: var(--texto); }
+.tabela-admin .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tabela-admin .texto-secundario { color: var(--texto-2); }
+.acoes-linha { white-space: nowrap; text-align: right !important; }
+.acoes-linha .botao + .botao { margin-left: 6px; }
+.vazio-tabela { color: var(--texto-2); text-align: center !important; padding: 24px !important; }
+
+/* Interruptor (checkbox com cara de chave liga/desliga) */
+.interruptor { position: relative; display: inline-block; width: 40px; height: 22px; cursor: pointer; }
+.interruptor input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.interruptor span {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--borda-forte);
+    transition: background .15s;
+    pointer-events: none;
+}
+.interruptor span::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform .15s;
+}
+.interruptor input:checked + span { background: var(--destaque); }
+.interruptor input:checked + span::after { transform: translateX(18px); }
+.interruptor input:focus-visible + span { outline: 2px solid var(--destaque); outline-offset: 2px; }
+.interruptor input:disabled + span { opacity: .5; }
+
+.formulario .linha-check { flex-direction: row; align-items: center; gap: 8px; }
+.formulario .linha-check input { width: auto; accent-color: var(--destaque); }
+
+@media (max-width: 700px) {
+    .botao.pequeno-admin { margin-left: 0; width: 100%; }
+}

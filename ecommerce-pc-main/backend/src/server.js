@@ -5,6 +5,7 @@ import categoriasRouter from './routes/categorias.js';
 import produtosRouter from './routes/produtos.js';
 import enderecosRouter from './routes/enderecos.js';
 import pedidosRouter from './routes/pedidos.js';
+import adminRouter from './routes/admin.js';
 
 const app = express();
 // O Render (hospedagem) informa a porta pela variável PORT; no seu computador usa 3000
@@ -18,6 +19,7 @@ app.use('/api/categorias', categoriasRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/enderecos', enderecosRouter);
 app.use('/api/pedidos', pedidosRouter);
+app.use('/api/admin', adminRouter);
 
 // Rota de teste
 app.get('/api/saude', (req, res) => {
