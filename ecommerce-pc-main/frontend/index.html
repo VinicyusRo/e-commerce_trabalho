@@ -8,35 +8,99 @@
 <body>
     <header id="cabecalho"></header>
 
-    <main>
-        <!-- Banner de destaque (escondido quando há busca ou filtro) -->
-        <section id="destaque" class="destaque">
-            <div class="destaque-texto">
-                <span class="destaque-etiqueta">Prévia 3D interativa</span>
-                <h1>Veja cada peça em 3D antes de comprar</h1>
-                <p>Gire, aproxime e confira placas de vídeo, processadores, memórias e SSDs direto no navegador.</p>
-                <div class="destaque-botoes">
-                    <a class="botao primario" href="#titulo-lista">Ver produtos</a>
-                    <a class="botao" href="/monte-seu-pc.html">Monte seu PC</a>
+    <main class="main-loja">
+        <!-- ===== Só na página inicial (sem categoria, departamento ou busca) ===== -->
+        <div id="so-inicio">
+            <section id="destaque" class="destaque">
+                <div class="destaque-texto">
+                    <span class="destaque-etiqueta">Prévia 3D interativa</span>
+                    <h1>Veja cada peça em 3D antes de comprar</h1>
+                    <p>Gire, aproxime e confira placas de vídeo, processadores, memórias e SSDs direto no navegador.</p>
+                    <div class="destaque-botoes">
+                        <a class="botao primario" href="#titulo-lista">Ver produtos</a>
+                        <a class="botao" href="/monte-seu-pc.html">Monte seu PC</a>
+                    </div>
+                    <ul class="destaque-vantagens">
+                        <li>Visualização 3D</li>
+                        <li>Estoque em tempo real</li>
+                        <li>Compra segura</li>
+                    </ul>
                 </div>
-                <ul class="destaque-vantagens">
-                    <li>Visualização 3D</li>
-                    <li>Estoque em tempo real</li>
-                    <li>Compra segura</li>
-                </ul>
-            </div>
-            <!-- Vitrine: produtos passando sozinhos (preenchida pelo home.js) -->
-            <div id="vitrine" class="vitrine" aria-roledescription="carrossel" aria-label="Produtos em destaque" hidden>
-                <div class="vitrine-janela"><div id="vitrine-trilho" class="vitrine-trilho"></div></div>
-                <div id="vitrine-pontos" class="vitrine-pontos" role="tablist" aria-label="Escolher produto"></div>
+                <!-- Vitrine: produtos passando sozinhos (preenchida pelo home.js) -->
+                <div id="vitrine" class="vitrine" aria-roledescription="carrossel" aria-label="Produtos em destaque" hidden>
+                    <div class="vitrine-janela"><div id="vitrine-trilho" class="vitrine-trilho"></div></div>
+                    <div id="vitrine-pontos" class="vitrine-pontos" role="tablist" aria-label="Escolher produto"></div>
+                </div>
+            </section>
+
+            <!-- Prateleiras por departamento, no estilo das grandes lojas -->
+            <section id="prateleiras" class="prateleiras" aria-label="Departamentos"></section>
+        </div>
+
+        <!-- ===== Lista de produtos: filtros na lateral só fora da página inicial ===== -->
+        <section id="area-compra" class="area-compra inicio">
+            <div id="veu-filtros" class="veu-filtros"></div>
+            <aside id="filtros" class="filtros" aria-label="Filtros">
+                <div class="filtros-topo">
+                    <h2>Filtrar</h2>
+                    <div>
+                        <button id="limpar-filtros" class="link-botao" type="button">Limpar filtros</button>
+                        <button id="fechar-filtros" class="fechar-filtros" type="button" aria-label="Fechar filtros">×</button>
+                    </div>
+                </div>
+                <details open><summary>Categoria</summary><div class="grupo-filtro" id="f-categorias"></div></details>
+                <div id="f-especificos"></div>
+                <details open>
+                    <summary>Preço</summary>
+                    <div class="grupo-filtro">
+                        <div class="faixa-preco">
+                            <input id="preco-min" inputmode="decimal" placeholder="Mín. R$" aria-label="Preço mínimo">
+                            <span>até</span>
+                            <input id="preco-max" inputmode="decimal" placeholder="Máx. R$" aria-label="Preço máximo">
+                        </div>
+                        <div class="faixas" id="faixas"></div>
+                    </div>
+                </details>
+                <details open>
+                    <summary>Marca</summary>
+                    <div class="grupo-filtro">
+                        <input id="busca-marca" class="busca-marca" placeholder="Buscar marca" aria-label="Buscar marca">
+                        <div id="f-marcas"></div>
+                        <button id="ver-marcas" class="link-botao" type="button"></button>
+                    </div>
+                </details>
+                <details open>
+                    <summary>Disponibilidade</summary>
+                    <div class="grupo-filtro">
+                        <label class="opcao-filtro"><input type="checkbox" id="so-estoque"> Somente em estoque</label>
+                        <label class="opcao-filtro"><input type="checkbox" id="so-3d"> Com 3D da própria peça</label>
+                        <label class="opcao-filtro"><input type="checkbox" id="so-foto"> Com foto</label>
+                    </div>
+                </details>
+            </aside>
+
+            <div class="resultados">
+                <nav id="trilha" class="trilha" aria-label="Você está em"></nav>
+                <div class="resultados-topo">
+                    <h2 id="titulo-lista" class="titulo-secao">Destaques para você <small id="contagem"></small></h2>
+                    <div class="ordenar">
+                        <button id="abrir-filtros" class="botao abrir-filtros" type="button">Filtros</button>
+                        <label for="ordem">Ordenar</label>
+                        <select id="ordem">
+                            <option value="relevancia">Mais relevantes</option>
+                            <option value="menor">Menor preço</option>
+                            <option value="maior">Maior preço</option>
+                            <option value="nome">Nome (A–Z)</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="chips" class="chips"></div>
+                <nav id="categorias" class="categorias" aria-label="Categorias"></nav>
+                <p id="mensagem"></p>
+                <section id="produtos" class="grade" aria-labelledby="titulo-lista"></section>
+                <button id="carregar-mais" class="botao carregar-mais" type="button" hidden>Carregar mais</button>
             </div>
         </section>
-
-        <nav id="categorias" class="categorias" aria-label="Categorias"></nav>
-
-        <h2 id="titulo-lista" class="titulo-secao">Produtos</h2>
-        <p id="mensagem"></p>
-        <section id="produtos" class="grade" aria-labelledby="titulo-lista"></section>
     </main>
 
     <script type="module" src="/src/pages/home.js"></script>
