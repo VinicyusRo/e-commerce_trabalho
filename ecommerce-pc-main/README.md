@@ -252,6 +252,15 @@ As técnicas usadas incluem formas extrudadas, `InstancedMesh` para pinos e cont
 As rotas `/api/admin` exigem um usuário com `admin = TRUE` (senão respondem 403).
 As rotas de endereços, pedidos e `/auth/eu` exigem o cabeçalho `Authorization: Bearer <token>`.
 
+## Equipe
+
+- Murilo Pacheco
+- Giovanni Oliveira
+- Vinicyus Rodrigues
+- Italo Silva Lira
+- Pierre Silva de Sá
+- Guilherme Augusto
+
 ## Fontes dos dados
 
 Este é um trabalho acadêmico, sem fins comerciais: nenhum produto é vendido de verdade.

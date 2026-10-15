@@ -267,6 +267,8 @@ main {
 }
 .rodape-coluna p { margin: 8px 0 0; }
 .rodape-coluna h3 { margin: 0; font-size: 15px; color: var(--topo-texto); }
+.rodape-tecnologias { font-size: 13px; color: var(--topo-texto-2); opacity: 0.85; }
+.rodape-equipe { margin: 8px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; }
 .rodape-logo { font-size: 20px; font-weight: 800; color: var(--topo-texto); }
 #rodape a { color: var(--ciano); }
 .rodape-aviso {
