@@ -223,7 +223,7 @@ async function iniciar() {
         elMensagem.textContent = '';
 
         // Mantém o nome do cabeçalho atualizado
-        localStorage.setItem('usuario', JSON.stringify({ id: usuario.id, nome: usuario.nome, email: usuario.email }));
+        localStorage.setItem('usuario', JSON.stringify({ id: usuario.id, nome: usuario.nome, email: usuario.email, admin: usuario.admin }));
         montarCabecalho();
 
         desenharPerfil(usuario);

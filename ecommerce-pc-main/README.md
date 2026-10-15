@@ -10,6 +10,7 @@ Projeto das disciplinas de **Banco de Dados** e **Computação Gráfica**: uma l
 - **Página do produto** com abas Foto e 3D, tela cheia, girar e aproximar, e "Ver por dentro" (vista explodida, tocar numa parte mostra o nome dela).
 - **Monte seu PC**: 15 passos opcionais e uma revisão. Cada passo só mostra as peças compatíveis com as já escolhidas (soquete, tipo de memória, tamanho da placa, potência da fonte e soquetes do cooler). A animação 3D encaixa as peças no gabinete e coloca os periféricos na mesa. No fim, adiciona tudo ao carrinho.
 - **Carrinho, checkout, login e cadastro** (JWT), **conta** com endereços (busca pelo CEP) e pedidos, com cancelamento que devolve as unidades ao estoque.
+- **Painel do administrador** (`admin.html`, só para contas com `admin = TRUE`): resumo da loja, todos os pedidos com mudança de status (pendente → pago → enviado → entregue, ou cancelado devolvendo o estoque), cadastro, edição, destaque e exclusão de produtos, e cadastro de categorias.
 
 ## Tecnologias
 
@@ -27,8 +28,8 @@ ecommerce-pc-main/
 ├── backend/src/
 │   ├── server.js    configura o Express e as rotas
 │   ├── db.js        conexão com o banco (pool)
-│   ├── middleware/  auth.js: exige login (token JWT)
-│   └── routes/      produtos, categorias, auth, enderecos, pedidos
+│   ├── middleware/  auth.js: exige login (token JWT) e exige administrador
+│   └── routes/      produtos, categorias, auth, enderecos, pedidos, admin
 ├── frontend/
 │   ├── *.html       uma página por tela
 │   ├── public/      fotos próprias dos produtos personalizados
@@ -60,7 +61,16 @@ psql -U postgres -d ecommerce_pc -f migracao-06-perifericos.sql
 psql -U postgres -d ecommerce_pc -f migracao-07-sem-modelos-baixados.sql
 psql -U postgres -d ecommerce_pc -f migracao-08-modelos-fieis.sql
 psql -U postgres -d ecommerce_pc -f migracao-09-destaques.sql
+psql -U postgres -d ecommerce_pc -f migracao-10-administrador.sql
 ```
+
+Para usar o painel do administrador, cadastre-se no site e depois marque a sua conta como administradora (troque pelo seu e-mail):
+
+```sql
+UPDATE usuario SET admin = TRUE WHERE email = 'seu-email@exemplo.com';
+```
+
+Saia e entre de novo no site: o link **Painel** aparece no cabeçalho.
 
 - `schema.sql` cria as tabelas e `seed.sql` coloca os primeiros dados. **Os dois apagam tudo o que já existe**, então só servem para começar do zero.
 - As **migrações** acrescentam o resto (produtos, categorias, dados técnicos, modelos 3D, destaques). Todas podem ser rodadas mais de uma vez sem duplicar nada. Sem elas o backend não funciona, porque ele usa colunas criadas nas migrações (por exemplo `destaque`, da migração 09).
@@ -91,7 +101,7 @@ Abra http://localhost:5173. O Vite repassa as chamadas `/api` para o backend (ve
 
 | Serviço  | O que configurar |
 |----------|------------------|
-| Supabase | Rode no SQL Editor os mesmos scripts da seção "Banco", na mesma ordem, e por último `database/supabase-seguranca.sql` (liga o RLS e bloqueia a API pública automática do Supabase). **Depois do banco criado, nunca rode `schema.sql` ou `seed.sql` de novo**: mudanças novas entram sempre como uma migração nova (`migracao-10-...`). |
+| Supabase | Rode no SQL Editor os mesmos scripts da seção "Banco", na mesma ordem, e por último `database/supabase-seguranca.sql` (liga o RLS e bloqueia a API pública automática do Supabase). **Depois do banco criado, nunca rode `schema.sql` ou `seed.sql` de novo**: mudanças novas entram sempre como uma migração nova (`migracao-11-...`). |
 | Render   | Pasta raiz `backend`, comando `npm start`. Variáveis: `DATABASE_URL` (endereço de conexão do Supabase), `JWT_SECRET` e, se quiser, `JWT_EXPIRA_EM`. |
 | Vercel   | Pasta raiz `frontend`, comando `npm run build`, saída `dist`. Variável: `VITE_API_URL` com o endereço do backend no Render (ex.: `https://meu-backend.onrender.com`). |
 
@@ -158,6 +168,7 @@ erDiagram
         varchar nome
         varchar email UK
         varchar senha_hash "bcrypt"
+        boolean admin "acesso ao painel"
         date data_cadastro
     }
     endereco {
@@ -196,6 +207,7 @@ erDiagram
 - **View `vw_produto_catalogo`:** junta produto, categoria, modelo 3D e dados técnicos. Escolhe o modelo 3D com `COALESCE` (primeiro o do produto, depois o da categoria) e junta os soquetes do cooler com uma subconsulta correlacionada e `array_agg`.
 - **Transação no pedido:** o pedido é criado numa transação que trava cada produto com `SELECT ... FOR UPDATE`, confere o estoque e o diminui. Os produtos são travados sempre em ordem de id, para evitar deadlock. O cancelamento também é uma transação: muda o status e devolve as unidades ao estoque.
 - **Histórico de preço:** `item_pedido.preco_unitario` guarda o preço do momento da compra, então mudar o preço do produto não altera pedidos antigos.
+- **Administrador:** `usuario.admin` diz quem pode usar o painel. O backend confere essa coluna no banco a cada requisição de `/api/admin` (e não só no token), então tirar o admin de alguém vale na hora. A mudança de status do pedido também é uma transação com `FOR UPDATE`, e só aceita os próximos passos válidos.
 - **Exclusão lógica:** um endereço já usado em pedido não é apagado, só fica `ativo = FALSE`. Assim o histórico continua certo.
 - **Integridade:** `CHECK` em preço, estoque, quantidade, status, tipo de memória e formato, além de `UNIQUE` no e-mail e nos nomes de categoria e de índices nas chaves estrangeiras.
 - **Segurança:** as senhas são guardadas com hash `bcrypt`, e o RLS fica ligado no Supabase.
@@ -229,7 +241,15 @@ As técnicas usadas incluem formas extrudadas, `InstancedMesh` para pinos e cont
 | `PUT /api/enderecos/:id` e `DELETE /api/enderecos/:id` | edita e exclui um endereço (exclusão lógica se já foi usado num pedido) |
 | `GET /api/pedidos` e `POST /api/pedidos` | lista os pedidos e cria um pedido (transação com `FOR UPDATE`) |
 | `POST /api/pedidos/:id/cancelar` | cancela um pedido e devolve o estoque |
+| `GET /api/admin/resumo` | números do painel: pedidos por status, faturamento, produtos sem estoque |
+| `GET /api/admin/pedidos` | todos os pedidos, com cliente (`?status=pendente`) |
+| `PATCH /api/admin/pedidos/:id/status` | muda o status (`{ "status": "enviado" }`); cancelar devolve o estoque |
+| `GET /api/admin/produtos` e `POST /api/admin/produtos` | lista e cadastra produtos |
+| `PUT /api/admin/produtos/:id` e `DELETE /api/admin/produtos/:id` | edita e exclui um produto (só se nunca foi vendido) |
+| `PATCH /api/admin/produtos/:id/destaque` | liga ou desliga o destaque |
+| `POST`, `PUT` e `DELETE /api/admin/categorias` | cadastra, edita e exclui categorias (só se estiver vazia) |
 
+As rotas `/api/admin` exigem um usuário com `admin = TRUE` (senão respondem 403).
 As rotas de endereços, pedidos e `/auth/eu` exigem o cabeçalho `Authorization: Bearer <token>`.
 
 ## Fontes dos dados

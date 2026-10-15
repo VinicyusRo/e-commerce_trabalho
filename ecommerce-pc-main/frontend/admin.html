@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do administrador - PC Store</title>
+</head>
+<body>
+    <header id="cabecalho"></header>
+
+    <main class="admin">
+        <a class="botao-voltar" href="/" data-voltar>Voltar</a>
+        <h1>Painel do administrador</h1>
+        <p id="mensagem"></p>
+
+        <!-- Tudo abaixo é preenchido pelo admin.js -->
+        <div id="painel" hidden>
+            <section id="admin-resumo" class="admin-resumo" aria-label="Resumo da loja"></section>
+
+            <nav class="admin-abas" role="tablist">
+                <button type="button" role="tab" data-aba="pedidos" aria-selected="true">Pedidos</button>
+                <button type="button" role="tab" data-aba="produtos" aria-selected="false">Produtos</button>
+                <button type="button" role="tab" data-aba="categorias" aria-selected="false">Categorias</button>
+            </nav>
+
+            <section id="aba-pedidos" class="admin-aba">
+                <div class="admin-filtros">
+                    <label>Status
+                        <select id="filtro-status">
+                            <option value="">Todos</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="pago">Pago</option>
+                            <option value="enviado">Enviado</option>
+                            <option value="entregue">Entregue</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="admin-pedidos" class="lista-pedidos"></div>
+            </section>
+
+            <section id="aba-produtos" class="admin-aba" hidden>
+                <div class="admin-filtros">
+                    <input id="busca-produto" type="search" placeholder="Buscar produto pelo nome" aria-label="Buscar produto">
+                    <select id="filtro-categoria" aria-label="Filtrar por categoria"></select>
+                    <button id="btn-novo-produto" class="botao primario pequeno-admin" type="button">+ Novo produto</button>
+                </div>
+                <p id="contagem-produtos" class="etapa-contagem"></p>
+                <div class="tabela-rolagem">
+                    <table class="tabela-admin">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Categoria</th>
+                                <th class="num">Preço</th>
+                                <th class="num">Estoque</th>
+                                <th>Destaque</th>
+                                <th><span class="sr-only">Ações</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-produtos"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="aba-categorias" class="admin-aba" hidden>
+                <div class="admin-filtros">
+                    <button id="btn-nova-categoria" class="botao primario pequeno-admin" type="button">+ Nova categoria</button>
+                </div>
+                <div class="tabela-rolagem">
+                    <table class="tabela-admin">
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th class="num">Produtos</th>
+                                <th><span class="sr-only">Ações</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-categorias"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="/src/pages/admin.js"></script>
+</body>
+</html>
