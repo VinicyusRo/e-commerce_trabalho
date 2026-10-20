@@ -62,6 +62,7 @@ psql -U postgres -d ecommerce_pc -f migracao-07-sem-modelos-baixados.sql
 psql -U postgres -d ecommerce_pc -f migracao-08-modelos-fieis.sql
 psql -U postgres -d ecommerce_pc -f migracao-09-destaques.sql
 psql -U postgres -d ecommerce_pc -f migracao-10-administrador.sql
+psql -U postgres -d ecommerce_pc -f migracao-11-modelos-sketchfab.sql
 ```
 
 Para usar o painel do administrador, cadastre-se no site e depois marque a sua conta como administradora (troque pelo seu e-mail):
@@ -214,7 +215,7 @@ erDiagram
 
 ## Computação Gráfica
 
-Todos os modelos 3D são **gerados por código** com Three.js (em milímetros), sem arquivos baixados. A tabela `modelo_3d` guarda o nome do gerador de cada categoria, e a view escolhe qual usar.
+Os modelos 3D são **gerados por código** com Three.js (em milímetros). A tabela `modelo_3d` guarda o nome do gerador de cada categoria, e a view escolhe qual usar. A exceção é a página do produto de placas de vídeo, processadores e gabinetes, que mostra um modelo baixado do Sketchfab (`.glb` em `frontend/public/modelos`, migração 11). Os produtos com modelo fiel e o Monte seu PC continuam com os modelos gerados por código, e se o `.glb` faltar a página volta para eles.
 
 | Arquivo (`frontend/src/viewer/`) | O que faz |
 |---|---|
@@ -267,7 +268,10 @@ Este é um trabalho acadêmico, sem fins comerciais: nenhum produto é vendido d
 
 - **Pichau** ([pichau.com.br](https://www.pichau.com.br)): nomes, preços à vista e fotos dos produtos, consultados em 08/10/2026 só como referência. A maioria das fotos aponta para o endereço original no site da Pichau.
 - **KaBuM** ([kabum.com.br](https://www.kabum.com.br)): fotos dos 13 produtos em destaque, usadas para fazer os modelos 3D fiéis. Ficam em `frontend/public/imagens/kabum`.
-- **Modelos 3D baixados**: os créditos e a licença de cada um estão na coluna `creditos` da tabela `modelo_3d`.
+- **Modelos 3D do Sketchfab** (licença [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/)). O crédito também aparece na página de cada produto e fica na coluna `creditos` da tabela `modelo_3d`:
+  - Placa de vídeo: ["GeForce RTX 3080 Graphics Card"](https://sketchfab.com/3d-models/geforce-rtx-3080-graphics-card-8b947ee1bf7a4e3d8ffa1c24893ac160), por _surovic_ (@samuelsurovic)
+  - Processador: ["AMD Ryzen 5 5600X Processor"](https://sketchfab.com/3d-models/amd-ryzen-5-5600x-processor-1649601de2014dbeab4f201010a7c366), por PolyDavid
+  - Gabinete: ["Gaming PC Case"](https://sketchfab.com/3d-models/gaming-pc-case-5f9261fef2874bf9ae39dd0f4029e978), por dylanheyes
 
 Os estoques são fictícios. O site mostra a fonte embaixo de cada foto e repete este aviso no rodapé.
 
