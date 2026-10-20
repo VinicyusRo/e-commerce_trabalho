@@ -7,7 +7,7 @@ Projeto das disciplinas de **Banco de Dados** e **Computação Gráfica**: uma l
 ## Funcionalidades
 
 - **Catálogo** com cerca de 238 produtos em 15 categorias, busca, filtro por categoria e vitrine de destaques no banner.
-- **Página do produto** com abas Foto e 3D, tela cheia, girar e aproximar, e "Ver por dentro" (vista explodida, tocar numa parte mostra o nome dela).
+- **Página do produto** com abas Foto e 3D, tela cheia, girar e aproximar, e "Ver por dentro" (vista explodida, tocar numa parte mostra o nome dela) e "Corte" (plano de corte ajustável para ver o modelo por dentro).
 - **Monte seu PC**: 15 passos opcionais e uma revisão. Cada passo só mostra as peças compatíveis com as já escolhidas (soquete, tipo de memória, tamanho da placa, potência da fonte e soquetes do cooler). A animação 3D encaixa as peças no gabinete e coloca os periféricos na mesa. No fim, adiciona tudo ao carrinho.
 - **Carrinho, checkout, login e cadastro** (JWT), **conta** com endereços (busca pelo CEP) e pedidos, com cancelamento que devolve as unidades ao estoque.
 - **Painel do administrador** (`admin.html`, só para contas com `admin = TRUE`): resumo da loja, todos os pedidos com mudança de status (pendente → pago → enviado → entregue, ou cancelado devolvendo o estoque), cadastro, edição, destaque e exclusão de produtos, e cadastro de categorias.
@@ -218,7 +218,7 @@ Todos os modelos 3D são **gerados por código** com Three.js (em milímetros), 
 
 | Arquivo (`frontend/src/viewer/`) | O que faz |
 |---|---|
-| `viewer.js` | Visualizador: câmera, luzes, girar e aproximar, tela cheia e vista explodida ("Ver por dentro") |
+| `viewer.js` | Visualizador: câmera, luzes, girar e aproximar, tela cheia, vista explodida ("Ver por dentro") e plano de corte ("Corte") |
 | `modelos-procedurais.js`, `modelos-pc.js`, `modelos-perifericos.js` | Modelo genérico de cada uma das 15 categorias |
 | `parametros.js` | Modelagem paramétrica: lê o nome e os dados do produto (número de ventoinhas, tamanho, formato, cor...) e ajusta o modelo genérico |
 | `especificos-pc.js`, `especificos-perifericos.js` | 13 modelos fiéis, feitos a partir de fotos dos produtos em destaque |
@@ -226,6 +226,15 @@ Todos os modelos 3D são **gerados por código** com Three.js (em milímetros), 
 | `util3d.js` | Funções de apoio: caixas, extrusões e texturas desenhadas em canvas |
 
 As técnicas usadas incluem formas extrudadas, `InstancedMesh` para pinos e contatos repetidos, texturas desenhadas em canvas e animação das ventoinhas e da montagem.
+
+### Plano de corte (clipping)
+
+O botão **Corte** (página do produto e tela cheia) corta o modelo com um plano, como um desenho técnico em corte:
+
+- O plano é um `THREE.Plane` passado em `renderer.clippingPlanes`. Todo pixel do lado negativo do plano é descartado na GPU (recorte no fragment shader), então só aparece a parte de um lado.
+- O painel escolhe o eixo do plano (X, Y ou Z), a posição (de 0% a 100% da caixa que envolve o modelo) e qual lado fica visível ("Inverter lado").
+- Para o modelo não parecer oco, enquanto o corte está ligado os materiais desenham também as faces de trás (`DoubleSide`) e um trecho injetado no shader (`onBeforeCompile`) pinta de laranja os pixels onde `gl_FrontFacing` é falso. Esses pixels são justamente o interior visto através do corte, o que dá a aparência de superfície cortada.
+- O toque nas peças (raycasting) ignora o que foi cortado, e o corte funciona junto com a vista explodida.
 
 ## API
 

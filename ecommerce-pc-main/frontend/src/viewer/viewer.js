@@ -146,6 +146,7 @@ export function criarVisualizador(container, opcoes = {}) {
 
     // Coloca um objeto na cena no lugar do modelo anterior
     function trocarModelo(objeto) {
+        materiaisCortados.clear();   // os materiais do modelo antigo vão ser liberados
         if (modeloAtual) {
             scene.remove(modeloAtual);
             liberarObjeto(modeloAtual);
@@ -154,8 +155,100 @@ export function criarVisualizador(container, opcoes = {}) {
         modeloAtual = objeto;
         scene.add(modeloAtual);
         enquadrarModelo(modeloAtual);
-        controls.autoRotate = autoRotacao;   // modelo novo volta a girar
+        controls.autoRotate = autoRotacao && !corte.ligado;   // modelo novo volta a girar
         esconderAviso();
+    }
+
+    // ---------- Plano de corte (clipping) ----------
+    // Um plano corta o modelo: o que fica do lado "negativo" dele não é
+    // desenhado (o próprio WebGL descarta esses pixels). Assim dá para ver
+    // o modelo por dentro, como num desenho técnico em corte.
+    //
+    // Só cortar deixaria o modelo "oco" (vemos as paredes de dentro, com luz
+    // estranha). Para parecer um objeto maciço cortado, enquanto o corte está
+    // ligado os materiais passam a desenhar também a face de trás, e o
+    // fragment shader pinta essas faces de uma cor só (a "superfície do corte").
+    const planoCorte = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
+    const corte = { ligado: false, eixo: 'x', posicao: 0.5, inverter: false };
+    const materiaisCortados = new Map();   // material → como ele era antes
+
+    // Cor das superfícies cortadas (laranja, em RGB de 0 a 1)
+    const COR_CORTE = 'vec3(1.0, 0.42, 0.18)';
+
+    function prepararMaterialParaCorte(material) {
+        if (materiaisCortados.has(material)) return;
+        // Materiais que já mostram os dois lados (chapas finas, pás) ficam como
+        // estão: o verso deles é visível normalmente e não é corte
+        if (material.side !== THREE.FrontSide) return;
+
+        materiaisCortados.set(material, {
+            side: material.side,
+            onBeforeCompile: material.onBeforeCompile,
+            customProgramCacheKey: material.customProgramCacheKey,
+        });
+        material.side = THREE.DoubleSide;
+        material.onBeforeCompile = (shader) => {
+            // gl_FrontFacing é falso quando o pixel vem da face de trás de um triângulo
+            shader.fragmentShader = shader.fragmentShader.replace(
+                '#include <dithering_fragment>',
+                `#include <dithering_fragment>
+                if (!gl_FrontFacing) gl_FragColor = vec4(${COR_CORTE}, 1.0);`
+            );
+        };
+        // Avisa o three.js que este shader é diferente (senão ele reaproveita o antigo)
+        material.customProgramCacheKey = () => 'corte';
+        material.needsUpdate = true;
+    }
+
+    function restaurarMateriais() {
+        for (const [material, original] of materiaisCortados) {
+            Object.assign(material, original);
+            material.needsUpdate = true;
+        }
+        materiaisCortados.clear();
+    }
+
+    // Percorre o modelo e prepara os materiais. Roda a cada quadro enquanto o
+    // corte está ligado, porque a vista explodida pode trocar materiais por cópias.
+    function aplicarCorteNoModelo() {
+        modeloAtual?.traverse((no) => {
+            if (!no.isMesh) return;
+            const materiais = Array.isArray(no.material) ? no.material : [no.material];
+            materiais.forEach(prepararMaterialParaCorte);
+        });
+    }
+
+    // Posiciona o plano: "posicao" vai de 0 (começo do modelo) a 1 (fim)
+    // no eixo escolhido, usando a caixa que envolve o modelo agora
+    function atualizarPlanoCorte() {
+        if (!modeloAtual) return;
+        const caixa = new THREE.Box3().setFromObject(modeloAtual);
+        const i = { x: 0, y: 1, z: 2 }[corte.eixo];
+        const minimo = caixa.min.getComponent(i);
+        const maximo = caixa.max.getComponent(i);
+        const d = minimo + (maximo - minimo) * corte.posicao;
+
+        // Fica visível o que tem distância >= 0 do plano:
+        // normal (-1,0,0) e constante d → mantém x <= d (a parte "de trás")
+        const normal = new THREE.Vector3();
+        normal.setComponent(i, corte.inverter ? 1 : -1);
+        planoCorte.set(normal, corte.inverter ? -d : d);
+    }
+
+    /**
+     * Liga, ajusta ou desliga o corte.
+     * @param {object} [ajustes] - { ligado, eixo: 'x'|'y'|'z', posicao: 0 a 1, inverter }
+     */
+    function definirCorte(ajustes = {}) {
+        Object.assign(corte, ajustes);
+        if (corte.ligado) {
+            renderer.clippingPlanes = [planoCorte];
+            aplicarCorteNoModelo();
+            atualizarPlanoCorte();
+        } else {
+            renderer.clippingPlanes = [];
+            restaurarMateriais();
+        }
     }
 
     // ---------- Toque na peça (raycasting) ----------
@@ -183,7 +276,9 @@ export function criarVisualizador(container, opcoes = {}) {
                 -((e.clientY - ret.top) / ret.height) * 2 + 1
             );
             raycaster.setFromCamera(ponto, camera);
-            const acertos = raycaster.intersectObject(modeloAtual, true);
+            // Com o corte ligado, ignora o que foi cortado (não aparece na tela)
+            const acertos = raycaster.intersectObject(modeloAtual, true)
+                .filter((a) => !corte.ligado || planoCorte.distanceToPoint(a.point) >= 0);
             aoTocar(acertos.length ? acertos[0].object : null);
         });
     }
@@ -239,6 +334,7 @@ export function criarVisualizador(container, opcoes = {}) {
     /** Remove o modelo atual e mostra uma mensagem no lugar. */
     function limpar(mensagem = '') {
         ++ultimoPedido;
+        materiaisCortados.clear();
         if (modeloAtual) {
             scene.remove(modeloAtual);
             liberarObjeto(modeloAtual);
@@ -295,9 +391,15 @@ export function criarVisualizador(container, opcoes = {}) {
         // Modelos podem ter animação própria (ex.: ventoinhas girando)
         modeloAtual?.userData.atualizar?.(dt);
 
+        // O corte acompanha o modelo (ex.: peças se afastando na vista explodida)
+        if (corte.ligado) {
+            aplicarCorteNoModelo();
+            atualizarPlanoCorte();
+        }
+
         controls.update();
         renderer.render(scene, camera);
     });
 
-    return { carregarModelo, mostrarObjeto, limpar, resetarCamera, destruir, pausar, retomar, obterModelo, controles: controls };
+    return { carregarModelo, mostrarObjeto, limpar, resetarCamera, destruir, pausar, retomar, obterModelo, definirCorte, controles: controls };
 }

@@ -1,6 +1,7 @@
 import { criarVisualizador } from '../viewer/viewer.js';
 import { api } from '../api/api.js';
 import { exibirModeloDoProduto } from '../viewer/modelo-produto.js';
+import { montarControleCorte } from '../componentes/controle-corte.js';
 
 const container = document.getElementById('visualizador');
 const elTitulo = document.getElementById('titulo-produto');
@@ -49,6 +50,14 @@ async function iniciar() {
 
     // Arquivo .glb ou modelo gerado por código (ver modelo-produto.js)
     exibirModeloDoProduto(visualizador, produto.modelo_3d, produto);
+
+    // Plano de corte para ver o modelo por dentro
+    document.getElementById('btn-corte').hidden = false;
+    montarControleCorte({
+        botao: document.getElementById('btn-corte'),
+        painel: document.getElementById('painel-corte'),
+        visualizador,
+    });
 }
 
 iniciar();

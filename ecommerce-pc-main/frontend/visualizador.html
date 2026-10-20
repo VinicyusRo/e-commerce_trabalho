@@ -52,6 +52,59 @@
             font-size: 14px;
         }
 
+        #btn-corte {
+            position: absolute;
+            top: 16px;
+            right: 150px;
+            z-index: 10;
+            padding: 8px 14px;
+            cursor: pointer;
+            background: rgba(19, 23, 32, 0.85);
+            color: #e9edf3;
+            border: 1px solid #36404f;
+            border-radius: 9px;
+            font: inherit;
+            font-size: 14px;
+        }
+        #btn-corte[hidden] { display: none; }
+        #btn-corte.ligado { border-color: #2bc3ff; color: #2bc3ff; }
+
+        /* Painel do plano de corte, por cima do 3D, embaixo */
+        .painel-corte {
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            z-index: 10;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 14px;
+            padding: 10px 14px;
+            background: rgba(19, 23, 32, 0.9);
+            border: 1px solid #36404f;
+            border-left: 3px solid #ff6b2e;
+            border-radius: 9px;
+            color: #c6d0dd;
+            font-size: 14px;
+        }
+        .painel-corte[hidden] { display: none; }
+        .painel-corte-titulo { font-weight: bold; color: #e9edf3; }
+        .painel-corte-eixos { display: flex; gap: 4px; }
+        .painel-corte button {
+            padding: 5px 11px;
+            border: 1px solid #36404f;
+            border-radius: 7px;
+            background: #1c222e;
+            color: #c6d0dd;
+            font: inherit;
+            cursor: pointer;
+        }
+        .painel-corte button[aria-pressed="true"],
+        .painel-corte button.ligado { border-color: #2bc3ff; color: #2bc3ff; }
+        .painel-corte-posicao { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 160px; }
+        .painel-corte-posicao input { flex: 1; accent-color: #2bc3ff; }
+
         #erro-pagina {
             display: none;
             position: absolute;
@@ -73,6 +126,8 @@
 
     <div id="visualizador">
         <button id="btn-reset">Resetar vista</button>
+        <button id="btn-corte" aria-pressed="false" hidden>Corte</button>
+        <div id="painel-corte" hidden></div>
     </div>
 
     <div id="erro-pagina"></div>
