@@ -7,7 +7,19 @@ import { parametrosDoProduto, modeloFiel } from './parametros.js';
 const GERADOR_DA_CATEGORIA = {
     'Placas de vídeo': 'gpu',
     'Processadores': 'cpu',
+    'Memórias RAM': 'ram',
+    'Armazenamento': 'ssd',
+    'Placas-mãe': 'mae',
     'Gabinetes': 'gabinete',
+    'Fontes': 'fonte',
+    'Coolers': 'cooler',
+    'Ventoinhas': 'ventoinha',
+    'Monitores': 'monitor',
+    'Teclados': 'teclado',
+    'Mouses': 'mouse',
+    'Headsets e fones': 'headset',
+    'Controles': 'controle',
+    'Cadeiras': 'cadeira',
 };
 
 /** Nome do gerador por código que vale para este modelo (ou undefined). */
