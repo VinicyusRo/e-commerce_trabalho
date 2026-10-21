@@ -63,6 +63,7 @@ psql -U postgres -d ecommerce_pc -f migracao-08-modelos-fieis.sql
 psql -U postgres -d ecommerce_pc -f migracao-09-destaques.sql
 psql -U postgres -d ecommerce_pc -f migracao-10-administrador.sql
 psql -U postgres -d ecommerce_pc -f migracao-11-modelos-sketchfab.sql
+psql -U postgres -d ecommerce_pc -f migracao-12-modelos-por-produto.sql
 ```
 
 Para usar o painel do administrador, cadastre-se no site e depois marque a sua conta como administradora (troque pelo seu e-mail):
@@ -215,7 +216,7 @@ erDiagram
 
 ## Computação Gráfica
 
-Os modelos 3D são **gerados por código** com Three.js (em milímetros). A tabela `modelo_3d` guarda o nome do gerador de cada categoria, e a view escolhe qual usar. A exceção é a página do produto, que mostra um modelo baixado do Sketchfab para cada uma das 15 categorias (`.glb` em `frontend/public/modelos`, migração 11). Os produtos com modelo fiel e o Monte seu PC continuam com os modelos gerados por código, e se o `.glb` faltar a página volta para eles.
+Os modelos 3D são **gerados por código** com Three.js (em milímetros). A tabela `modelo_3d` guarda o nome do gerador de cada categoria, e a view escolhe qual usar. A exceção é a página do produto, que mostra um modelo baixado do Sketchfab para cada uma das 15 categorias (`.glb` em `frontend/public/modelos`, migração 11). Cinco produtos têm um modelo do próprio produto no Sketchfab (migração 12). Os produtos com modelo fiel e o Monte seu PC continuam com os modelos gerados por código, e se o `.glb` faltar a página volta para eles.
 
 | Arquivo (`frontend/src/viewer/`) | O que faz |
 |---|---|
@@ -284,6 +285,12 @@ Este é um trabalho acadêmico, sem fins comerciais: nenhum produto é vendido d
   - Headset: ["Wireless Gaming Headset"](https://sketchfab.com/3d-models/wireless-gaming-headset-3075896c0ab84e23a6f085c300c33805), por DatSketch
   - Controle: ["Xbox Inalambric Controller (Black)"](https://sketchfab.com/3d-models/xbox-inalambric-controller-black-29cc9624894a4f2cae7d2a675044db45), por Chistodrako.\_. (@oscar.lopez.riviello)
   - Cadeira: ["Gaming Chair \[FREE DOWNLOAD\]"](https://sketchfab.com/3d-models/gaming-chair-free-download-bcb13eb7ef9e4c3c9499aacff6c79757), por Karlos (@Karldashian)
+  - Produtos específicos (migração 12):
+    - SSD Samsung 990 Pro: ["Samsung 990 PRO SSD"](https://sketchfab.com/3d-models/samsung-990-pro-ssd-6ada64c9ba734e499978a084e68ec3df), por PolyDavid
+    - Logitech MX Master 3S: ["Logitech MX Master 3S by Scaniverse"](https://sketchfab.com/3d-models/logitech-mx-master-3s-by-scaniverse-be1d82499209475c8cd1d009df9aaa00), por Zhirayr (@zhirayrsfabcloud)
+    - DualSense: ["Playstation 5 Dualsense"](https://sketchfab.com/3d-models/playstation-5-dualsense-878c1f882808477ab81c2fe86d5a3936), por AHarmlessPotato
+    - AMD Ryzen 5 7600: ["AMD Ryzen 5 7600 CPU chip (AM5 socket)"](https://sketchfab.com/3d-models/amd-ryzen-5-7600-cpu-chip-am5-socket-a05c2732e0b847c2967e2c9282abd5f9), por arsdever
+    - Intel Core i5-12400F: ["Intel Core i5-12400F"](https://sketchfab.com/3d-models/intel-core-i5-12400f-ad8a458fa799483b92d119018f6505f1), por Alex (@alex.ars.460)
 
 Os estoques são fictícios. O site mostra a fonte embaixo de cada foto e repete este aviso no rodapé.
 
