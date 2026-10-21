@@ -62,6 +62,7 @@ psql -U postgres -d ecommerce_pc -f migracao-07-sem-modelos-baixados.sql
 psql -U postgres -d ecommerce_pc -f migracao-08-modelos-fieis.sql
 psql -U postgres -d ecommerce_pc -f migracao-09-destaques.sql
 psql -U postgres -d ecommerce_pc -f migracao-10-administrador.sql
+psql -U postgres -d ecommerce_pc -f migracao-11-modelos-sketchfab.sql
 ```
 
 Para usar o painel do administrador, cadastre-se no site e depois marque a sua conta como administradora (troque pelo seu e-mail):
@@ -214,7 +215,7 @@ erDiagram
 
 ## Computação Gráfica
 
-Todos os modelos 3D são **gerados por código** com Three.js (em milímetros), sem arquivos baixados. A tabela `modelo_3d` guarda o nome do gerador de cada categoria, e a view escolhe qual usar.
+Os modelos 3D são **gerados por código** com Three.js (em milímetros). A tabela `modelo_3d` guarda o nome do gerador de cada categoria, e a view escolhe qual usar. A exceção é a página do produto, que mostra um modelo baixado do Sketchfab para cada uma das 15 categorias (`.glb` em `frontend/public/modelos`, migração 11). Os produtos com modelo fiel e o Monte seu PC continuam com os modelos gerados por código, e se o `.glb` faltar a página volta para eles.
 
 | Arquivo (`frontend/src/viewer/`) | O que faz |
 |---|---|
@@ -267,7 +268,22 @@ Este é um trabalho acadêmico, sem fins comerciais: nenhum produto é vendido d
 
 - **Pichau** ([pichau.com.br](https://www.pichau.com.br)): nomes, preços à vista e fotos dos produtos, consultados em 08/10/2026 só como referência. A maioria das fotos aponta para o endereço original no site da Pichau.
 - **KaBuM** ([kabum.com.br](https://www.kabum.com.br)): fotos dos 13 produtos em destaque, usadas para fazer os modelos 3D fiéis. Ficam em `frontend/public/imagens/kabum`.
-- **Modelos 3D baixados**: os créditos e a licença de cada um estão na coluna `creditos` da tabela `modelo_3d`.
+- **Modelos 3D do Sketchfab** (licença [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/)). O crédito também aparece na página de cada produto e fica na coluna `creditos` da tabela `modelo_3d`:
+  - Placa de vídeo: ["GeForce RTX 3080 Graphics Card"](https://sketchfab.com/3d-models/geforce-rtx-3080-graphics-card-8b947ee1bf7a4e3d8ffa1c24893ac160), por \_surovic\_ (@samuelsurovic)
+  - Processador: ["AMD Ryzen 5 5600X Processor"](https://sketchfab.com/3d-models/amd-ryzen-5-5600x-processor-1649601de2014dbeab4f201010a7c366), por PolyDavid
+  - Memória RAM: ["Crucial BALLISTIX 8GB DDR4 3600 RAM \| Black"](https://sketchfab.com/3d-models/crucial-ballistix-8gb-ddr4-3600-ram-black-1fce4935471e46cab6ee57ba140c87f9), por BlackCube (@blackcube4)
+  - Armazenamento: ["Storage (SSD, HDD, M.2)"](https://sketchfab.com/3d-models/storage-ssd-hdd-m2-bdd5fd67a7674359ab8648204b5c0575), por Vivien Deroche (@blue-odym)
+  - Placa-mãe: ["X570 Prime motherboard \[HQ PBR\]"](https://sketchfab.com/3d-models/x570-prime-motherboard-hq-pbr-25b3659935774b1e9d73d8954be065d8), por Igor.Jop
+  - Gabinete: ["Corsair 4000D PC case"](https://sketchfab.com/3d-models/corsair-4000d-pc-case-bc15e007d6634579bc0e8ffdf238e665), por SzaBa
+  - Fonte: ["Power supply Aerocool KCAS 500W ATX"](https://sketchfab.com/3d-models/power-supply-aerocool-kcas-500w-atx-bfb1f77fffb0410f9ee0d0be6fb5fc88), por nofurion
+  - Cooler: ["Cooler Master CPU Cooler"](https://sketchfab.com/3d-models/cooler-master-cpu-cooler-e54651982f524644a2144b52a6b36e89), por BlenderFace (@BlenderFace1)
+  - Ventoinha: ["Corsair Fan"](https://sketchfab.com/3d-models/corsair-fan-27f023b65e814d1c946460fcc0cb8250), por umkhero
+  - Monitor: ["Samsung Odyssey G3 144hz"](https://sketchfab.com/3d-models/samsung-odyssey-g3-144hz-c640947b16374bd8959564e32f497e0d), por abdullahpowerfull
+  - Teclado: ["Logitech mechanical gaming keyboard"](https://sketchfab.com/3d-models/logitech-mechanical-gaming-keyboard-c775d45baf854606931584404d7b9109), por BlackCube (@blackcube4)
+  - Mouse: ["Mouse Logitech G203"](https://sketchfab.com/3d-models/mouse-logitech-g203-6b70ace291c44735bed3309b05f44bba), por JorgeAlfredOwO
+  - Headset: ["Wireless Gaming Headset"](https://sketchfab.com/3d-models/wireless-gaming-headset-3075896c0ab84e23a6f085c300c33805), por DatSketch
+  - Controle: ["Xbox Inalambric Controller (Black)"](https://sketchfab.com/3d-models/xbox-inalambric-controller-black-29cc9624894a4f2cae7d2a675044db45), por Chistodrako.\_. (@oscar.lopez.riviello)
+  - Cadeira: ["Gaming Chair \[FREE DOWNLOAD\]"](https://sketchfab.com/3d-models/gaming-chair-free-download-bcb13eb7ef9e4c3c9499aacff6c79757), por Karlos (@Karldashian)
 
 Os estoques são fictícios. O site mostra a fonte embaixo de cada foto e repete este aviso no rodapé.
 

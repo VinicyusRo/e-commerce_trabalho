@@ -1,6 +1,34 @@
 import { gerarModeloProcedural, existeModeloProcedural } from './modelos-procedurais.js';
 import { parametrosDoProduto, modeloFiel } from './parametros.js';
 
+// Categorias que usam um modelo baixado (.glb, migração 11) → gerador por código
+// da mesma peça. O modelo fiel do produto tem preferência sobre o baixado, e o
+// gerador serve de reserva se o arquivo .glb não existir.
+const GERADOR_DA_CATEGORIA = {
+    'Placas de vídeo': 'gpu',
+    'Processadores': 'cpu',
+    'Memórias RAM': 'ram',
+    'Armazenamento': 'ssd',
+    'Placas-mãe': 'mae',
+    'Gabinetes': 'gabinete',
+    'Fontes': 'fonte',
+    'Coolers': 'cooler',
+    'Ventoinhas': 'ventoinha',
+    'Monitores': 'monitor',
+    'Teclados': 'teclado',
+    'Mouses': 'mouse',
+    'Headsets e fones': 'headset',
+    'Controles': 'controle',
+    'Cadeiras': 'cadeira',
+};
+
+/** Nome do gerador por código que vale para este modelo (ou undefined). */
+function geradorDoModelo(modelo, produto) {
+    if (modelo?.formato === 'procedural') return modelo.arquivo;
+    if (modelo?.origem === 'categoria') return GERADOR_DA_CATEGORIA[produto?.categoria];
+    return undefined;
+}
+
 /**
  * Mostra no visualizador o modelo 3D de um produto, do jeito que a API devolve:
  *   produto.modelo_3d = { arquivo, formato, creditos, origem } ou null
@@ -14,26 +42,35 @@ export function exibirModeloDoProduto(visualizador, modelo, produto = null) {
         return;
     }
 
-    if (modelo.formato === 'procedural') {
-        if (!existeModeloProcedural(modelo.arquivo)) {
-            console.warn('Gerador procedural não encontrado:', modelo.arquivo);
+    const gerador = geradorDoModelo(modelo, produto);
+    function gerar() {
+        if (!existeModeloProcedural(gerador)) {
+            console.warn('Gerador procedural não encontrado:', gerador);
             visualizador.limpar('Prévia 3D indisponível.');
             return;
         }
         // Com o produto, o modelo genérico ganha a cara dele (modelagem paramétrica)
-        visualizador.mostrarObjeto(gerarModeloProcedural(modelo.arquivo, parametrosDoProduto(modelo.arquivo, produto)));
+        visualizador.mostrarObjeto(gerarModeloProcedural(gerador, parametrosDoProduto(gerador, produto)));
+    }
+
+    if (modelo.formato === 'procedural' || temModeloFiel(modelo, produto)) {
+        gerar();
         return;
     }
 
     // O caminho do banco é relativo ("modelos/..."), então prefixamos com "/"
     visualizador
         .carregarModelo(`/${modelo.arquivo}`)
-        .catch((erro) => console.error('Erro ao carregar o modelo:', erro));
+        .catch((erro) => {
+            console.error('Erro ao carregar o modelo:', erro);
+            if (gerador) gerar();   // sem o .glb, volta para o modelo gerado por código
+        });
 }
 
 /** O produto tem modelo 3D fiel (feito a partir das fotos dele)? */
 export function temModeloFiel(modelo, produto) {
-    return Boolean(modelo?.formato === 'procedural' && modeloFiel(modelo.arquivo, produto));
+    const gerador = geradorDoModelo(modelo, produto);
+    return Boolean(gerador && modeloFiel(gerador, produto));
 }
 
 /** Texto curto para o selo: "3D do produto" ou "3D genérico". */
