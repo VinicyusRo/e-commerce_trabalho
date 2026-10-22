@@ -7,6 +7,7 @@ import { adicionarAoCarrinho, lerCarrinho } from '../carrinho.js';
 import { criarVisualizador } from '../viewer/viewer.js';
 import { exibirModeloDoProduto, textoSeloModelo, temModeloFiel, elementoCreditos } from '../viewer/modelo-produto.js';
 import { encontrarParte, destacarParte } from '../viewer/modelos-procedurais.js';
+import { montarControleCorte } from '../componentes/controle-corte.js';
 import { montarCarrossel } from '../componentes/carrossel.js';
 import { ICONES } from '../componentes/icones.js';
 import { urlImagem, fonteDaImagem } from '../componentes/foto.js';
@@ -143,7 +144,7 @@ function desenharModelo3D(p) {
     btnExplodir.addEventListener('click', () => {
         explodido = !explodido;
         visualizador.obterModelo()?.userData.explodir?.(explodido);
-        visualizador.controles.autoRotate = !explodido;
+        visualizador.controles.autoRotate = !explodido && !btnCorte.classList.contains('ligado');
         btnExplodir.textContent = explodido ? 'Juntar as partes' : 'Ver por dentro';
         btnExplodir.classList.toggle('ligado', explodido);
         mostrarParte(null);
@@ -151,11 +152,27 @@ function desenharModelo3D(p) {
             ? 'Toque numa parte para saber o que ela faz'
             : 'Arraste para girar · role para aproximar';
     });
-    ativarAbaFoto(p, visualizador);
+
+    // Botão "Corte": um plano corta o modelo para ver o interior (clipping)
+    const btnCorte = document.getElementById('btn-corte');
+    btnCorte.hidden = !p.modelo_3d;
+    let cortando = false;
+    montarControleCorte({
+        botao: btnCorte,
+        painel: document.getElementById('painel-corte'),
+        visualizador,
+        aoMudar: (ligado) => {
+            cortando = ligado;
+            document.querySelector('.dica-3d').textContent = ligado
+                ? 'Arraste a posição para mover o plano de corte · gire para ver a parte cortada'
+                : 'Arraste para girar · role para aproximar';
+        },
+    });
+    ativarAbaFoto(p, visualizador, () => cortando);
 }
 
 // Abas "3D" e "Foto" em cima do visualizador (só aparecem se houver foto)
-function ativarAbaFoto(p, visualizador) {
+function ativarAbaFoto(p, visualizador, estaCortando) {
     const url = urlImagem(p.imagem);
     if (!url) return;
 
@@ -188,9 +205,11 @@ function ativarAbaFoto(p, visualizador) {
             botao.setAttribute('aria-selected', String(botao.dataset.aba === aba));
         }
         // Botões que só fazem sentido no 3D
-        for (const elId of ['selo-modelo', 'btn-tela-cheia', 'btn-reset', 'btn-explodir']) {
+        for (const elId of ['selo-modelo', 'btn-tela-cheia', 'btn-reset', 'btn-explodir', 'btn-corte']) {
             document.getElementById(elId).classList.toggle('escondido-foto', foto);
         }
+        // O painel do corte fica embaixo do 3D: na foto ele some de vez
+        document.getElementById('painel-corte').hidden = foto || !estaCortando();
         document.querySelector('.dica-3d')?.classList.toggle('escondido-foto', foto);
     }
 

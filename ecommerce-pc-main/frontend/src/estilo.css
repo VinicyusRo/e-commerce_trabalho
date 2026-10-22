@@ -2295,3 +2295,36 @@ body.sem-rolagem { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
     .filtros { transition: none; }
 }
+
+/* ----- Plano de corte do visualizador 3D (controle-corte.js) ----- */
+#btn-corte.ligado { border-color: var(--destaque); color: var(--destaque); }
+.painel-corte {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin: 10px 0 0;
+    padding: 10px 14px;
+    background: var(--superficie);
+    border: 1px solid var(--borda);
+    border-left: 3px solid #ff6b2e;   /* mesma cor das superfícies cortadas no 3D */
+    border-radius: var(--raio-peq);
+    font-size: 13px;
+    color: var(--texto-2);
+}
+.painel-corte[hidden] { display: none; }
+.painel-corte-titulo { font-weight: 600; color: var(--texto); }
+.painel-corte-eixos { display: flex; gap: 4px; }
+.painel-corte button {
+    padding: 5px 11px;
+    border: 1px solid var(--borda-forte);
+    border-radius: 7px;
+    background: var(--superficie-2);
+    color: var(--texto-2);
+    font: inherit;
+    cursor: pointer;
+}
+.painel-corte button[aria-pressed="true"],
+.painel-corte button.ligado { border-color: var(--destaque); background: var(--destaque-fundo); color: var(--destaque); }
+.painel-corte-posicao { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 160px; }
+.painel-corte-posicao input { flex: 1; accent-color: var(--destaque); }
