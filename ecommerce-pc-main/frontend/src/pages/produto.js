@@ -54,14 +54,18 @@ function desenharProduto(p) {
     } else if (p.modelo_3d?.origem === 'categoria') {
         const aviso = document.createElement('p');
         aviso.className = 'aviso-generico';
-        aviso.textContent = p.modelo_3d.arquivo === 'gpu'
+        aviso.textContent = p.modelo_3d.formato !== 'procedural'
+            ? `A prévia 3D é um modelo ilustrativo da categoria ${p.categoria}, feito por outra pessoa (crédito abaixo). ` +
+              'A peça real pode ser diferente.'
+            : p.modelo_3d.arquivo === 'gpu'
             ? 'A prévia 3D é um modelo genérico ajustado a esta placa (ventoinhas, cor, tamanho e conectores). ' +
               'O desenho real da marca é diferente.'
             : `A prévia 3D é um modelo genérico da categoria ${p.categoria}. ` +
               'A aparência real da peça pode ser diferente.';
         elProduto.append(aviso);
     }
-    if (p.modelo_3d?.creditos) {
+    // Produto com modelo fiel não usa o modelo baixado, então não leva o crédito dele
+    if (p.modelo_3d?.creditos && !temModeloFiel(p.modelo_3d, p)) {
         elProduto.append(elementoCreditos(p.modelo_3d.creditos));
     }
 
