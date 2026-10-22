@@ -2,7 +2,8 @@
 //
 // No HTML:  <button id="btn-corte">Corte</button>   e   <div id="painel-corte" hidden></div>
 // O botão liga e desliga o corte; o painel tem o eixo do plano, a posição
-// (controle deslizante) e o botão que troca o lado que fica visível.
+// (controle deslizante), o botão que troca o lado que fica visível e o que
+// separa as duas metades (a peça "serrada ao meio").
 
 const EIXOS = [
     { eixo: 'x', nome: 'X', dica: 'Plano de corte em pé, cortando da esquerda para a direita' },
@@ -29,6 +30,7 @@ export function montarControleCorte({ botao, painel, visualizador, aoMudar = nul
             <input type="range" min="0" max="100" value="50" aria-label="Posição do plano de corte">
         </label>
         <button type="button" class="painel-corte-inverter" title="Mostra o outro lado do corte">Inverter lado</button>
+        <button type="button" class="painel-corte-separar" aria-pressed="false" title="Mostra as duas metades afastadas, como a peça cortada ao meio">Separar metades</button>
     `;
 
     const deslizante = painel.querySelector('input[type="range"]');
@@ -70,5 +72,12 @@ export function montarControleCorte({ botao, painel, visualizador, aoMudar = nul
         invertido = !invertido;
         visualizador.definirCorte({ inverter: invertido });
         e.currentTarget.classList.toggle('ligado', invertido);
+    });
+
+    let separado = false;
+    painel.querySelector('.painel-corte-separar').addEventListener('click', (e) => {
+        separado = !separado;
+        visualizador.definirCorte({ separar: separado });
+        e.currentTarget.setAttribute('aria-pressed', String(separado));
     });
 }

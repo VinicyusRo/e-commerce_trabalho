@@ -233,9 +233,11 @@ As técnicas usadas incluem formas extrudadas, `InstancedMesh` para pinos e cont
 
 O botão **Corte** (página do produto e tela cheia) corta o modelo com um plano, como um desenho técnico em corte:
 
-- O plano é um `THREE.Plane` passado em `renderer.clippingPlanes`. Todo pixel do lado negativo do plano é descartado na GPU (recorte no fragment shader), então só aparece a parte de um lado.
+- O plano é um `THREE.Plane` passado aos materiais (`material.clippingPlanes`). Todo pixel do lado negativo do plano é descartado na GPU (recorte no fragment shader), então só aparece a parte de um lado.
 - O painel escolhe o eixo do plano (X, Y ou Z), a posição (de 0% a 100% da caixa que envolve o modelo) e qual lado fica visível ("Inverter lado").
 - Para o modelo não parecer oco, enquanto o corte está ligado os materiais desenham também as faces de trás (`DoubleSide`) e um trecho injetado no shader (`onBeforeCompile`) pinta de laranja os pixels onde `gl_FrontFacing` é falso. Esses pixels são justamente o interior visto através do corte, o que dá a aparência de superfície cortada.
+- **Separar metades** corta a peça ao meio e mostra as duas partes afastadas: uma cópia do modelo (que reaproveita as mesmas geometrias) é cortada pelo plano oposto, e cada metade anda para o seu lado levando o seu plano junto. Por isso cada material tem o próprio plano (`material.clippingPlanes`, com `renderer.localClippingEnabled`).
+- Funciona com os modelos gerados por código e com os modelos do Sketchfab (.glb).
 - O toque nas peças (raycasting) ignora o que foi cortado, e o corte funciona junto com a vista explodida.
 
 ## API
