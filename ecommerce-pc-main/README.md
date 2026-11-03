@@ -7,7 +7,7 @@ Projeto das disciplinas de **Banco de Dados** e **Computação Gráfica**: uma l
 ## Funcionalidades
 
 - **Catálogo** com cerca de 238 produtos em 15 categorias, busca, filtro por categoria e vitrine de destaques no banner.
-- **Página do produto** com abas Foto e 3D, tela cheia, girar e aproximar, e "Ver por dentro" (vista explodida, tocar numa parte mostra o nome dela).
+- **Página do produto** com abas Foto e 3D, tela cheia, girar e aproximar, e "Ver por dentro" (vista explodida, tocar numa parte mostra o nome dela, e dá para ver uma peça sozinha, tirando as outras da cena).
 - **Monte seu PC**: 15 passos opcionais e uma revisão. Cada passo só mostra as peças compatíveis com as já escolhidas (soquete, tipo de memória, tamanho da placa, potência da fonte e soquetes do cooler). A animação 3D encaixa as peças no gabinete e coloca os periféricos na mesa. No fim, adiciona tudo ao carrinho.
 - **Carrinho, checkout, login e cadastro** (JWT), **conta** com endereços (busca pelo CEP) e pedidos, com cancelamento que devolve as unidades ao estoque.
 - **Painel do administrador** (`admin.html`, só para contas com `admin = TRUE`): resumo da loja, todos os pedidos com mudança de status (pendente → pago → enviado → entregue, ou cancelado devolvendo o estoque), cadastro, edição, destaque e exclusão de produtos, e cadastro de categorias.
@@ -220,7 +220,7 @@ Os modelos 3D são **gerados por código** com Three.js (em milímetros). A tabe
 
 | Arquivo (`frontend/src/viewer/`) | O que faz |
 |---|---|
-| `viewer.js` | Visualizador: câmera, luzes, girar e aproximar, tela cheia e vista explodida ("Ver por dentro") |
+| `viewer.js` | Visualizador: câmera, luzes, girar e aproximar, tela cheia, vista explodida ("Ver por dentro") e peça isolada ("Ver só esta peça") |
 | `modelos-procedurais.js`, `modelos-pc.js`, `modelos-perifericos.js` | Modelo genérico de cada uma das 15 categorias |
 | `parametros.js` | Modelagem paramétrica: lê o nome e os dados do produto (número de ventoinhas, tamanho, formato, cor...) e ajusta o modelo genérico |
 | `especificos-pc.js`, `especificos-perifericos.js` | 13 modelos fiéis, feitos a partir de fotos dos produtos em destaque |
@@ -228,6 +228,16 @@ Os modelos 3D são **gerados por código** com Three.js (em milímetros). A tabe
 | `util3d.js` | Funções de apoio: caixas, extrusões e texturas desenhadas em canvas |
 
 As técnicas usadas incluem formas extrudadas, `InstancedMesh` para pinos e contatos repetidos, texturas desenhadas em canvas e animação das ventoinhas e da montagem.
+
+### Ver uma peça sozinha
+
+Na vista explodida ("Ver por dentro"), cada modelo gerado por código é dividido em partes nomeadas (`parte()` em `util3d.js`). A lista embaixo do 3D, ou o botão "Ver só esta peça" depois de tocar numa parte (raycasting), deixa só aquela peça na cena:
+
+- `isolarParte(grupo)` em `viewer.js` percorre o grafo de cena (`traverse`) e esconde (`visible = false`) todo objeto que não é a peça nem um dos grupos "pais" dela. A visibilidade antiga fica guardada para voltar depois.
+- A câmera vai suavemente até a peça (interpolação com `lerp` a cada quadro), enquadrando pela caixa que envolve a peça (`Box3`), na mesma direção em que o usuário estava olhando.
+- "Todas" ou "Mostrar todas as peças" reacende tudo e devolve a câmera para onde estava. Toques em peças escondidas são ignorados.
+
+Os modelos do Sketchfab (.glb) não têm partes com nome, então o "Ver por dentro" aparece só nos produtos com modelo gerado por código (os 13 em destaque).
 
 ## API
 
