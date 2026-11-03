@@ -82,6 +82,7 @@ export function criarVisualizador(container, opcoes = {}) {
     // Quando o usuário começa a arrastar, para a rotação automática
     controls.addEventListener('start', () => {
         controls.autoRotate = false;
+        transicaoCamera.ativa = false;   // quem manda na câmera agora é o usuário
     });
 
     // ---------- Iluminação ----------
@@ -146,6 +147,9 @@ export function criarVisualizador(container, opcoes = {}) {
 
     // Coloca um objeto na cena no lugar do modelo anterior
     function trocarModelo(objeto) {
+        visibilidadeOriginal.clear();   // o modelo antigo vai embora junto com o isolamento
+        parteIsolada = null;
+        transicaoCamera.ativa = false;
         if (modeloAtual) {
             scene.remove(modeloAtual);
             liberarObjeto(modeloAtual);
@@ -156,6 +160,85 @@ export function criarVisualizador(container, opcoes = {}) {
         enquadrarModelo(modeloAtual);
         controls.autoRotate = autoRotacao;   // modelo novo volta a girar
         esconderAviso();
+    }
+
+    // ---------- Ver uma peça sozinha (isolar) ----------
+    // Esconde da cena tudo o que não é a peça escolhida e leva a câmera até
+    // ela. Os objetos continuam no modelo (só ficam invisíveis), então voltar
+    // a mostrar todas é só reacender a visibilidade de cada um.
+    const visibilidadeOriginal = new Map();   // objeto → visible antes de isolar
+    let parteIsolada = null;
+    const vistaAntesDeIsolar = { posicao: new THREE.Vector3(), alvo: new THREE.Vector3() };
+
+    // Transição suave da câmera: a cada quadro ela anda um pouco até o destino
+    const transicaoCamera = { ativa: false, posicao: new THREE.Vector3(), alvo: new THREE.Vector3() };
+
+    function moverCameraPara(posicao, alvo) {
+        transicaoCamera.posicao.copy(posicao);
+        transicaoCamera.alvo.copy(alvo);
+        transicaoCamera.ativa = true;
+    }
+
+    function animarCamera(dt) {
+        if (!transicaoCamera.ativa) return;
+        const passo = Math.min(1, dt * 6);
+        camera.position.lerp(transicaoCamera.posicao, passo);
+        controls.target.lerp(transicaoCamera.alvo, passo);
+        if (camera.position.distanceTo(transicaoCamera.posicao) < 1e-4) {
+            camera.position.copy(transicaoCamera.posicao);
+            controls.target.copy(transicaoCamera.alvo);
+            transicaoCamera.ativa = false;
+        }
+    }
+
+    // O objeto está dentro da peça, ou é um dos grupos que contêm a peça?
+    function fazParteDe(objeto, grupo) {
+        for (let o = objeto; o; o = o.parent) if (o === grupo) return true;   // dentro dela
+        for (let o = grupo; o; o = o.parent) if (o === objeto) return true;   // "pai" dela
+        return false;
+    }
+
+    /**
+     * Mostra só uma peça do modelo (um grupo criado com parte(), em util3d.js).
+     * Com null, volta a mostrar todas as peças e a câmera volta para onde estava.
+     */
+    function isolarParte(grupo) {
+        if (!modeloAtual) return;
+
+        // Primeiro desfaz o isolamento anterior (se houver)
+        for (const [objeto, visivel] of visibilidadeOriginal) objeto.visible = visivel;
+        visibilidadeOriginal.clear();
+
+        if (!grupo) {
+            if (parteIsolada) moverCameraPara(vistaAntesDeIsolar.posicao, vistaAntesDeIsolar.alvo);
+            parteIsolada = null;
+            return;
+        }
+
+        // Guarda a câmera só ao entrar no modo isolado (trocar de peça não conta)
+        if (!parteIsolada) {
+            vistaAntesDeIsolar.posicao.copy(camera.position);
+            vistaAntesDeIsolar.alvo.copy(controls.target);
+        }
+        parteIsolada = grupo;
+
+        modeloAtual.traverse((objeto) => {
+            if (objeto === modeloAtual || fazParteDe(objeto, grupo)) return;
+            visibilidadeOriginal.set(objeto, objeto.visible);
+            objeto.visible = false;
+        });
+
+        // Enquadra a peça: mesma direção de olhar, distância pelo tamanho dela
+        const caixa = new THREE.Box3().setFromObject(grupo);
+        const centro = caixa.getCenter(new THREE.Vector3());
+        const raio = Math.max(caixa.getSize(new THREE.Vector3()).length() / 2, 1e-3);
+        const fovMenor = Math.min(
+            THREE.MathUtils.degToRad(camera.fov),
+            2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect)
+        );
+        const distancia = (raio / Math.sin(fovMenor / 2)) * folga;
+        const direcao = camera.position.clone().sub(controls.target).normalize();
+        moverCameraPara(centro.clone().addScaledVector(direcao, distancia), centro);
     }
 
     // ---------- Toque na peça (raycasting) ----------
@@ -183,7 +266,9 @@ export function criarVisualizador(container, opcoes = {}) {
                 -((e.clientY - ret.top) / ret.height) * 2 + 1
             );
             raycaster.setFromCamera(ponto, camera);
-            const acertos = raycaster.intersectObject(modeloAtual, true);
+            // Peças escondidas (isolamento) não contam
+            const acertos = raycaster.intersectObject(modeloAtual, true)
+                .filter((a) => { for (let o = a.object; o; o = o.parent) if (!o.visible) return false; return true; });
             aoTocar(acertos.length ? acertos[0].object : null);
         });
     }
@@ -249,6 +334,7 @@ export function criarVisualizador(container, opcoes = {}) {
     }
 
     function resetarCamera() {
+        transicaoCamera.ativa = false;
         camera.position.copy(vistaInicial.posicao);
         controls.target.copy(vistaInicial.alvo);
         controls.update();
@@ -294,10 +380,11 @@ export function criarVisualizador(container, opcoes = {}) {
 
         // Modelos podem ter animação própria (ex.: ventoinhas girando)
         modeloAtual?.userData.atualizar?.(dt);
+        animarCamera(dt);
 
         controls.update();
         renderer.render(scene, camera);
     });
 
-    return { carregarModelo, mostrarObjeto, limpar, resetarCamera, destruir, pausar, retomar, obterModelo, controles: controls };
+    return { carregarModelo, mostrarObjeto, limpar, resetarCamera, destruir, pausar, retomar, obterModelo, isolarParte, controles: controls };
 }

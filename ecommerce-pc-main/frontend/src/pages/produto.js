@@ -113,21 +113,74 @@ function desenharModelo3D(p) {
 
     // Vista explodida: tocar numa parte mostra o nome e para que serve
     const elInfo = document.getElementById('info-parte');
-    let parteAtual = null;
+    const elLista = document.getElementById('lista-partes');
+    const elDica = document.querySelector('.dica-3d');
+    let parteAtual = null;     // parte tocada (com brilho)
+    let parteSozinha = null;   // parte isolada (as outras saíram da cena)
+
     function mostrarParte(grupo) {
         if (parteAtual) destacarParte(parteAtual, null);
         parteAtual = grupo;
         elInfo.hidden = !grupo;
         if (!grupo) return;
-        destacarParte(grupo, 0x2bc3ff);
+        // Sozinha na cena a peça já está em evidência: brilho só no modo com todas
+        if (!parteSozinha) destacarParte(grupo, 0x2bc3ff);
         const { nome, descricao } = grupo.userData.parte;
-        elInfo.innerHTML = `<strong>${escapar(nome)}</strong><span>${escapar(descricao)}</span>`;
+        const botao = parteSozinha
+            ? '<button type="button" class="botao pequeno" data-acao="todas">Mostrar todas as peças</button>'
+            : '<button type="button" class="botao pequeno" data-acao="sozinha">Ver só esta peça</button>';
+        elInfo.innerHTML = `<strong>${escapar(nome)}</strong><span>${escapar(descricao)}</span>${botao}`;
     }
+
+    // Mostra só uma peça (ou todas, com null) e marca o botão dela na lista
+    function verSozinha(grupo) {
+        parteSozinha = grupo;
+        visualizador.isolarParte(grupo);
+        mostrarParte(grupo);
+        for (const b of elLista.querySelectorAll('[data-parte]')) {
+            const indice = b.dataset.parte === '' ? null : partesDoModelo()[Number(b.dataset.parte)];
+            b.setAttribute('aria-pressed', String(indice === grupo));
+        }
+        elDica.textContent = grupo
+            ? 'Só esta peça está na cena · gire para ver todos os lados'
+            : 'Toque numa parte ou escolha uma peça na lista';
+    }
+
+    function partesDoModelo() {
+        return visualizador.obterModelo()?.userData.partes ?? [];
+    }
+
+    // Botões da lista: "Todas" e um para cada peça do modelo
+    function montarListaDePartes() {
+        elLista.innerHTML = '<span class="lista-partes-titulo">Ver uma peça:</span>' +
+            '<button type="button" data-parte="" aria-pressed="true">Todas</button>' +
+            partesDoModelo().map((g, i) =>
+                `<button type="button" data-parte="${i}" aria-pressed="false">${escapar(g.userData.parte.nome)}</button>`
+            ).join('');
+    }
+
+    elLista.addEventListener('click', (e) => {
+        const valor = e.target.closest('[data-parte]')?.dataset.parte;
+        if (valor === undefined) return;
+        verSozinha(valor === '' ? null : partesDoModelo()[Number(valor)]);
+    });
+
+    elInfo.addEventListener('click', (e) => {
+        const acao = e.target.closest('[data-acao]')?.dataset.acao;
+        if (acao === 'sozinha') verSozinha(parteAtual);
+        if (acao === 'todas') verSozinha(null);
+    });
 
     const visualizador = criarVisualizador(document.getElementById('visualizador'), {
         corFundo: 0x131720,
         autoRotacao: true,     // gira sozinho até o usuário mexer
-        aoTocar: (objeto) => { if (explodido) mostrarParte(objeto ? encontrarParte(objeto) : null); },
+        aoTocar: (objeto) => {
+            if (!explodido) return;
+            const grupo = objeto ? encontrarParte(objeto) : null;
+            // Com uma peça sozinha, tocar no vazio não tira o nome dela da tela
+            if (parteSozinha && !grupo) return;
+            mostrarParte(grupo);
+        },
     });
 
     document
@@ -142,13 +195,16 @@ function desenharModelo3D(p) {
     btnExplodir.hidden = !visualizador.obterModelo()?.userData.explodir;
     btnExplodir.addEventListener('click', () => {
         explodido = !explodido;
+        if (!explodido && parteSozinha) verSozinha(null);   // juntar traz todas de volta
         visualizador.obterModelo()?.userData.explodir?.(explodido);
         visualizador.controles.autoRotate = !explodido;
         btnExplodir.textContent = explodido ? 'Juntar as partes' : 'Ver por dentro';
         btnExplodir.classList.toggle('ligado', explodido);
         mostrarParte(null);
-        document.querySelector('.dica-3d').textContent = explodido
-            ? 'Toque numa parte para saber o que ela faz'
+        if (explodido) montarListaDePartes();
+        elLista.hidden = !explodido;
+        elDica.textContent = explodido
+            ? 'Toque numa parte ou escolha uma peça na lista'
             : 'Arraste para girar · role para aproximar';
     });
     ativarAbaFoto(p, visualizador);
@@ -192,6 +248,7 @@ function ativarAbaFoto(p, visualizador) {
             document.getElementById(elId).classList.toggle('escondido-foto', foto);
         }
         document.querySelector('.dica-3d')?.classList.toggle('escondido-foto', foto);
+        document.getElementById('lista-partes').classList.toggle('escondido-foto-lista', foto);
     }
 
     abas.addEventListener('click', (e) => {
