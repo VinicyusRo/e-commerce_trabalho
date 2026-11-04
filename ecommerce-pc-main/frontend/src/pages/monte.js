@@ -6,6 +6,8 @@ import { lerCarrinho, adicionarAoCarrinho } from '../carrinho.js';
 import { iconeDaCategoria, ICONES } from '../componentes/icones.js';
 import { fotoHTML } from '../componentes/foto.js';
 import { confirmar } from '../componentes/confirmar.js';
+import { observarAoRolar } from '../componentes/animacoes.js';
+import { tocarQuandoVisivel } from '../componentes/carrossel-destaque.js';
 
 /*
  * MONTE SEU PC
@@ -526,6 +528,7 @@ let bancada = null;
 const elBancada = document.getElementById('bancada');
 const elLayout = document.getElementById('montagem-layout');
 const btnModo = document.getElementById('btn-modo');
+const elTopo = document.querySelector('.montagem-topo');
 
 function lerModo() {
     try { return localStorage.getItem(CHAVE_MODO); } catch { return null; }
@@ -535,6 +538,7 @@ async function definirModo(novo) {
     modo = novo;
     try { localStorage.setItem(CHAVE_MODO, novo); } catch { /* ok */ }
     document.getElementById('escolha-modo').hidden = true;
+    elTopo.hidden = false;
     elLayout.hidden = false;
     document.getElementById('passos').hidden = false;
     btnModo.hidden = false;
@@ -611,8 +615,12 @@ async function iniciar() {
             definirModo(salvo);
         } else {
             // Primeira vez: pergunta como a pessoa quer montar
+            // (a tela de escolha tem o próprio título grande, então o topo da montagem some)
             document.getElementById('escolha-modo').hidden = false;
+            elTopo.hidden = true;
             elLayout.hidden = true;
+            document.querySelectorAll('.modo-video').forEach(tocarQuandoVisivel);
+            observarAoRolar(document.querySelectorAll('#escolha-modo .entra'));
             document.getElementById('passos').hidden = true;
         }
     } catch (erro) {
