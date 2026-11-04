@@ -2349,3 +2349,233 @@ body.sem-rolagem { overflow: hidden; }
     font: inherit;
     cursor: pointer;
 }
+
+/* =====================================================
+   AJUSTES DE DESIGN (revisão de novembro/2026)
+   Tudo aqui em baixo sobrescreve regras anteriores, para
+   ficar fácil de revisar (e de desfazer, se precisar).
+   Ideia geral: menos enfeite (degradês, brilhos, etiquetas
+   em CAIXA ALTA, sombras paradas) e mais contraste e tamanho.
+   ===================================================== */
+
+/* ---------- Cabeçalho: um atalho só para o Monte seu PC ---------- */
+/* o link "Monte seu PC" da linha de cima repetia o botão da barra de departamentos */
+.cabecalho-linha .nav-montar { display: none; }
+/* logo nova: o chip com T (public/logo.svg), também usado como ícone da aba */
+.logo-icone { width: 30px; height: 30px; background: none; box-shadow: none; border-radius: 0; }
+.logo-icone::after { content: none; }
+.rodape-logo { display: inline-flex; align-items: center; gap: 10px; }
+.rodape-icone { width: 34px; height: 34px; }
+#cabecalho { box-shadow: none; }
+
+/* ---------- Banner: azul chapado, título maior ---------- */
+.destaque {
+    background: var(--topo);
+    border-radius: var(--raio);
+    padding: 48px;
+    gap: 48px;
+}
+.destaque-etiqueta { display: none; }            /* a etiqueta repetia o título */
+.destaque h1 {
+    margin: 0 0 16px;
+    font-size: clamp(32px, 3.7vw, 52px);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    text-wrap: balance;                         /* divide o título em 2 linhas parecidas */
+}
+.destaque p { font-size: 18px; color: var(--topo-texto); opacity: .85; }
+
+/* os três "✓" viraram números de verdade do catálogo */
+.destaque-vantagens {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+    gap: 8px 36px;
+    margin-top: 32px;
+}
+.destaque-vantagens li::before { content: none; }
+.destaque-vantagens li { display: flex; flex-direction: column; font-size: 14px; color: var(--topo-texto-2); }
+.destaque-vantagens strong { font-size: 30px; line-height: 1.1; font-weight: 800; color: var(--topo-texto); letter-spacing: -0.02em; }
+
+/* vitrine: foto maior, sem selo flutuando por cima */
+.vitrine-foto { height: 250px; }
+.vitrine-info { padding: 16px 20px 20px; }
+.vitrine-info .categoria { font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--texto-2); }
+.vitrine-info .preco { font-size: 24px; color: var(--texto); }
+
+/* ---------- Cartões de produto ---------- */
+.cartao {
+    border-color: transparent;                  /* separação pelo tom do fundo, não por linha */
+    box-shadow: none;                           /* sombra só quando o cartão "sobe" */
+    border-radius: 12px;
+}
+.cartao:hover {
+    transform: translateY(-3px);
+    border-color: transparent;
+    box-shadow: 0 14px 30px rgba(11, 42, 82, 0.12);
+}
+.cartao-imagem {
+    height: 170px;
+    background: #ffffff;                        /* fundo branco igual ao das fotos */
+    border-bottom: 0;
+}
+.cartao-imagem > svg {                          /* ícone quando não há foto */
+    width: 60px;
+    height: 60px;
+    color: var(--borda-forte);
+    filter: none;
+}
+.cartao:hover .cartao-imagem > svg { transform: scale(1.06); }
+.cartao-corpo { background: var(--superficie); padding: 14px 18px 18px; }
+.cartao .categoria {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--texto-2);
+}
+.cartao h3 { font-size: 15.5px; color: var(--texto); }
+.cartao .preco { color: var(--texto); font-size: 23px; }
+.cartao-rodape { font-size: 13px; }
+.ver-3d { opacity: 1; transform: none; color: var(--destaque); }
+
+/* selo 3D: o "deste produto" é chapado (destaque), o genérico some do cartão
+   (continua aparecendo na página do produto, onde explica a diferença) */
+.selo-3d { backdrop-filter: none; border: 0; }
+.cartao-imagem .selo-3d { background: var(--topo); color: var(--topo-texto); }
+.cartao-imagem .selo-3d.generico { display: none; }
+
+/* ---------- Prateleiras (Hardware, Periféricos...) ---------- */
+.prateleira { border-color: transparent; box-shadow: none; border-radius: 12px; }
+.prateleira-foto { border-color: transparent; background: var(--superficie-2); }
+.menu-deptos h4 { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--texto-2); }
+
+/* ---------- Página do produto ---------- */
+.produto .categoria {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 15px;
+    font-weight: 600;
+}
+.produto h1 { font-size: clamp(30px, 3.4vw, 42px); letter-spacing: -0.03em; line-height: 1.08; }
+.preco-grande { font-size: 40px; }
+.aviso-generico { border: 0; border-left: 3px solid var(--destaque); background: var(--superficie); }
+.visualizador-embutido { border: 0; box-shadow: none; border-radius: 12px; }
+
+/* ---------- Monte seu PC: escolha do modo sem degradê ---------- */
+.modo:first-child { background: var(--superficie); }
+
+/* ---------- Rodapé: o nome fecha a página ---------- */
+.rodape-logo { font-size: 30px; letter-spacing: -0.03em; }
+.rodape-aviso { border-top: 0; padding-top: 4px; color: var(--topo-texto-2); opacity: .8; }
+
+/* ---------- Celular ---------- */
+@media (max-width: 700px) {
+    .destaque { padding: 28px 22px; gap: 28px; }
+    .destaque h1 { font-size: 34px; max-width: none; }
+    .destaque p { font-size: 16px; }
+    .destaque-vantagens { gap: 8px 20px; }
+    .destaque-vantagens strong { font-size: 24px; }
+    .destaque-vantagens li { font-size: 12.5px; }
+    .vitrine-foto { height: 200px; }
+    .cartao-imagem { height: 130px; }
+    .cartao .preco { font-size: 19px; }
+    .cartao .categoria { font-size: 12px; }
+}
+
+/* =====================================================
+   ANIMAÇÕES (componentes/animacoes.js)
+   Só transform e opacity, que o navegador anima sem travar.
+   ===================================================== */
+:root {
+    --saida: cubic-bezier(.22, 1, .36, 1);     /* começa rápido e freia no fim */
+    --mola:  cubic-bezier(.34, 1.56, .64, 1);  /* passa um pouco do ponto e volta */
+}
+
+/* 1. Peça voando até o carrinho */
+.peca-voando {
+    position: fixed;
+    z-index: 60;
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    background: #ffffff center / 80% no-repeat;
+    background-image: url('/logo.svg');        /* sem foto, voa a logo */
+    box-shadow: 0 10px 24px rgba(11, 42, 82, 0.25);
+    pointer-events: none;
+}
+.contador-carrinho.pula { animation: pula-contador .45s var(--mola); }
+@keyframes pula-contador { 40% { transform: scale(1.35); } }
+
+/* 2. Cartões entrando em sequência */
+.entrando { animation: entrar-cartao .5s var(--saida) both; animation-delay: calc(var(--ordem, 0) * 55ms); }
+@keyframes entrar-cartao { from { opacity: 0; transform: translateY(18px); } }
+
+/* 3. Cartão reage ao mouse: a seta do "Ver em 3D" anda */
+.ver-3d i { display: inline-block; font-style: normal; transition: transform .25s var(--saida); }
+.cartao:hover .ver-3d i { transform: translateX(4px); }
+.cartao { transition: transform .25s var(--saida), box-shadow .25s var(--saida); }
+.cartao-imagem.tem-foto .foto-produto { transition: transform .35s var(--saida); }
+
+/* 4. Botões afundam ao clicar */
+.botao, #cabecalho .busca button { transition: transform .16s var(--saida), background .15s, filter .15s; }
+.botao:active, #cabecalho .busca button:active { transform: scale(.97); }
+
+/* 5. Esqueleto enquanto carrega */
+.cartao.esqueleto { pointer-events: none; }
+.cartao.esqueleto .cartao-imagem,
+.linha-esq {
+    background: linear-gradient(90deg, var(--superficie-2) 0%, #ffffff 50%, var(--superficie-2) 100%);
+    background-size: 200% 100%;
+    animation: brilho-esqueleto 1.3s linear infinite;
+}
+.linha-esq { display: block; height: 12px; border-radius: 6px; margin: 4px 0; }
+.linha-esq.curta { width: 40%; }
+.linha-esq.media { width: 55%; height: 18px; margin-top: 14px; }
+@keyframes brilho-esqueleto { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+/* 6. Aviso que sobe de baixo e some */
+.aviso-flutuante {
+    position: fixed;
+    z-index: 70;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100vw - 32px);
+    padding: 12px 18px;
+    border-radius: var(--raio-peq);
+    background: var(--topo);
+    color: var(--topo-texto);
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 12px 30px rgba(11, 42, 82, 0.3);
+    transform: translate(-50%, 160%);
+    opacity: 0;
+    transition: transform .4s var(--saida), opacity .3s;
+}
+.aviso-flutuante.mostrar { transform: translate(-50%, 0); opacity: 1; }
+.aviso-flutuante a { color: var(--ciano); }
+.aviso-check { color: var(--ciano); }
+
+/* 7. Barra de progresso do Monte seu PC */
+.progresso-montagem { height: 6px; margin: 18px 0 14px; border-radius: 3px; background: var(--borda); overflow: hidden; }
+.progresso-montagem > div {
+    height: 100%;
+    background: var(--destaque);
+    transform-origin: left;
+    transform: scaleX(var(--progresso, 0));
+    transition: transform .45s var(--saida);
+}
+
+/* 8. O cubo do selo 3D dá meia-volta */
+.selo-3d svg { transition: transform .6s var(--saida); }
+.cartao:hover .selo-3d svg { transform: rotateY(180deg) rotateX(20deg); }
+
+/* Quem pediu "reduzir movimento" no sistema vê tudo parado */
+@media (prefers-reduced-motion: reduce) {
+    .entrando, .contador-carrinho.pula, .cartao.esqueleto .cartao-imagem, .linha-esq { animation: none; }
+    .cartao, .cartao:hover, .ver-3d i, .selo-3d svg, .foto-produto, .botao, .progresso-montagem > div { transition: none; transform: none !important; }
+    .aviso-flutuante { transition: opacity .2s; transform: translate(-50%, 0); }
+}

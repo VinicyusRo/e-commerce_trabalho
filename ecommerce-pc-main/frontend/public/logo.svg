@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Logo TechForAll: um chip (processador) visto de cima com a letra T vazada -->
+  <g fill="#2bc3ff">
+    <rect x="15" y="4" width="3" height="6" rx="1"/><rect x="22.5" y="4" width="3" height="6" rx="1"/><rect x="30" y="4" width="3" height="6" rx="1"/>
+    <rect x="15" y="38" width="3" height="6" rx="1"/><rect x="22.5" y="38" width="3" height="6" rx="1"/><rect x="30" y="38" width="3" height="6" rx="1"/>
+    <rect x="4" y="15" width="6" height="3" rx="1"/><rect x="4" y="22.5" width="6" height="3" rx="1"/><rect x="4" y="30" width="6" height="3" rx="1"/>
+    <rect x="38" y="15" width="6" height="3" rx="1"/><rect x="38" y="22.5" width="6" height="3" rx="1"/><rect x="38" y="30" width="6" height="3" rx="1"/>
+    <path fill-rule="evenodd" d="M13 9h22a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H13a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4Zm4 8v5h4.5v11h5V22H31v-5Z"/>
+  </g>
+</svg>

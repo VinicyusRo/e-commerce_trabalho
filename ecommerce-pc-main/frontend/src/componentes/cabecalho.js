@@ -39,7 +39,7 @@ export function montarCabecalho() {
     alvo.innerHTML = `
       <div class="cabecalho-linha">
         <a class="logo" href="/">
-            <span class="logo-icone" aria-hidden="true"></span>
+            <img class="logo-icone" src="/logo.svg" alt="" width="30" height="30">
             <span>Tech<span class="logo-destaque">ForAll</span></span>
         </a>
 
