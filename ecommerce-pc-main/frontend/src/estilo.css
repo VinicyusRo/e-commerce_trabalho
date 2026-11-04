@@ -1812,30 +1812,7 @@ article.cartao .preco { margin-bottom: 12px; }
     .etapa-acoes .botao { padding-left: 14px; padding-right: 14px; }
 }
 
-/* ----- Monte seu PC: escolha do modo e bancada 3D ----- */
-.escolha-modo { margin-top: 28px; }
-.escolha-modo h2 { margin: 0 0 16px; font-size: 22px; }
-.modos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-.modo {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 24px;
-    border: 1px solid var(--borda);
-    border-radius: var(--raio);
-    background: var(--superficie);
-    color: var(--texto);
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-    transition: border-color .15s ease, transform .15s ease;
-}
-.modo:hover { border-color: var(--destaque); transform: translateY(-2px); }
-.modo:first-child { background: radial-gradient(circle at 90% 0%, var(--destaque-fundo), transparent 60%), var(--superficie); }
-.modo-titulo { font-size: 20px; font-weight: 800; }
-.modo-texto { color: var(--texto-2); line-height: 1.5; }
-.modo-nota { margin-top: auto; padding-top: 8px; font-size: 13px; font-weight: 600; color: var(--destaque); }
-
+/* ----- Monte seu PC: bancada 3D (a escolha do modo fica no bloco "MONTE SEU PC: ESCOLHA DO MODO", no fim) ----- */
 .coluna-direita { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .montagem-layout.com-3d { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
 .montagem-layout.com-3d .resumo-montagem { position: static; }
@@ -2430,9 +2407,6 @@ body.sem-rolagem { overflow: hidden; }
 .aviso-generico { border: 0; border-left: 3px solid var(--destaque); background: var(--superficie); }
 .visualizador-embutido { border: 0; box-shadow: none; border-radius: 12px; }
 
-/* ---------- Monte seu PC: escolha do modo sem degradê ---------- */
-.modo:first-child { background: var(--superficie); }
-
 /* ---------- Celular ---------- */
 @media (max-width: 700px) {
     .destaque { padding: 28px 22px; gap: 28px; }
@@ -2819,4 +2793,134 @@ body { overflow-x: clip; }
     .slide-texto > * { opacity: 1; transform: none; transition: none; }
     .carrossel-marcas span.ligada i { animation: none; transform: none; }
     .com-rolagem .entra { opacity: 1; transform: none; transition: none; }
+}
+
+/* =====================================================
+   MONTE SEU PC: ESCOLHA DO MODO
+   Primeira tela da montagem: título grande, dois painéis com a
+   gravação de cada modo e, embaixo, os passos, as regras de
+   compatibilidade e o porquê do design.
+   ===================================================== */
+.escolha-modo { margin-top: 0; }
+.escolha-abertura { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: end; padding: 40px 0 56px; }
+.escolha-olho { margin: 0 0 14px; font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--destaque); }
+.escolha-abertura h1 { margin: 0; font-size: clamp(44px, 6vw, 92px); font-weight: 900; line-height: .95; letter-spacing: -.05em; text-wrap: balance; }
+.escolha-apoio { margin: 22px 0 0; font-size: 19px; color: var(--texto-2); max-width: 48ch; }
+.escolha-fatos { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--borda-forte); }
+.escolha-fatos li { display: flex; gap: 16px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--borda-forte); }
+.escolha-fatos b { min-width: 2.6ch; font-size: 34px; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.escolha-fatos span { font-size: 16px; color: var(--texto-2); }
+.escolha-pergunta { margin: 0 0 20px; font-size: clamp(28px, 3vw, 40px); font-weight: 800; letter-spacing: -.03em; }
+
+/* Os dois painéis. O cartão inteiro é clicável: o ::after do botão cobre o cartão. */
+.modos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.modo { position: relative; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; transition: transform .3s var(--saida); }
+.modo:hover { transform: translateY(-4px); }
+.modo-3d { background: var(--topo); color: #fff; }
+.modo-lista-simples { background: var(--superficie); color: var(--texto); }
+/* a gravação da tela fica numa "janela", para ler como a página de verdade */
+.modo-janela { margin: 12px 12px 0; border-radius: 10px 10px 0 0; overflow: hidden; background: #fff; box-shadow: 0 18px 40px rgba(6, 20, 40, .28); }
+.modo-lista-simples .modo-janela { border: 1px solid var(--borda); border-bottom: 0; box-shadow: 0 18px 40px rgba(19, 27, 43, .14); }
+.modo-janela-barra { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; background: #e9eef5; font-size: 12px; color: var(--texto-2); }
+.modo-janela-barra i { width: 9px; height: 9px; border-radius: 50%; background: var(--borda-forte); }
+.modo-janela-barra span { margin-left: 10px; padding: 2px 10px; border-radius: 6px; background: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.modo-video { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: var(--fundo); }
+.modo-corpo { flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 28px 32px 32px; }
+.modo-nota { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.modo-3d .modo-nota { color: var(--ciano); }
+.modo-lista-simples .modo-nota { color: var(--destaque); }
+.modo-titulo { margin: 0; font-size: clamp(30px, 3vw, 44px); font-weight: 900; line-height: 1.02; letter-spacing: -.04em; }
+.modo-texto { margin: 0; font-size: 17px; max-width: 46ch; }
+.modo-3d .modo-texto { color: var(--topo-texto-2); }
+.modo-lista-simples .modo-texto { color: var(--texto-2); }
+.modo-lista { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 8px; font-size: 15.5px; }
+.modo-lista li { display: flex; gap: 10px; align-items: flex-start; }
+.modo-lista svg { flex: none; width: 18px; height: 18px; margin-top: 3px; }
+.modo-3d .modo-lista svg { color: var(--ciano); }
+.modo-lista-simples .modo-lista svg { color: var(--verde); }
+.modo-base { margin-top: auto; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px 16px; flex-wrap: wrap; }
+.modo-base small { font-size: 14px; opacity: .75; }
+.modo-base .botao { position: static; padding: 15px 26px; font-size: 16px; font-weight: 700; border: 0; }   /* static: o ::after mede o cartão, não o botão */
+.modo-base .botao::after { content: ""; position: absolute; inset: 0; border-radius: 16px; }
+/* sem transform no botão: um transform faria o ::after encolher para o tamanho do botão no meio do clique */
+.modo-base .botao:hover, .modo-base .botao:active { transform: none; }
+.modo:active { transform: translateY(-2px) scale(.995); }
+.modo-3d .modo-base .botao { background: var(--ciano); color: var(--topo); }
+.modo-lista-simples .modo-base .botao { background: var(--destaque); color: #fff; }
+.modo-base .botao:focus-visible { outline: 3px solid var(--ciano); outline-offset: 3px; }
+
+/* Seções de informação abaixo dos painéis */
+.escolha-secao { padding-top: 120px; }
+.escolha-secao.ultima { padding-bottom: 40px; }
+.escolha-cabeca { display: flex; justify-content: space-between; align-items: baseline; gap: 16px 24px; flex-wrap: wrap; margin-bottom: 32px; }
+.escolha-cabeca h2 { margin: 0; font-size: clamp(34px, 4vw, 58px); font-weight: 900; line-height: 1.02; letter-spacing: -.04em; }
+.escolha-cabeca p { margin: 0; font-size: 17px; color: var(--texto-2); max-width: 46ch; }
+
+.trilha-passos { display: grid; grid-template-columns: minmax(0, 9fr) minmax(0, 6fr) minmax(0, 2fr); gap: 12px; }
+.trilha-grupo { border-radius: 14px; padding: 22px; background: var(--campo-1); }
+.trilha-grupo.perifericos { background: var(--campo-2); }
+.trilha-grupo.revisao { background: var(--topo); color: #fff; }
+.trilha-grupo h3 { margin: 0 0 14px; font-size: 15px; font-weight: 700; letter-spacing: 0; }
+.trilha-grupo ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.trilha-grupo li { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border-radius: 999px; background: var(--superficie); color: var(--texto); font-size: 15px; font-weight: 600; }
+.trilha-grupo li b { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--fundo); font-size: 13px; font-variant-numeric: tabular-nums; }
+.trilha-grupo.revisao li { background: var(--ciano); color: var(--topo); }
+.trilha-grupo.revisao li b { background: #fff; }
+
+.regras-tabela { border-top: 2px solid var(--texto); }
+.regra { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 4fr) minmax(0, 4fr); gap: 24px; align-items: baseline; padding: 20px 0; border-bottom: 1px solid var(--borda-forte); }
+.regra.cabeca-tabela { padding: 12px 0; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-2); }
+.regra b { font-size: 20px; letter-spacing: -.02em; }
+.regra span { font-size: 16.5px; }
+.regra em { font-style: normal; font-size: 15.5px; color: var(--texto-2); }
+.regra em strong { color: var(--texto); }
+.regra-conta { margin-top: 28px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: center; padding: 28px 32px; border-radius: 14px; background: var(--superficie); }
+.regra-conta-num { font-size: clamp(40px, 5vw, 68px); font-weight: 900; line-height: 1; letter-spacing: -.05em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.regra-conta-num small { font-size: .4em; font-weight: 700; letter-spacing: -.01em; }
+.regra-conta p { margin: 0; font-size: 17px; color: var(--texto-2); max-width: 60ch; }
+.regra-conta code { padding: 2px 6px; border-radius: 5px; background: var(--fundo); color: var(--texto); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; white-space: nowrap; }
+
+.motivos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.motivo { display: flex; flex-direction: column; gap: 10px; padding: 28px; border-radius: 14px; background: var(--superficie); }
+.motivo h3 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.03em; }
+.motivo p { margin: 0; font-size: 16.5px; color: var(--texto-2); max-width: 56ch; }
+.motivo.destaque-escuro { grid-column: span 2; background: var(--topo); color: #fff; }
+.motivo.destaque-escuro p { color: var(--topo-texto-2); }
+.motivo.ciano { background: var(--campo-2); }
+.motivo-exemplo { margin-top: auto; padding-top: 10px; font-size: 14px; font-weight: 600; }
+.motivo.destaque-escuro .motivo-exemplo { color: var(--ciano); }
+
+/* Tablet: os painéis ficam um embaixo do outro, com o vídeo grande */
+@media (max-width: 1023px) {
+    .escolha-abertura { grid-template-columns: 1fr; gap: 32px; padding-top: 24px; }
+    .modos { grid-template-columns: 1fr; }
+    .trilha-passos { grid-template-columns: 1fr 1fr; }
+    .trilha-grupo:first-child { grid-column: 1 / -1; }
+    .motivos { grid-template-columns: 1fr 1fr; }
+    .escolha-secao { padding-top: 96px; }
+}
+/* Celular */
+@media (max-width: 640px) {
+    .escolha-abertura { padding: 8px 0 40px; }
+    .escolha-apoio { font-size: 17px; }
+    .escolha-fatos li { padding: 10px 0; gap: 12px; }
+    .escolha-fatos b { font-size: 26px; min-width: 2ch; }
+    .escolha-fatos span { font-size: 15px; }
+    .modo-janela { margin: 8px 8px 0; }
+    .modo-janela-barra { height: 24px; }
+    .modo-corpo { padding: 22px 20px 24px; }
+    .modo-texto { font-size: 16px; }
+    .modo-base .botao { flex: 1; }
+    .trilha-passos { grid-template-columns: 1fr; }
+    .regra { grid-template-columns: 1fr; gap: 4px; }
+    .regra.cabeca-tabela { display: none; }
+    .regra-conta { grid-template-columns: 1fr; gap: 12px; padding: 22px; }
+    .regra-conta code { white-space: normal; }
+    .motivos { grid-template-columns: 1fr; }
+    .motivo.destaque-escuro { grid-column: auto; }
+    .escolha-secao { padding-top: 80px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .modo { transition: none; }
+    .modo:hover { transform: none; }
 }

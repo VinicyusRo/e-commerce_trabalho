@@ -26,21 +26,112 @@
         <ol id="passos" class="passos" aria-label="Passos da montagem"></ol>
         <p id="mensagem"></p>
 
-        <!-- Escolha do modo: com ou sem o visualizador 3D -->
+        <!-- Escolha do modo: com ou sem o visualizador 3D.
+             É a primeira tela do Monte seu PC, então também explica como a montagem funciona.
+             Os vídeos são gravações da própria página (public/videos/montagem-*.mp4). -->
         <section id="escolha-modo" class="escolha-modo" hidden>
-            <h2>Como você quer montar?</h2>
-            <div class="modos">
-                <button type="button" class="modo" data-modo="3d">
-                    <span class="modo-titulo">Com visualizador 3D</span>
-                    <span class="modo-texto">Veja cada peça entrar no lugar: a placa-mãe na bandeja, o processador no soquete, a placa de vídeo no slot...</span>
-                    <span class="modo-nota">Recomendado no computador</span>
-                </button>
-                <button type="button" class="modo" data-modo="lista">
-                    <span class="modo-titulo">Só a lista</span>
-                    <span class="modo-texto">O formulário passo a passo, sem 3D. Mais leve e rápido.</span>
-                    <span class="modo-nota">Bom para celular ou internet lenta</span>
-                </button>
+            <div class="escolha-abertura">
+                <div>
+                    <p class="escolha-olho">Monte seu PC</p>
+                    <h1>Monte o seu PC peça por peça</h1>
+                    <p class="escolha-apoio">Escolha o processador e a loja mostra só as placas-mãe que servem nele. A cada passo, só aparece o que combina com o que você já escolheu. No fim, tudo vai para o carrinho de uma vez.</p>
+                </div>
+                <ul class="escolha-fatos">
+                    <li><b>15</b><span>passos, todos opcionais: pule o que você já tem</span></li>
+                    <li><b>5</b><span>regras de compatibilidade conferidas a cada escolha</span></li>
+                    <li><b>1</b><span>clique para levar a montagem inteira para o carrinho</span></li>
+                </ul>
             </div>
+
+            <h2 class="escolha-pergunta">Como você quer montar?</h2>
+            <div class="modos">
+                <div class="modo modo-3d">
+                    <div class="modo-janela" aria-hidden="true">
+                        <div class="modo-janela-barra"><i></i><i></i><i></i><span>techforall / monte-seu-pc</span></div>
+                        <video class="modo-video" src="/videos/montagem-3d.mp4" poster="/videos/montagem-3d.jpg" muted loop playsinline preload="metadata"></video>
+                    </div>
+                    <div class="modo-corpo">
+                        <span class="modo-nota">Recomendado no computador</span>
+                        <h3 class="modo-titulo">Com visualizador 3D</h3>
+                        <p class="modo-texto">Cada peça que você escolhe entra no gabinete na hora: a placa-mãe na bandeja, o processador no soquete, a placa de vídeo no slot. No fim, o PC pronto aparece inteiro na tela.</p>
+                        <ul class="modo-lista">
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Arraste para girar e role para aproximar</li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>A câmera vai até a peça de cada passo</li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Dá para desligar o 3D no meio, sem perder nada</li>
+                        </ul>
+                        <div class="modo-base">
+                            <button type="button" class="botao" data-modo="3d">Montar em 3D</button>
+                            <small>Carrega o 3D só se você escolher</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modo modo-lista-simples">
+                    <div class="modo-janela" aria-hidden="true">
+                        <div class="modo-janela-barra"><i></i><i></i><i></i><span>techforall / monte-seu-pc</span></div>
+                        <video class="modo-video" src="/videos/montagem-lista.mp4" poster="/videos/montagem-lista.jpg" muted loop playsinline preload="metadata"></video>
+                    </div>
+                    <div class="modo-corpo">
+                        <span class="modo-nota">Bom para celular ou internet lenta</span>
+                        <h3 class="modo-titulo">Só a lista</h3>
+                        <p class="modo-texto">O mesmo passo a passo, sem 3D. Você escolhe na lista, a sua montagem vai sendo somada ao lado e, no fim, a revisão confere tudo antes do carrinho.</p>
+                        <ul class="modo-lista">
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Mais leve: abre rápido no celular</li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Total e consumo em watts atualizados a cada peça</li>
+                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Dá para ligar o 3D depois, se quiser</li>
+                        </ul>
+                        <div class="modo-base">
+                            <button type="button" class="botao" data-modo="lista">Montar pela lista</button>
+                            <small>A montagem fica salva se você fechar a aba</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Os passos, as regras e o porquê do design (informação para quem ainda não começou) -->
+            <section class="escolha-secao" aria-labelledby="t-passos">
+                <div class="escolha-cabeca">
+                    <h2 id="t-passos" class="entra">Os 15 passos</h2>
+                    <p class="entra" style="--i:1">Primeiro as peças de dentro, na ordem em que uma depende da outra. Depois os periféricos. Por último, a revisão.</p>
+                </div>
+                <div class="trilha-passos">
+                    <div class="trilha-grupo entra"><h3>Hardware</h3><ol><li><b>1</b>Processador</li><li><b>2</b>Placa-mãe</li><li><b>3</b>Memória RAM</li><li><b>4</b>Placa de vídeo</li><li><b>5</b>Armazenamento</li><li><b>6</b>Cooler</li><li><b>7</b>Fonte</li><li><b>8</b>Gabinete</li><li><b>9</b>Ventoinhas</li></ol></div>
+                    <div class="trilha-grupo perifericos entra" style="--i:1"><h3>Periféricos</h3><ol><li><b>10</b>Monitor</li><li><b>11</b>Teclado</li><li><b>12</b>Mouse</li><li><b>13</b>Headset ou fone</li><li><b>14</b>Controle</li><li><b>15</b>Cadeira</li></ol></div>
+                    <div class="trilha-grupo revisao entra" style="--i:2"><h3>Fim</h3><ol><li><b>✓</b>Revisão</li></ol></div>
+                </div>
+            </section>
+
+            <section class="escolha-secao" aria-labelledby="t-regras">
+                <div class="escolha-cabeca">
+                    <h2 id="t-regras" class="entra">O que a loja confere</h2>
+                    <p class="entra" style="--i:1">As peças que não servem somem da lista, e a página diz quantas escondeu e por quê. Os exemplos são da montagem do vídeo.</p>
+                </div>
+                <div class="regras-tabela entra" role="table" aria-label="Regras de compatibilidade">
+                    <div class="regra cabeca-tabela" role="row"><span role="columnheader">Peça</span><span role="columnheader">Regra</span><span role="columnheader">No vídeo</span></div>
+                    <div class="regra" role="row"><b role="cell">Placa-mãe</b><span role="cell">Mesmo soquete do processador</span><em role="cell">Ryzen 5 7600 é <strong>AM5</strong>, então só aparecem placas AM5</em></div>
+                    <div class="regra" role="row"><b role="cell">Memória RAM</b><span role="cell">Mesmo tipo da placa-mãe: DDR4 ou DDR5</span><em role="cell">A MSI B650 Gaming Plus WiFi usa <strong>DDR5</strong></em></div>
+                    <div class="regra" role="row"><b role="cell">Cooler</b><span role="cell">Precisa servir no soquete do processador</span><em role="cell">O Rise Mode Temp 8 aceita <strong>AM5</strong></em></div>
+                    <div class="regra" role="row"><b role="cell">Fonte</b><span role="cell">Potência igual ou maior que a recomendada</span><em role="cell">Consumo de <strong>353 W</strong>, fonte de <strong>500 W</strong> ou mais</em></div>
+                    <div class="regra" role="row"><b role="cell">Gabinete</b><span role="cell">Precisa caber a placa-mãe: ITX, M-ATX, ATX ou E-ATX</span><em role="cell">O Redragon Wideload Lite aceita até <strong>ATX</strong></em></div>
+                </div>
+                <div class="regra-conta entra">
+                    <div class="regra-conta-num">500<small> W</small></div>
+                    <p>Como a fonte é calculada: consumo do processador + consumo da placa de vídeo + 100 W para o resto do PC. Depois soma 30% de folga e arredonda para cima, de 50 em 50 W. No vídeo: <code>353 W × 1,3 = 459 W → 500 W</code>.</p>
+                </div>
+            </section>
+
+            <section class="escolha-secao ultima" aria-labelledby="t-design">
+                <div class="escolha-cabeca">
+                    <h2 id="t-design" class="entra">Por que a página é assim</h2>
+                    <p class="entra" style="--i:1">As decisões de design por trás do Monte seu PC.</p>
+                </div>
+                <div class="motivos">
+                    <div class="motivo destaque-escuro entra"><h3>Dois jeitos de montar</h3><p>O 3D é a parte mais pesada do site: são cerca de 800 kB de código a mais, e a placa de vídeo do celular trabalha bastante. Por isso ele só é carregado quando você escolhe "Com visualizador 3D". A lista é o mesmo formulário sem o 3D, e as duas guardam a mesma montagem.</p><span class="motivo-exemplo">Trocar de modo no meio não apaga nada</span></div>
+                    <div class="motivo entra" style="--i:1"><h3>Só aparece o que combina</h3><p>Em vez de avisar o erro no fim, a lista já esconde as peças que não servem. Assim não tem como montar um PC que não liga.</p><span class="motivo-exemplo">No passo da placa-mãe do vídeo: "10 ocultas porque não são soquete AM5"</span></div>
+                    <div class="motivo entra"><h3>Nenhum passo é obrigatório</h3><p>Quem já tem gabinete ou monitor pula o passo. Se você pular o processador, a loja mostra todas as placas-mãe e avisa que não conferiu a compatibilidade.</p></div>
+                    <div class="motivo ciano entra" style="--i:1"><h3>Peças em tamanho real</h3><p>Os modelos 3D são feitos em milímetros, com as medidas das peças de verdade. Por isso cada peça entra no gabinete na escala certa.</p></div>
+                    <div class="motivo entra" style="--i:2"><h3>Continua de onde parou</h3><p>A montagem fica salva no navegador. Se você fechar a aba e voltar, a página abre no mesmo passo, com as mesmas peças.</p></div>
+                </div>
+            </section>
         </section>
 
         <div id="montagem-layout" class="montagem-layout">
