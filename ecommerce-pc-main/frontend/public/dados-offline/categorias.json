@@ -1,0 +1,92 @@
+[
+ {
+  "id": 4,
+  "nome": "Armazenamento",
+  "descricao": "SSDs e HDs",
+  "total_produtos": 16
+ },
+ {
+  "id": 10,
+  "nome": "Cadeiras",
+  "descricao": "Cadeiras gamer e de escritório",
+  "total_produtos": 11
+ },
+ {
+  "id": 11,
+  "nome": "Controles",
+  "descricao": "Controles para PC e consoles",
+  "total_produtos": 9
+ },
+ {
+  "id": 9,
+  "nome": "Coolers",
+  "descricao": "Air coolers e water coolers para processador",
+  "total_produtos": 13
+ },
+ {
+  "id": 8,
+  "nome": "Fontes",
+  "descricao": "Fontes de alimentação ATX com certificação 80 Plus",
+  "total_produtos": 12
+ },
+ {
+  "id": 6,
+  "nome": "Gabinetes",
+  "descricao": "Gabinetes Mid-Tower, Mini-Tower e Full-Tower",
+  "total_produtos": 13
+ },
+ {
+  "id": 12,
+  "nome": "Headsets e fones",
+  "descricao": "Headsets gamer e fones de ouvido",
+  "total_produtos": 13
+ },
+ {
+  "id": 3,
+  "nome": "Memórias RAM",
+  "descricao": "Módulos de memória DDR4 e DDR5",
+  "total_produtos": 17
+ },
+ {
+  "id": 13,
+  "nome": "Monitores",
+  "descricao": "Monitores Full HD, QHD, 4K e ultrawide",
+  "total_produtos": 15
+ },
+ {
+  "id": 14,
+  "nome": "Mouses",
+  "descricao": "Mouses gamer e de escritório",
+  "total_produtos": 13
+ },
+ {
+  "id": 1,
+  "nome": "Placas de vídeo",
+  "descricao": "GPUs para jogos, edição e inteligência artificial",
+  "total_produtos": 40
+ },
+ {
+  "id": 5,
+  "nome": "Placas-mãe",
+  "descricao": "Placas-mãe AMD e Intel para montar o seu PC",
+  "total_produtos": 21
+ },
+ {
+  "id": 2,
+  "nome": "Processadores",
+  "descricao": "CPUs para desktop",
+  "total_produtos": 22
+ },
+ {
+  "id": 15,
+  "nome": "Teclados",
+  "descricao": "Teclados mecânicos e de membrana",
+  "total_produtos": 13
+ },
+ {
+  "id": 7,
+  "nome": "Ventoinhas",
+  "descricao": "Ventoinhas avulsas e kits para o gabinete",
+  "total_produtos": 10
+ }
+]

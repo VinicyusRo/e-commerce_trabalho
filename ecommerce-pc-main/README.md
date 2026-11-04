@@ -107,6 +107,13 @@ Abra http://localhost:5173. O Vite repassa as chamadas `/api` para o backend (ve
 | Render   | Pasta raiz `backend`, comando `npm start`. Variáveis: `DATABASE_URL` (endereço de conexão do Supabase), `JWT_SECRET` e, se quiser, `JWT_EXPIRA_EM`. |
 | Vercel   | Pasta raiz `frontend`, comando `npm run build`, saída `dist`. Variável: `VITE_API_URL` com o endereço do backend no Render (ex.: `https://meu-backend.onrender.com`). |
 
+### Quando o servidor está dormindo
+
+O plano grátis do Render desliga o backend depois de 15 minutos sem uso, e ele leva até 1 minuto para ligar de novo. Para o site não ficar parado nesse tempo:
+
+- **Catálogo salvo:** se o backend não responder em 6 segundos, o site mostra produtos, categorias, busca, página do produto, 3D e Monte seu PC a partir de uma cópia em `frontend/public/dados-offline/`. Um aviso amarelo aparece no topo e fica verde quando o servidor liga. Login, endereços e pedidos esperam o servidor. Quando mudar produtos no banco, atualize a cópia com `npm run gerar-offline -- https://meu-backend.onrender.com` (dentro de `frontend`) e suba os arquivos.
+- **Manter acordado (opcional):** o GitHub Actions em `.github/workflows/manter-servidor-acordado.yml` chama `/api/saude` a cada 10 minutos. Para ligar, crie a variável `URL_BACKEND` em Settings > Secrets and variables > Actions > Variables.
+
 ## Banco de dados
 
 ![DER do banco](docs/der.png)

@@ -1,0 +1,24 @@
+# Chama o backend no Render a cada 10 minutos para ele não "dormir"
+# (o plano grátis dorme depois de 15 minutos sem uso).
+#
+# Para ligar: no GitHub, Settings > Secrets and variables > Actions >
+# aba Variables > New repository variable
+#   Nome:  URL_BACKEND
+#   Valor: o endereço do backend, ex.: https://meu-backend.onrender.com
+# Sem essa variável, o passo é pulado e nada acontece.
+#
+# Obs.: o GitHub pode atrasar alguns minutos os horários agendados.
+name: Manter servidor acordado
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:   # permite rodar na mão pela aba Actions
+
+jobs:
+  chamar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar /api/saude
+        if: ${{ vars.URL_BACKEND != '' }}
+        run: curl -sS --max-time 90 --retry 2 "${{ vars.URL_BACKEND }}/api/saude"
