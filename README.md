@@ -1,4 +1,4 @@
-# PC Store
+# TechForAll
 
 E-commerce de peças de PC e periféricos com prévia 3D de cada produto, feito para as disciplinas de Banco de Dados e Computação Gráfica.
 

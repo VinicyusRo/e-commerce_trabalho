@@ -17,7 +17,7 @@ export function montarRodape() {
     rodape.innerHTML = `
       <div class="rodape-linha">
         <div class="rodape-coluna">
-            <span class="rodape-logo">PC<span class="logo-destaque">Store</span></span>
+            <span class="rodape-logo">Tech<span class="logo-destaque">ForAll</span></span>
             <p>Loja fictícia criada como trabalho acadêmico das disciplinas de Banco de Dados
                e Computação Gráfica. Nenhum produto é vendido de verdade.</p>
             <p class="rodape-tecnologias">Feito com PostgreSQL (Supabase), Node.js + Express e Vite + Three.js.</p>
@@ -37,7 +37,7 @@ export function montarRodape() {
         </div>
       </div>
       <div class="rodape-aviso">
-        © ${new Date().getFullYear()} PCStore · Projeto sem fins comerciais. As marcas, nomes de produtos e imagens pertencem aos seus respectivos donos.
+        © ${new Date().getFullYear()} TechForAll · Projeto sem fins comerciais. As marcas, nomes de produtos e imagens pertencem aos seus respectivos donos.
       </div>
     `;
     document.body.appendChild(rodape);

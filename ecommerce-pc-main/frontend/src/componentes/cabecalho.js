@@ -40,7 +40,7 @@ export function montarCabecalho() {
       <div class="cabecalho-linha">
         <a class="logo" href="/">
             <span class="logo-icone" aria-hidden="true"></span>
-            <span>PC<span class="logo-destaque">Store</span></span>
+            <span>Tech<span class="logo-destaque">ForAll</span></span>
         </a>
 
         <form class="busca" action="/" method="get" role="search">

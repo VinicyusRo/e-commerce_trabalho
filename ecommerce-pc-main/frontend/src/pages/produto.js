@@ -20,7 +20,7 @@ const elProduto = document.getElementById('produto');
 const elPagina = document.getElementById('pagina-produto');
 
 function desenharProduto(p) {
-    document.title = `${p.nome} - PC Store`;
+    document.title = `${p.nome} - TechForAll`;
 
     const disponivel = p.estoque > 0;
 
