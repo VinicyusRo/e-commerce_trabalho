@@ -12,30 +12,97 @@
     <main class="main-loja">
         <!-- ===== Só na página inicial (sem categoria, departamento ou busca) ===== -->
         <div id="so-inicio">
-            <section id="destaque" class="destaque">
-                <div class="destaque-texto">
-                    <span class="destaque-etiqueta">Prévia 3D interativa</span>
-                    <h1>Veja cada peça em 3D antes de comprar</h1>
-                    <p>Gire, aproxime e abra por dentro peças e periféricos de 15 categorias, direto no navegador.</p>
-                    <div class="destaque-botoes">
-                        <a class="botao primario" href="#titulo-lista">Ver produtos</a>
-                        <a class="botao" href="/monte-seu-pc.html">Monte seu PC</a>
+            <!-- Carrossel gigante de ponta a ponta: vídeos gravados do próprio 3D do site
+                 (public/videos). Passa sozinho; as setas e o dedo trocam o slide. -->
+            <section class="carrossel-grande sangria" id="carrossel" aria-roledescription="carrossel" aria-label="Destaques da loja" data-tom="claro">
+                <div class="carrossel-trilho" id="carrossel-trilho">
+                    <div class="slide claro" role="group" aria-roledescription="slide" aria-label="1 de 4">
+                        <video class="slide-peca" src="/videos/gpu.mp4" poster="/videos/gpu.jpg" muted loop playsinline preload="auto" aria-hidden="true"></video>
+                        <div class="slide-texto">
+                            <h1>Veja por dentro antes de comprar</h1>
+                            <p>Cada peça da loja tem um modelo 3D para girar, aproximar e abrir. Esta placa foi modelada a partir de fotos da peça real.</p>
+                            <span class="slide-preco">ASRock RX 7600 Challenger · R$ 1.949,99</span>
+                            <div class="slide-acoes"><a class="botao primario" href="/produto.html?id=228">Ver em 3D</a><a class="botao branco" href="/produto.html?id=228">Comprar</a></div>
+                        </div>
                     </div>
-                    <ul class="destaque-vantagens">
-                        <li><strong>15</strong> categorias</li>
-                        <li><strong>13</strong> peças com 3D fiel</li>
-                        <li><strong>100%</strong> com prévia 3D</li>
-                    </ul>
+                    <div class="slide escuro" role="group" aria-roledescription="slide" aria-label="2 de 4">
+                        <video class="slide-cena" src="/videos/monte.mp4" poster="/videos/monte.jpg" muted loop playsinline preload="metadata" aria-hidden="true"></video>
+                        <div class="slide-texto">
+                            <h2>Monte seu PC peça por peça</h2>
+                            <p>A loja mostra só o que combina com o que você já escolheu, e cada peça entra no gabinete na hora.</p>
+                            <div class="slide-acoes"><a class="botao primario" href="/monte-seu-pc.html">Começar a montagem</a></div>
+                        </div>
+                    </div>
+                    <div class="slide marinho" role="group" aria-roledescription="slide" aria-label="3 de 4">
+                        <video class="slide-peca" src="/videos/explodida.mp4" poster="/videos/explodida.jpg" muted loop playsinline preload="metadata" aria-hidden="true"></video>
+                        <div class="slide-texto">
+                            <h2>Abra a peça e veja cada parte</h2>
+                            <p>Na vista explodida, a placa se separa em partes. Toque em uma para ver o nome e para que serve.</p>
+                            <div class="slide-acoes"><a class="botao primario" href="/produto.html?id=228">Experimentar</a></div>
+                        </div>
+                    </div>
+                    <div class="slide claro" role="group" aria-roledescription="slide" aria-label="4 de 4">
+                        <video class="slide-peca" src="/videos/teclado.mp4" poster="/videos/teclado.jpg" muted loop playsinline preload="metadata" aria-hidden="true"></video>
+                        <div class="slide-texto">
+                            <h2>Periféricos em 3D também</h2>
+                            <p>Teclados, mouses, headsets, controles e cadeiras, cada um com a sua prévia.</p>
+                            <span class="slide-preco">Redragon Kumara K552RGB-1 · R$ 139,99</span>
+                            <div class="slide-acoes"><a class="botao primario" href="/?grupo=perifericos">Ver periféricos</a></div>
+                        </div>
+                    </div>
                 </div>
-                <!-- Vitrine: produtos passando sozinhos (preenchida pelo home.js) -->
-                <div id="vitrine" class="vitrine" aria-roledescription="carrossel" aria-label="Produtos em destaque" hidden>
-                    <div class="vitrine-janela"><div id="vitrine-trilho" class="vitrine-trilho"></div></div>
-                    <div id="vitrine-pontos" class="vitrine-pontos" role="tablist" aria-label="Escolher produto"></div>
+                <button class="carrossel-seta ant" id="carrossel-ant" type="button" aria-label="Destaque anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+                <button class="carrossel-seta prox" id="carrossel-prox" type="button" aria-label="Próximo destaque"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+                <div class="carrossel-marcas" id="carrossel-marcas" aria-hidden="true"></div>
+            </section>
+
+            <!-- Números do catálogo (preenchidos pelo home.js com os dados de verdade) -->
+            <div class="faixa-numeros" id="faixa-numeros"></div>
+
+            <!-- Propaganda do Monte seu PC -->
+            <section class="monte-anuncio sangria" aria-labelledby="t-monte">
+                <div class="sangria-dentro">
+                    <div class="monte-topo">
+                        <h2 id="t-monte" class="entra">Monte seu PC peça por peça</h2>
+                        <p class="entra" style="--i:1">Escolha o processador e a loja mostra só as placas-mãe que servem nele. Cada peça que você escolhe entra no gabinete na hora, em 3D.</p>
+                    </div>
+                    <div class="monte-palco entra" style="--i:2"><video id="video-monte" src="/videos/monte.mp4" poster="/videos/monte.jpg" muted loop playsinline preload="metadata" aria-label="Animação do Monte seu PC: as peças entram no gabinete uma a uma"></video></div>
+                    <div class="monte-passos">
+                        <div class="entra"><b>15 passos, todos opcionais</b><p>Do processador à cadeira. Pule o que você já tem.</p></div>
+                        <div class="entra" style="--i:1"><b>Só o que combina</b><p>Soquete, tipo de memória, tamanho do gabinete e potência da fonte conferidos a cada passo.</p></div>
+                        <div class="entra" style="--i:2"><b>Tudo no carrinho de uma vez</b><p>No fim, a montagem inteira vai para o carrinho com um clique.</p></div>
+                    </div>
+                    <div class="monte-convite">
+                        <p class="entra">Não sabe por onde começar? Comece pelo processador. O resto a loja vai filtrando para você.</p>
+                        <div class="cartao-convite entra" style="--i:1">
+                            <h3>Seu PC, peça por peça</h3>
+                            <p>Dá para pular qualquer passo e voltar depois.</p>
+                            <a class="botao" href="/monte-seu-pc.html">Começar a montagem</a>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Prateleiras por departamento, no estilo das grandes lojas -->
-            <section id="prateleiras" class="prateleiras" aria-label="Departamentos"></section>
+            <!-- Peças com 3D fiel: cada uma sozinha num bloco de cor (preenchido pelo home.js) -->
+            <section class="especimes" aria-labelledby="t-especimes">
+                <div class="secao-cabeca">
+                    <h2 id="t-especimes" class="entra">Peças com 3D fiel</h2>
+                    <p class="entra" style="--i:1">Modeladas a partir de fotos de cada produto. Toque em uma para girar e abrir por dentro. <a href="#titulo-lista">Ver todos os produtos</a></p>
+                </div>
+                <div class="especimes-grade" id="especimes"></div>
+            </section>
+
+            <!-- Por que comprar aqui: blocos de tipos diferentes -->
+            <section class="porque" aria-labelledby="t-porque">
+                <div class="porque-mosaico">
+                    <div class="pq-titulo entra"><h2 id="t-porque">Por que comprar aqui</h2></div>
+                    <div class="pq-video entra" style="--i:1"><video id="video-explodida" src="/videos/explodida.mp4" poster="/videos/explodida.jpg" muted loop playsinline preload="metadata" aria-label="A placa de vídeo se abre em partes na vista explodida"></video><p>Ver por dentro: a peça se abre em partes e cada uma diz o nome e para que serve.</p></div>
+                    <div class="pq-numero entra" style="--i:2"><strong id="pq-total">238</strong><span id="pq-total-texto">produtos em 15 categorias, de placas de vídeo a cadeiras</span></div>
+                    <div class="pq-lista entra" style="--i:3"><ul id="pq-categorias"></ul></div>
+                    <div class="pq-frase entra">O estoque aparece em cada produto, antes de você clicar.</div>
+                    <div class="pq-frase destaque-ciano entra" style="--i:1">Servidor dormindo? O catálogo continua aberto com a cópia salva.</div>
+                </div>
+            </section>
         </div>
 
         <!-- ===== Lista de produtos: filtros na lateral só fora da página inicial ===== -->

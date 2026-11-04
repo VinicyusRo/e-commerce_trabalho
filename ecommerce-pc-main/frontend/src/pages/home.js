@@ -4,10 +4,11 @@ import { api } from '../api/api.js';
 import { escapar, formatarPreco } from '../utils.js';
 import { cartaoProduto } from '../componentes/cartao-produto.js';
 import { fotoHTML } from '../componentes/foto.js';
-import { iconeDaCategoria, ICONES } from '../componentes/icones.js';
-import { textoSeloModelo } from '../viewer/modelo-produto.js';
+import { ICONES } from '../componentes/icones.js';
+import { temModeloFiel } from '../viewer/modelo-produto.js';
 import { GRUPOS, grupoDaCategoria, marcaDoProduto } from '../grupos.js';
-import { animarEntrada, esqueletoCartoes } from '../componentes/animacoes.js';
+import { esqueletoCartoes, observarAoRolar } from '../componentes/animacoes.js';
+import { montarCarrossel, tocarQuandoVisivel } from '../componentes/carrossel-destaque.js';
 
 montarCabecalho();
 
@@ -225,6 +226,7 @@ function desenharAtalhos() {
 function desenhar() {
     const inicio = ehInicio();
     $('so-inicio').hidden = !inicio;
+    if (inicio) carrossel?.atualizar();
     $('area-compra').classList.toggle('inicio', inicio);
     if (!inicio) abrirFiltros(false);
 
@@ -250,8 +252,8 @@ function desenhar() {
         : estado.busca && produtos.length === 0 ? 'Nenhum produto encontrado para essa busca.'
         : 'Nenhum produto com esses filtros. Tire algum filtro para ver mais.';
     $('produtos').innerHTML = lista.slice(0, estado.limite).map((p) => cartaoProduto(p)).join('');
-    // Os cartões só "entram" na primeira carga e no "Carregar mais" (nos filtros não, para não atrasar)
-    if (animarDesde !== null) { animarEntrada($('produtos'), animarDesde); animarDesde = null; }
+    // Os cartões aparecem ao descer e somem ao subir (componentes/animacoes.js)
+    observarAoRolar($('produtos').children);
     $('carregar-mais').hidden = lista.length <= estado.limite;
     $('carregar-mais').textContent = `Carregar mais (${lista.length - estado.limite} restantes)`;
 }
@@ -349,7 +351,6 @@ $('ordem').addEventListener('change', (e) => {
     desenhar();
 });
 $('carregar-mais').addEventListener('click', () => {
-    animarDesde = estado.limite;   // anima só os cartões novos
     estado.limite += POR_PAGINA;
     desenhar();
 });
@@ -392,120 +393,56 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') abrirFiltr
 // =====================================================
 // Página inicial: prateleiras por departamento
 // =====================================================
-function miniatura(p) {
-    return `<a class="prateleira-foto" href="/produto.html?id=${p.id}" title="${escapar(p.nome)}">
-        ${iconeDaCategoria(p.categoria)}${fotoHTML(p)}</a>`;
-}
-
-// Até 4 produtos com foto, de categorias diferentes quando der
-function escolherMiniaturas(lista) {
-    const comFoto = lista.filter((p) => p.imagem);
-    const escolhidos = [];
-    const vistas = new Set();
-    for (const p of comFoto) {
-        if (escolhidos.length === 4) break;
-        if (!vistas.has(p.categoria)) { escolhidos.push(p); vistas.add(p.categoria); }
-    }
-    for (const p of comFoto) {
-        if (escolhidos.length === 4) break;
-        if (!escolhidos.includes(p)) escolhidos.push(p);
-    }
-    return escolhidos;
-}
-
-function montarPrateleiras() {
-    const blocos = ['hardware', 'perifericos', '3d'].map((g) => {
-        const doGrupo = produtos.filter((p) => GRUPOS[g].contem(p));
-        if (doGrupo.length === 0) return '';
-        return `<div class="prateleira">
-            <a class="prateleira-titulo" href="/?grupo=${g}">
-                <h3>${GRUPOS[g].nome}</h3><span>Ver ${doGrupo.length} ›</span>
-            </a>
-            <div class="prateleira-fotos">${escolherMiniaturas(doGrupo).map(miniatura).join('')}</div>
-        </div>`;
-    });
-
-    const maisProcurados = [...categorias].sort((a, b) => b.total_produtos - a.total_produtos).slice(0, 5);
-    blocos.push(`<div class="prateleira">
-        <div class="prateleira-titulo"><h3>Mais procurados</h3></div>
-        <div class="prateleira-lista">${maisProcurados.map((c) =>
-            `<a href="/?grupo=${grupoDaCategoria(c.nome)}&categoria=${c.id}">${escapar(c.nome)}<span>${c.total_produtos}</span></a>`).join('')}
-        </div>
-    </div>`);
-
-    $('prateleiras').innerHTML = blocos.join('');
-}
-
 // =====================================================
-// Vitrine do banner: até 10 produtos com foto passando sozinhos.
-// A lista já vem na ordem do catálogo (personalizados primeiro).
+// Página inicial nova: peças com 3D fiel e números do catálogo
 // =====================================================
-function montarVitrine(lista) {
-    const elVitrine = $('vitrine');
-    const trilho = $('vitrine-trilho');
-    const pontos = $('vitrine-pontos');
-    const comFoto = lista.filter((p) => p.imagem).slice(0, 10);
-    if (comFoto.length === 0) return;
 
-    trilho.innerHTML = comFoto.map((p, i) => {
-        const selo = textoSeloModelo(p.modelo_3d, p);
-        return `<a class="vitrine-slide" href="/produto.html?id=${p.id}" aria-label="${escapar(p.nome)}" ${i ? 'tabindex="-1"' : ''}>
-            <div class="vitrine-foto tem-foto">
-                ${selo ? `<span class="selo-3d">${ICONES.cubo}${selo}</span>` : ''}
-                ${iconeDaCategoria(p.categoria)}${fotoHTML(p)}
+// Peças com 3D fiel: cada uma sozinha num bloco de cor, na mesma escala.
+// Usa os produtos em destaque que têm foto; a 1ª e a 7ª ocupam um bloco duplo.
+function montarEspecimes(lista) {
+    const fieis = lista.filter((p) => p.destaque && p.imagem && temModeloFiel(p.modelo_3d, p)).slice(0, 10);
+    $('especimes').innerHTML = fieis.map((p, i) => `
+        <a class="especime ${i === 0 || i === 6 ? 'dupla' : ''}" href="/produto.html?id=${p.id}">
+            <div class="especime-bloco tem-foto">
+                <span class="especime-selo">${ICONES.cubo}3D fiel</span>
+                ${fotoHTML(p)}
             </div>
-            <div class="vitrine-info">
-                <span class="categoria">${escapar(p.categoria)}</span>
-                <strong>${escapar(p.nome)}</strong>
-                <span class="preco">${formatarPreco(p.preco)}</span>
+            <div class="especime-nome">
+                <b>${escapar(p.nome.split(',')[0])}<span>${escapar(p.categoria)}</span></b>
+                <em>${formatarPreco(p.preco)}</em>
             </div>
-        </a>`;
-    }).join('');
-    pontos.innerHTML = comFoto.map((p, i) =>
-        `<button type="button" role="tab" aria-label="Produto ${i + 1} de ${comFoto.length}" aria-selected="${i === 0}"></button>`).join('');
-    elVitrine.hidden = false;
-
-    let atual = 0;
-    const slides = trilho.children, botoes = pontos.children;
-    function ir(i) {
-        atual = (i + comFoto.length) % comFoto.length;
-        trilho.style.transform = `translateX(-${atual * 100}%)`;
-        [...botoes].forEach((b, k) => b.setAttribute('aria-selected', String(k === atual)));
-        [...slides].forEach((s, k) => s.tabIndex = k === atual ? 0 : -1);
-    }
-    [...botoes].forEach((b, k) => b.addEventListener('click', () => ir(k)));
-
-    // Passa sozinho a cada 4 s; para enquanto o mouse está em cima, o foco está dentro
-    // ou a vitrine não aparece (página de categoria/busca)
-    let parado = false;
-    elVitrine.addEventListener('mouseenter', () => { parado = true; });
-    elVitrine.addEventListener('mouseleave', () => { parado = false; });
-    elVitrine.addEventListener('focusin', () => { parado = true; });
-    elVitrine.addEventListener('focusout', () => { parado = false; });
-    setInterval(() => {
-        if (!parado && !document.hidden && !$('so-inicio').hidden) ir(atual + 1);
-    }, 4000);
-
-    // Arrastar com o dedo (celular)
-    let inicioX = null, arrastou = false;
-    trilho.addEventListener('pointerdown', (e) => { inicioX = e.clientX; arrastou = false; });
-    trilho.addEventListener('pointerup', (e) => {
-        if (inicioX === null) return;
-        const dx = e.clientX - inicioX;
-        inicioX = null;
-        if (Math.abs(dx) > 40) { arrastou = true; ir(atual + (dx < 0 ? 1 : -1)); }
-    });
-    // um arrasto não deve abrir o produto (só um toque abre)
-    trilho.addEventListener('click', (e) => { if (arrastou) { e.preventDefault(); arrastou = false; } }, true);
-    trilho.addEventListener('dragstart', (e) => e.preventDefault());
+        </a>`).join('');
+    observarAoRolar($('especimes').children);
 }
+
+// Números de verdade, contados a partir do catálogo
+function montarNumeros(lista) {
+    const comCategoria = categorias.filter((c) => c.total_produtos > 0);
+    const fieis = lista.filter((p) => temModeloFiel(p.modelo_3d, p)).length;
+    $('faixa-numeros').innerHTML = [
+        [lista.length, 'produtos'],
+        [comCategoria.length, 'categorias'],
+        [fieis, 'peças com 3D fiel'],
+        ['100%', 'com prévia 3D'],
+    ].map(([n, t]) => `<div><strong>${n}</strong>${t}</div>`).join('');
+    observarAoRolar($('faixa-numeros').children);
+
+    $('pq-total').textContent = lista.length;
+    $('pq-total-texto').textContent = `produtos em ${comCategoria.length} categorias, de placas de vídeo a cadeiras`;
+    $('pq-categorias').innerHTML = [...comCategoria]
+        .sort((a, b) => b.total_produtos - a.total_produtos).slice(0, 5)
+        .map((c) => `<li><a href="/?grupo=${grupoDaCategoria(c.nome)}&categoria=${c.id}">${escapar(c.nome)}</a><span>${c.total_produtos}</span></li>`).join('');
+}
+
+// Carrossel gigante e vídeos da página inicial (não dependem do servidor)
+const carrossel = montarCarrossel($('carrossel'), { estaVisivel: () => !$('so-inicio').hidden });
+tocarQuandoVisivel($('video-monte'));
+tocarQuandoVisivel($('video-explodida'));
+observarAoRolar(document.querySelectorAll('#so-inicio .entra'));
 
 // =====================================================
 // Início
 // =====================================================
-// De qual cartão a animação de entrada começa (null = não animar)
-let animarDesde = null;
-
 async function iniciar() {
     lerUrl();
     $('mensagem').textContent = 'Carregando produtos...';
@@ -533,10 +470,9 @@ async function iniciar() {
         produtos = listaProdutos.map((p) => ({ ...p, marca: marcaDoProduto(p.nome) }));
 
         desenharAtalhos();
-        animarDesde = 0;
         if (!estado.busca) {
-            montarPrateleiras();
-            montarVitrine(produtos);
+            montarEspecimes(produtos);
+            montarNumeros(produtos);
         }
         desenhar();
     } catch (erro) {
