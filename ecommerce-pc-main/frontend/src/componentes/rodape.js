@@ -17,7 +17,7 @@ export function montarRodape() {
     rodape.innerHTML = `
       <div class="rodape-linha">
         <div class="rodape-coluna">
-            <span class="rodape-logo">Tech<span class="logo-destaque">ForAll</span></span>
+            <span class="rodape-logo"><img class="rodape-icone" src="/logo.svg" alt="" width="34" height="34">Tech<span class="logo-destaque">ForAll</span></span>
             <p>Loja fictícia criada como trabalho acadêmico das disciplinas de Banco de Dados
                e Computação Gráfica. Nenhum produto é vendido de verdade.</p>
             <p class="rodape-tecnologias">Feito com PostgreSQL (Supabase), Node.js + Express e Vite + Three.js.</p>

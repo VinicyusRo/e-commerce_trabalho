@@ -32,7 +32,7 @@ export function cartaoProduto(p, { comBotao = false } = {}) {
                 <p class="preco">${formatarPreco(p.preco)}</p>
                 <div class="cartao-rodape">
                     ${estoque}
-                    <span class="ver-3d">Ver em 3D →</span>
+                    <span class="ver-3d">Ver em 3D <i aria-hidden="true">→</i></span>
                 </div>
             </div>
         </a>`;

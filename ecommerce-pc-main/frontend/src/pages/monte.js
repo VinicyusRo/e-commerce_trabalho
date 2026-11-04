@@ -177,6 +177,23 @@ function etapaCompleta(i) {
 
 // ---------- Passos (topo) ----------
 function desenharPassos() {
+    // Barra de progresso: criada uma vez só, para a transição deslizar de um passo ao outro
+    let barra = document.getElementById('progresso-montagem');
+    if (!barra) {
+        barra = document.createElement('div');
+        barra.id = 'progresso-montagem';
+        barra.className = 'progresso-montagem';
+        barra.setAttribute('role', 'progressbar');
+        barra.setAttribute('aria-label', 'Progresso da montagem');
+        barra.innerHTML = '<div></div>';
+        elPassos.before(barra);
+    }
+    const feitos = ETAPAS.filter((_, i) => etapaCompleta(i)).length;
+    const total = ETAPAS.length - 1;   // a revisão não conta
+    barra.style.setProperty('--progresso', Math.max(feitos, atual >= total ? total : 0) / total);
+    barra.setAttribute('aria-valuenow', String(feitos));
+    barra.setAttribute('aria-valuemin', '0');
+    barra.setAttribute('aria-valuemax', String(total));
     elPassos.innerHTML = ETAPAS.map((etapa, i) => {
         const estado = i === atual ? 'atual' : etapaCompleta(i) ? 'feito' : '';
         const liberado = true;   // tudo é opcional: dá para pular para qualquer passo

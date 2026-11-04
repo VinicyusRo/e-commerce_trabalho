@@ -7,6 +7,7 @@ import { fotoHTML } from '../componentes/foto.js';
 import { iconeDaCategoria, ICONES } from '../componentes/icones.js';
 import { textoSeloModelo } from '../viewer/modelo-produto.js';
 import { GRUPOS, grupoDaCategoria, marcaDoProduto } from '../grupos.js';
+import { animarEntrada, esqueletoCartoes } from '../componentes/animacoes.js';
 
 montarCabecalho();
 
@@ -249,6 +250,8 @@ function desenhar() {
         : estado.busca && produtos.length === 0 ? 'Nenhum produto encontrado para essa busca.'
         : 'Nenhum produto com esses filtros. Tire algum filtro para ver mais.';
     $('produtos').innerHTML = lista.slice(0, estado.limite).map((p) => cartaoProduto(p)).join('');
+    // Os cartões só "entram" na primeira carga e no "Carregar mais" (nos filtros não, para não atrasar)
+    if (animarDesde !== null) { animarEntrada($('produtos'), animarDesde); animarDesde = null; }
     $('carregar-mais').hidden = lista.length <= estado.limite;
     $('carregar-mais').textContent = `Carregar mais (${lista.length - estado.limite} restantes)`;
 }
@@ -346,6 +349,7 @@ $('ordem').addEventListener('change', (e) => {
     desenhar();
 });
 $('carregar-mais').addEventListener('click', () => {
+    animarDesde = estado.limite;   // anima só os cartões novos
     estado.limite += POR_PAGINA;
     desenhar();
 });
@@ -499,9 +503,13 @@ function montarVitrine(lista) {
 // =====================================================
 // Início
 // =====================================================
+// De qual cartão a animação de entrada começa (null = não animar)
+let animarDesde = null;
+
 async function iniciar() {
     lerUrl();
     $('mensagem').textContent = 'Carregando produtos...';
+    $('produtos').innerHTML = esqueletoCartoes(8);   // cartões cinza enquanto o servidor responde
 
     // O backend grátis "dorme" quando ninguém usa; avisa se demorar
     const avisoLento = setTimeout(() => {
@@ -525,6 +533,7 @@ async function iniciar() {
         produtos = listaProdutos.map((p) => ({ ...p, marca: marcaDoProduto(p.nome) }));
 
         desenharAtalhos();
+        animarDesde = 0;
         if (!estado.busca) {
             montarPrateleiras();
             montarVitrine(produtos);
@@ -532,6 +541,7 @@ async function iniciar() {
         desenhar();
     } catch (erro) {
         clearTimeout(avisoLento);
+        $('produtos').innerHTML = '';
         $('mensagem').textContent = `Erro ao carregar: ${erro.message}`;
     }
 }

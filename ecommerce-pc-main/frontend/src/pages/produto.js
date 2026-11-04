@@ -9,6 +9,7 @@ import { exibirModeloDoProduto, textoSeloModelo, temModeloFiel, elementoCreditos
 import { encontrarParte, destacarParte } from '../viewer/modelos-procedurais.js';
 import { montarCarrossel } from '../componentes/carrossel.js';
 import { ICONES } from '../componentes/icones.js';
+import { voarAteCarrinho, mostrarAviso } from '../componentes/animacoes.js';
 import { urlImagem, fonteDaImagem } from '../componentes/foto.js';
 
 montarCabecalho();
@@ -82,13 +83,15 @@ function desenharProduto(p) {
 
         adicionarAoCarrinho(p.id);
         montarCabecalho();   // atualiza o contador do carrinho no topo
+        // a foto (ou o 3D) voa até o carrinho do topo
+        voarAteCarrinho(document.getElementById('visualizador'), urlImagem(p.imagem));
         return true;
     }
 
     document.getElementById('btn-carrinho').addEventListener('click', () => {
         if (adicionar()) {
-            document.getElementById('aviso-carrinho').innerHTML =
-                'Adicionado! <a href="/carrinho.html">Ver carrinho</a>';
+            document.getElementById('aviso-carrinho').textContent = '';
+            mostrarAviso('Adicionado ao carrinho. <a href="/carrinho.html">Ver carrinho</a>');
         }
     });
 

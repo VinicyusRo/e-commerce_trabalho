@@ -6,6 +6,7 @@ import { formatarPreco, escapar } from '../utils.js';
 import { limparCarrinho } from '../carrinho.js';
 import { confirmar } from '../componentes/confirmar.js';
 import { enderecoHTML, abrirJanelaEndereco } from '../componentes/endereco.js';
+import { mostrarAviso } from '../componentes/animacoes.js';
 
 montarCabecalho();
 ativarBotaoVoltar();
@@ -170,7 +171,7 @@ document.getElementById('btn-novo-endereco').addEventListener('click', async () 
         titulo: 'Novo endereço',
         salvar: (dados) => api('/enderecos', { method: 'POST', body: JSON.stringify(dados) }),
     });
-    if (salvo) recarregarEnderecos().catch(tratarErro);
+    if (salvo) { mostrarAviso('Endereço salvo'); recarregarEnderecos().catch(tratarErro); }
 });
 
 elEnderecos.addEventListener('click', async (e) => {
@@ -184,7 +185,7 @@ elEnderecos.addEventListener('click', async (e) => {
             endereco: enderecos.find((x) => x.id === id),
             salvar: (dados) => api(`/enderecos/${id}`, { method: 'PUT', body: JSON.stringify(dados) }),
         });
-        if (salvo) recarregarEnderecos().catch(tratarErro);
+        if (salvo) { mostrarAviso('Endereço atualizado'); recarregarEnderecos().catch(tratarErro); }
     }
 
     if (excluir) {
