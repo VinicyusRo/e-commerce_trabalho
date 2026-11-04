@@ -232,7 +232,7 @@ function desenhar() {
         : estado.grupo ? GRUPOS[estado.grupo].nome
         : 'Destaques para você';
     $('titulo-lista').firstChild.textContent = `${titulo} `;
-    document.title = inicio ? 'PC Store' : `${titulo} - PC Store`;
+    document.title = inicio ? 'TechForAll' : `${titulo} - TechForAll`;
 
     if (!inicio) {
         desenharTrilha();

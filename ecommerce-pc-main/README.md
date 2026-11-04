@@ -1,4 +1,4 @@
-# PC Store: e-commerce de peças de PC
+# TechForAll: e-commerce de peças de PC
 
 Projeto das disciplinas de **Banco de Dados** e **Computação Gráfica**: uma loja de peças de PC e periféricos em que cada produto tem uma prévia 3D gerada por código (Three.js), e um "Monte seu PC" que só mostra peças compatíveis e anima a montagem em 3D.
 
