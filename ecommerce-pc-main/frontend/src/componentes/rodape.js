@@ -1,5 +1,7 @@
-// Rodapé do site: equipe, aviso de projeto acadêmico e fontes dos dados.
+// Rodapé do site em blocos: aviso de projeto acadêmico, navegação da loja,
+// equipe, a marca grande e um atalho para o Monte seu PC.
 // É criado no fim do <body> de qualquer página que monta o cabeçalho.
+// Fica sempre visível (sem a animação de entrada), para nunca sumir o aviso.
 const EQUIPE = [
     'Murilo Pacheco',
     'Giovanni Oliveira',
@@ -15,29 +17,34 @@ export function montarRodape() {
     const rodape = document.createElement('footer');
     rodape.id = 'rodape';
     rodape.innerHTML = `
-      <div class="rodape-linha">
-        <div class="rodape-coluna">
-            <span class="rodape-logo"><img class="rodape-icone" src="/logo.svg" alt="" width="34" height="34">Tech<span class="logo-destaque">ForAll</span></span>
-            <p>Loja fictícia criada como trabalho acadêmico das disciplinas de Banco de Dados
-               e Computação Gráfica. Nenhum produto é vendido de verdade.</p>
-            <p class="rodape-tecnologias">Feito com PostgreSQL (Supabase), Node.js + Express e Vite + Three.js.</p>
-        </div>
-        <div class="rodape-coluna">
-            <h3>Desenvolvido por</h3>
-            <ul class="rodape-equipe">
-                ${EQUIPE.map((nome) => `<li>${nome}</li>`).join('')}
-            </ul>
-        </div>
-        <div class="rodape-coluna">
-            <h3>Fontes dos dados</h3>
-            <p>Nomes, preços e fotos dos produtos foram tirados da
+      <div class="rodape-tabua">
+        <div class="r-frase">
+            <span>Loja fictícia de um trabalho acadêmico de Banco de Dados e Computação Gráfica. Nada é vendido de verdade.</span>
+            <small>Nomes, preços e fotos tirados da
                <a href="https://www.pichau.com.br" target="_blank" rel="noopener">Pichau</a> e da
-               <a href="https://www.kabum.com.br" target="_blank" rel="noopener">KaBuM</a>
-               só como referência. Os estoques são fictícios.</p>
+               <a href="https://www.kabum.com.br" target="_blank" rel="noopener">KaBuM</a> só como referência; os estoques são fictícios.
+               As marcas pertencem aos seus donos. © ${new Date().getFullYear()} TechForAll.</small>
         </div>
-      </div>
-      <div class="rodape-aviso">
-        © ${new Date().getFullYear()} TechForAll · Projeto sem fins comerciais. As marcas, nomes de produtos e imagens pertencem aos seus respectivos donos.
+        <nav class="r-nav" aria-label="Loja">
+            <span class="r-titulo">Loja</span>
+            <ul>
+                <li><a href="/?grupo=hardware">Hardware</a></li>
+                <li><a href="/?grupo=perifericos">Periféricos</a></li>
+                <li><a href="/monte-seu-pc.html">Monte seu PC</a></li>
+                <li><a href="/conta.html">Minha conta</a></li>
+            </ul>
+        </nav>
+        <div class="r-time">
+            <span class="r-titulo">Feito por</span>
+            <ul>${EQUIPE.map((nome) => `<li>${nome}</li>`).join('')}</ul>
+        </div>
+        <div class="r-marca" aria-hidden="true">
+            <span><img src="/logo.svg" alt="" width="100" height="100"><span>Tech<span>ForAll</span></span></span>
+        </div>
+        <a class="r-acao" href="/monte-seu-pc.html">
+            Montar meu PC agora
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
       </div>
     `;
     document.body.appendChild(rodape);

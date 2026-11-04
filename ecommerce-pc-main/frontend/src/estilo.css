@@ -251,37 +251,7 @@ main {
     padding: 0 32px;
 }
 
-/* ---------- Rodapé ---------- */
-#rodape {
-    background: var(--topo);
-    color: var(--topo-texto-2);
-    font-size: 14px;
-}
-.rodape-linha {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 24px 48px;
-    max-width: 1320px;
-    margin: 0 auto;
-    padding: 32px 32px 24px;
-}
-.rodape-coluna p { margin: 8px 0 0; }
-.rodape-coluna h3 { margin: 0; font-size: 15px; color: var(--topo-texto); }
-.rodape-tecnologias { font-size: 13px; color: var(--topo-texto-2); opacity: 0.85; }
-.rodape-equipe { margin: 8px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; }
-.rodape-logo { font-size: 20px; font-weight: 800; color: var(--topo-texto); }
-#rodape a { color: var(--ciano); }
-.rodape-aviso {
-    max-width: 1320px;
-    margin: 0 auto;
-    padding: 14px 32px 20px;
-    border-top: 1px solid var(--topo-2);
-    font-size: 12px;
-}
-@media (max-width: 700px) {
-    .rodape-linha { padding: 24px 16px 16px; }
-    .rodape-aviso { padding: 12px 16px 16px; }
-}
+/* O rodapé de blocos fica no bloco "PÁGINA INICIAL NOVA", no fim do arquivo */
 
 #mensagem { color: var(--texto-2); }
 #mensagem:empty { display: none; }
@@ -2364,8 +2334,6 @@ body.sem-rolagem { overflow: hidden; }
 /* logo nova: o chip com T (public/logo.svg), também usado como ícone da aba */
 .logo-icone { width: 30px; height: 30px; background: none; box-shadow: none; border-radius: 0; }
 .logo-icone::after { content: none; }
-.rodape-logo { display: inline-flex; align-items: center; gap: 10px; }
-.rodape-icone { width: 34px; height: 34px; }
 #cabecalho { box-shadow: none; }
 
 /* ---------- Banner: azul chapado, título maior ---------- */
@@ -2464,10 +2432,6 @@ body.sem-rolagem { overflow: hidden; }
 
 /* ---------- Monte seu PC: escolha do modo sem degradê ---------- */
 .modo:first-child { background: var(--superficie); }
-
-/* ---------- Rodapé: o nome fecha a página ---------- */
-.rodape-logo { font-size: 30px; letter-spacing: -0.03em; }
-.rodape-aviso { border-top: 0; padding-top: 4px; color: var(--topo-texto-2); opacity: .8; }
 
 /* ---------- Celular ---------- */
 @media (max-width: 700px) {
@@ -2578,4 +2542,281 @@ body.sem-rolagem { overflow: hidden; }
     .entrando, .contador-carrinho.pula, .cartao.esqueleto .cartao-imagem, .linha-esq { animation: none; }
     .cartao, .cartao:hover, .ver-3d i, .selo-3d svg, .foto-produto, .botao, .progresso-montagem > div { transition: none; transform: none !important; }
     .aviso-flutuante { transition: opacity .2s; transform: translate(-50%, 0); }
+}
+
+/* =====================================================
+   PÁGINA INICIAL NOVA
+   Carrossel gigante de ponta a ponta com vídeos do próprio 3D,
+   propaganda do Monte seu PC, catálogo de "espécimes" (cada peça
+   sozinha num bloco de cor) e rodapé de blocos.
+   ===================================================== */
+:root {
+    --campo-1: #dfe7f1;
+    --campo-2: #d4effb;
+    --campo-3: #e6ebf2;
+    --saida: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* as seções "sangria" vão de ponta a ponta, mesmo dentro do <main> estreito;
+   o clip evita a barra de rolagem lateral que o 100vw criaria */
+body { overflow-x: clip; }
+.sangria { width: 100vw; margin-left: calc(50% - 50vw); }
+.sangria-dentro { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+
+/* botão branco, para usar em cima dos fundos de cor do carrossel */
+.botao.branco { background: #fff; border-color: transparent; color: var(--texto); }
+.botao.branco:hover { background: #f3f6fa; }
+
+/* ---------- Carrossel gigante ---------- */
+.carrossel-grande {
+    position: relative;
+    overflow: hidden;
+    margin-top: -28px;                 /* encosta no cabeçalho */
+    height: clamp(560px, calc(100svh - 120px), 860px);
+    background: var(--topo);
+    touch-action: pan-y;               /* o dedo na horizontal troca o slide; na vertical rola a página */
+}
+.carrossel-trilho { display: flex; height: 100%; transition: transform .8s var(--saida); }
+.slide { position: relative; flex: 0 0 100%; height: 100%; overflow: hidden; display: flex; align-items: flex-end; }
+.slide.claro   { background: #dee7f0; color: var(--texto); }
+.slide.marinho { background: #0a2a51; color: #fff; }
+.slide.escuro  { background: #10141c; color: #fff; }
+/* peça girando: o vídeo quadrado fica à direita e some nas bordas,
+   para se fundir no fundo da mesma cor */
+.slide-peca {
+    position: absolute; top: 0; bottom: 0; right: 3%;
+    height: 100%; width: auto; max-width: 58%; aspect-ratio: 1 / 1; object-fit: cover;
+    -webkit-mask-image: radial-gradient(closest-side, #000 82%, transparent 100%);
+            mask-image: radial-gradient(closest-side, #000 82%, transparent 100%);
+}
+.slide-cena { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* véu escuro só do lado do texto, para ler em cima do vídeo da montagem */
+.slide.escuro::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, rgba(16,20,29,.85) 0%, rgba(16,20,29,.35) 45%, rgba(16,20,29,0) 70%);
+}
+.slide-texto {
+    position: relative; z-index: 2; width: 100%;
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 96px clamp(48px, 9svh, 96px);   /* 96px de lado: espaço para as setas */
+}
+.slide h1, .slide h2 {
+    margin: 0;
+    font-size: clamp(44px, 4.8vw, 80px); font-weight: 900; line-height: .94; letter-spacing: -.045em;
+    text-wrap: balance;
+}
+.slide-texto > * { max-width: min(50vw, 720px); }
+.slide-texto > p { max-width: min(40vw, 520px); margin: 22px 0 0; font-size: clamp(17px, 1.4vw, 20px); opacity: .9; }
+.slide-preco { display: block; margin-top: 18px; font-size: clamp(22px, 2vw, 30px); font-weight: 800; letter-spacing: -.02em; }
+.slide-acoes { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.slide-acoes .botao { padding: 15px 26px; font-size: 16px; font-weight: 700; }
+.slide.marinho .botao.primario, .slide.escuro .botao.primario { background: var(--ciano); color: var(--topo); }
+/* o texto do slide entra em sequência quando o slide chega */
+.slide-texto > * { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--saida), transform .7s var(--saida); }
+.slide.atual .slide-texto > * { opacity: 1; transform: none; }
+.slide.atual .slide-texto > :nth-child(2) { transition-delay: .12s; }
+.slide.atual .slide-texto > :nth-child(3) { transition-delay: .22s; }
+.slide.atual .slide-texto > :nth-child(4) { transition-delay: .32s; }
+
+/* setas quase transparentes nos cantos; ficam fortes só com o mouse em cima */
+.carrossel-seta {
+    position: absolute; top: 50%; z-index: 5;
+    width: 60px; height: 60px; margin-top: -30px;
+    border: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+    background: rgba(255,255,255,.16); color: #fff; opacity: .45;
+    transition: opacity .2s, background .2s, transform .2s var(--saida);
+}
+.carrossel-seta svg { width: 26px; height: 26px; }
+.carrossel-seta:hover, .carrossel-seta:focus-visible { opacity: 1; background: rgba(255,255,255,.4); }
+.carrossel-seta:active { transform: scale(.94); }
+.carrossel-seta.ant  { left: max(16px, env(safe-area-inset-left, 0px)); }
+.carrossel-seta.prox { right: max(16px, env(safe-area-inset-right, 0px)); }
+.carrossel-grande[data-tom="claro"] .carrossel-seta { color: var(--texto); background: rgba(19,27,43,.08); }
+.carrossel-grande[data-tom="claro"] .carrossel-seta:hover { background: rgba(19,27,43,.16); }
+
+/* tracinhos: mostram quantos slides há e quanto falta para o próximo (não pausam nada) */
+.carrossel-marcas {
+    position: absolute; z-index: 5; bottom: 24px; left: 0; right: 0;
+    max-width: 1200px; margin: 0 auto; padding: 0 96px;
+    display: flex; gap: 8px; justify-content: flex-end; color: #fff;
+}
+.carrossel-grande[data-tom="claro"] .carrossel-marcas { color: var(--texto); }
+.carrossel-marcas span { position: relative; width: 44px; height: 3px; border-radius: 2px; background: currentColor; opacity: .25; overflow: hidden; }
+.carrossel-marcas span.ligada { opacity: 1; background: transparent; }
+.carrossel-marcas span.ligada::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: .25; }
+.carrossel-marcas span.ligada i {
+    position: absolute; inset: 0; background: currentColor; transform-origin: left;
+    animation: encher-marca var(--tempo, 8s) linear forwards;
+}
+@keyframes encher-marca { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ---------- Números do catálogo ---------- */
+.faixa-numeros { display: flex; gap: 48px; flex-wrap: wrap; align-items: baseline; padding: 40px 0 0; }
+.faixa-numeros div { display: flex; align-items: baseline; gap: 10px; font-size: 16px; color: var(--texto-2); }
+.faixa-numeros strong { font-size: 40px; font-weight: 800; letter-spacing: -.03em; color: var(--texto); }
+
+/* ---------- Propaganda do Monte seu PC ---------- */
+.monte-anuncio { margin-top: 96px; background: var(--topo); color: var(--topo-texto); padding: 120px 0 0; overflow: hidden; }
+.monte-topo { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: end; margin-bottom: 48px; }
+.monte-topo h2 { margin: 0; font-size: clamp(40px, 5.4vw, 80px); font-weight: 900; line-height: 1.02; letter-spacing: -.045em; text-wrap: balance; }
+.monte-topo p { margin: 0; font-size: 19px; color: var(--topo-texto-2); max-width: 40ch; }
+.monte-palco { border-radius: 12px; overflow: hidden; background: #10141c; aspect-ratio: 16 / 9; }
+.monte-palco video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.monte-passos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding: 48px 0 0; }
+.monte-passos b { display: block; font-size: 22px; letter-spacing: -.02em; color: #fff; margin-bottom: 6px; }
+.monte-passos p { margin: 0; color: var(--topo-texto-2); font-size: 16px; }
+/* o convite é um cartão-resposta "sobre a mesa", cortado pela borda de baixo */
+.monte-convite { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: end; padding-top: 96px; min-height: 420px; }
+.monte-convite > p { margin: 0; padding-bottom: 96px; font-size: 22px; color: var(--topo-texto-2); max-width: 30ch; }
+.cartao-convite {
+    justify-self: end; width: min(100%, 600px); aspect-ratio: 7 / 5;
+    display: flex; flex-direction: column; justify-content: center; gap: 14px;
+    padding: 48px; border-radius: 4px; text-align: center;
+    background: #fff; color: var(--texto);
+    transform: rotate(-2deg) translateY(60px); transform-origin: center bottom;
+}
+.cartao-convite.entra.visivel { transform: rotate(-2deg) translateY(60px); }
+.cartao-convite h3 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -.03em; }
+.cartao-convite p { margin: 0; font-size: 17px; color: var(--texto-2); }
+.cartao-convite .botao { width: 100%; height: 58px; margin-top: 14px; background: var(--topo); border-color: transparent; color: #fff; font-size: 16px; font-weight: 700; }
+.cartao-convite .botao:hover { background: var(--topo-2); }
+
+/* ---------- Peças com 3D fiel (espécimes) ---------- */
+.especimes { padding: 160px 0 120px; }
+.secao-cabeca { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
+.secao-cabeca h2 { margin: 0; font-size: clamp(36px, 4.4vw, 64px); font-weight: 900; line-height: 1.02; letter-spacing: -.04em; }
+.secao-cabeca p { margin: 0; font-size: 17px; color: var(--texto-2); max-width: 44ch; }
+.secao-cabeca a { font-weight: 700; white-space: nowrap; }
+.especimes-grade { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; grid-auto-flow: dense; }
+.especime { display: flex; flex-direction: column; gap: 12px; color: var(--texto); }
+.especime:hover { text-decoration: none; }
+.especime-bloco { position: relative; aspect-ratio: 4 / 5; border-radius: 12px; display: grid; place-items: center; overflow: hidden; background: var(--campo-1); }
+.especime:nth-child(3n+2) .especime-bloco { background: var(--campo-2); }
+.especime:nth-child(3n) .especime-bloco { background: var(--campo-3); }
+/* multiply apaga o fundo branco da foto e deixa a peça "pousada" na cor do bloco */
+.especime-bloco img { width: 78%; height: 78%; object-fit: contain; mix-blend-mode: multiply; transition: transform .5s var(--saida); }
+.especime:hover .especime-bloco img { transform: scale(1.06); }
+.especime.dupla { grid-column: span 2; grid-row: span 2; }
+.especime.dupla .especime-bloco { aspect-ratio: auto; flex: 1; min-height: 0; }
+.especime-selo { position: absolute; top: 14px; left: 14px; z-index: 1; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--topo); }
+.especime-selo svg { width: 15px; height: 15px; }
+.especime-nome { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 20px; }
+.especime-nome b { font-size: 18px; font-weight: 600; letter-spacing: -.01em; line-height: 1.25; }
+.especime-nome b span { display: block; margin-top: 2px; font-size: 14px; font-weight: 400; color: var(--texto-2); }
+.especime-nome em { font-style: normal; font-weight: 800; font-size: 19px; white-space: nowrap; }
+.especime.dupla .especime-nome b { font-size: 24px; }
+.especime.dupla .especime-nome em { font-size: 26px; }
+
+/* ---------- Por que comprar aqui: mosaico de blocos diferentes ---------- */
+.porque { padding: 0 0 96px; }
+.porque-mosaico { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-rows: 96px; gap: 10px; }
+.porque-mosaico > * { position: relative; overflow: hidden; border-radius: 12px; padding: 28px; }
+.pq-titulo { grid-column: 1 / 7; grid-row: span 3; background: var(--superficie); }
+.pq-titulo h2 { margin: 0; font-size: clamp(40px, 4.6vw, 68px); font-weight: 900; line-height: 1.02; letter-spacing: -.045em; }
+.pq-video { grid-column: 7 / 13; grid-row: span 5; padding: 0; background: var(--topo); }
+.pq-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pq-video p { position: absolute; left: 28px; right: 28px; bottom: 24px; margin: 0; max-width: 30ch; color: #fff; font-size: 20px; font-weight: 600; }
+.pq-numero { grid-column: 1 / 4; grid-row: span 3; background: var(--campo-2); }
+.pq-numero strong { display: block; font-size: clamp(56px, 6vw, 96px); font-weight: 900; line-height: .95; letter-spacing: -.05em; }
+.pq-numero span { font-size: 16px; color: var(--texto-2); }
+.pq-lista { grid-column: 4 / 7; grid-row: span 3; background: var(--campo-1); }
+.pq-lista ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 18px; }
+.pq-lista li { display: flex; justify-content: space-between; gap: 12px; }
+.pq-lista a { color: var(--texto); }
+.pq-lista li span { color: var(--texto-2); }
+.pq-frase { grid-column: 1 / 7; grid-row: span 2; background: var(--superficie); font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.pq-frase.destaque-ciano { grid-column: 7 / 13; background: var(--ciano); color: var(--topo); }
+
+/* ---------- Rodapé de blocos (todas as páginas) ---------- */
+#rodape { padding: 0 10px 10px; }
+.rodape-tabua { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; }
+.rodape-tabua > * { min-height: 220px; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
+.r-frase { grid-column: 1 / 5; background: var(--superficie); font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.25; }
+.r-frase small { font-size: 13px; font-weight: 400; color: var(--texto-2); letter-spacing: 0; line-height: 1.5; }
+.r-frase a { color: var(--destaque); }
+.r-nav { grid-column: 5 / 8; background: var(--campo-1); }
+.r-nav ul, .r-time ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 16px; }
+.r-nav a { color: var(--texto); }
+.r-time { grid-column: 8 / 13; background: var(--campo-2); }
+.r-time ul { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+.r-titulo { font-size: 15px; font-weight: 700; }
+.r-marca { grid-column: 1 / 9; min-height: 300px; justify-content: center; align-items: center; background: var(--topo); color: #fff; }
+/* o gap fica só no span de fora (logo + nome), senão "Tech" e "ForAll" se separam */
+.r-marca > span { display: flex; align-items: center; gap: .25em; font-size: clamp(44px, 8.2vw, 128px); font-weight: 900; line-height: 1; letter-spacing: -.05em; }
+.r-marca img { width: .8em; height: .8em; }
+.r-marca > span > span > span { color: var(--ciano); }
+.r-acao { grid-column: 9 / 13; background: var(--ciano); color: var(--topo); font-size: 30px; font-weight: 800; line-height: 1.1; letter-spacing: -.03em; transition: background .2s; }
+.r-acao:hover { background: #5fd3ff; text-decoration: none; }
+.r-acao svg { align-self: flex-end; width: 56px; height: 56px; transition: transform .3s var(--saida); }
+.r-acao:hover svg { transform: translateX(6px); }
+
+/* ---------- Aparece ao descer, some ao subir ----------
+   A classe com-rolagem só entra pelo JavaScript; sem ele, tudo aparece. */
+.com-rolagem .entra {
+    opacity: 0; transform: translateY(28px);
+    transition: opacity .7s var(--saida), transform .7s var(--saida);
+    transition-delay: calc(var(--i, 0) * 70ms);
+}
+.com-rolagem .entra.visivel { opacity: 1; transform: none; }
+.com-rolagem .cartao-convite.entra { transform: rotate(-2deg) translateY(100px); }
+.com-rolagem .cartao-convite.entra.visivel { transform: rotate(-2deg) translateY(60px); }
+
+/* ---------- Tablet e celular ---------- */
+@media (max-width: 980px) {
+    .monte-topo, .monte-convite { grid-template-columns: 1fr; }
+    .monte-anuncio { padding-top: 88px; }
+    .monte-passos { grid-template-columns: 1fr; gap: 20px; }
+    .monte-convite { padding-top: 56px; gap: 24px; min-height: 0; }
+    .monte-convite > p { padding-bottom: 0; }
+    .cartao-convite,
+    .cartao-convite.entra.visivel,
+    .com-rolagem .cartao-convite.entra.visivel { justify-self: center; width: 92%; aspect-ratio: auto; padding: 32px 24px; transform: rotate(-1deg) translateY(48px); }
+    .com-rolagem .cartao-convite.entra { transform: rotate(-1deg) translateY(80px); }
+    .cartao-convite h3 { font-size: 26px; }
+    .especimes { padding: 120px 0 88px; }
+    .especimes-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .porque-mosaico { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: auto; }
+    .porque-mosaico > * { grid-column: span 2 !important; grid-row: auto !important; min-height: 120px; }
+    .pq-video { aspect-ratio: 1 / 1; }
+    .rodape-tabua { grid-template-columns: 1fr 1fr; }
+    .rodape-tabua > * { grid-column: span 2 !important; min-height: 160px; }
+    .r-nav, .r-time { grid-column: span 1 !important; }
+    .r-time ul { grid-template-columns: 1fr; }
+}
+@media (max-width: 820px) {
+    /* no celular: vídeo em cima, texto embaixo */
+    .carrossel-grande { margin-top: -20px; height: max(560px, calc(100svh - 170px)); }
+    .slide-texto { padding: 0 16px 56px; }
+    .slide-texto > *, .slide-texto > p { max-width: none; }
+    .slide-peca { top: 0; bottom: auto; right: 50%; transform: translateX(50%); height: 42%; max-width: none; }
+    .slide.escuro .slide-cena { height: 48%; bottom: auto; }
+    .slide.escuro::after { background: linear-gradient(0deg, #10141c 36%, rgba(16,20,29,0) 62%); }
+    .slide h1, .slide h2 { font-size: clamp(32px, 9vw, 42px); }
+    .slide-texto > p { margin-top: 12px; font-size: 15.5px; }
+    .slide-preco { margin-top: 10px; font-size: 16px; }
+    .slide-acoes { margin-top: 16px; }
+    .slide-acoes .botao { flex: 1; padding: 14px 18px; }
+    .carrossel-seta { width: 44px; height: 44px; margin-top: 0; top: 18%; }
+    .carrossel-seta svg { width: 20px; height: 20px; }
+    .carrossel-marcas { bottom: 22px; padding: 0 16px; justify-content: flex-start; }
+    .carrossel-marcas span { width: 32px; }
+    .faixa-numeros { gap: 16px 28px; padding-top: 28px; }
+    .faixa-numeros strong { font-size: 30px; }
+    .faixa-numeros div { font-size: 14px; }
+    .sangria-dentro { padding: 0 16px; }
+    .monte-anuncio { margin-top: 64px; }
+}
+@media (max-width: 640px) {
+    .especime-nome { flex-direction: column; gap: 2px; }
+    .especime-nome b { font-size: 15px; }
+    .especime-nome em { font-size: 16px; }
+    .especime.dupla .especime-nome b { font-size: 18px; }
+    .pq-frase { font-size: 20px; }
+    .r-acao { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .carrossel-trilho { transition: none; }
+    .slide-texto > * { opacity: 1; transform: none; transition: none; }
+    .carrossel-marcas span.ligada i { animation: none; transform: none; }
+    .com-rolagem .entra { opacity: 1; transform: none; transition: none; }
 }

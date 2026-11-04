@@ -83,3 +83,21 @@ export function mostrarAviso(html, duracao = 3500) {
     clearTimeout(temporizador);
     temporizador = setTimeout(() => elAviso.classList.remove('mostrar'), duracao);
 }
+
+/**
+ * Aparecer e sumir ao rolar: o elemento aparece quando entra na tela e some
+ * quando sai. Assim, ao subir a página, o que fica para baixo some, e volta
+ * a aparecer quando você desce de novo. Use a classe "entra" no HTML.
+ */
+let observadorRolagem;
+export function observarAoRolar(elementos) {
+    if (reduzirMovimento()) return;
+    document.documentElement.classList.add('com-rolagem');
+    observadorRolagem ??= new IntersectionObserver((entradas) => {
+        for (const e of entradas) e.target.classList.toggle('visivel', e.isIntersecting);
+    }, { threshold: 0.12 });
+    for (const el of elementos) {
+        el.classList.add('entra');
+        observadorRolagem.observe(el);
+    }
+}
