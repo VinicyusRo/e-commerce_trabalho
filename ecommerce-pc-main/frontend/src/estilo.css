@@ -2273,28 +2273,59 @@ body.sem-rolagem { overflow: hidden; }
 .lista-partes button[aria-pressed="true"] { border-color: var(--destaque); background: var(--destaque-fundo); color: var(--destaque); }
 
 /* Aviso de modo offline (src/api/api.js): servidor dormindo, catálogo salvo */
+/* Faixa de carregamento (api.js): o servidor está ligando e a página usa a cópia salva */
 .aviso-offline {
-    padding: 10px 16px;
-    background: var(--amarelo-fundo);
-    border-bottom: 1px solid var(--borda);
-    color: var(--amarelo);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px 14px;
+    flex-wrap: wrap;
+    padding: 10px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px));
+    background: var(--topo-2);
+    color: var(--topo-texto);
     font-size: 14px;
-    font-weight: 500;
-    text-align: center;
+    overflow: hidden;
 }
-.aviso-offline.online {
-    background: rgba(15, 138, 85, 0.12);
-    color: var(--verde);
+.aviso-texto { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 2px 10px; text-align: center; }
+.aviso-texto b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.aviso-texto > span { color: var(--topo-texto-2); }
+/* rodinha girando ao lado do texto */
+.aviso-giro {
+    flex: none;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255, 255, 255, .25);
+    border-top-color: var(--ciano);
+    border-radius: 50%;
+    animation: aviso-girar .9s linear infinite;
 }
+@keyframes aviso-girar { to { transform: rotate(360deg); } }
+/* barra fina andando na borda de baixo */
+.aviso-barra { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; overflow: hidden; }
+.aviso-barra::before {
+    content: ""; position: absolute; top: 0; bottom: 0; width: 30%;
+    background: var(--ciano);
+    animation: aviso-andar 1.6s ease-in-out infinite;
+}
+@keyframes aviso-andar { from { left: -30%; } to { left: 100%; } }
+.aviso-offline.online { background: #0d6b45; }
+.aviso-offline.online .aviso-texto > span { color: rgba(255, 255, 255, .85); }
 .aviso-offline button {
-    margin-left: 6px;
-    padding: 4px 10px;
-    border: 1px solid currentColor;
+    padding: 6px 14px;
+    border: 0;
     border-radius: var(--raio-peq);
-    background: transparent;
-    color: inherit;
+    background: #fff;
+    color: #0d6b45;
     font: inherit;
+    font-weight: 700;
     cursor: pointer;
+}
+@media (max-width: 700px) {
+    .aviso-offline { font-size: 13px; padding-top: 8px; padding-bottom: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .aviso-giro, .aviso-barra::before { animation: none; }
+    .aviso-barra::before { left: 0; width: 100%; opacity: .5; }
 }
 
 /* =====================================================
