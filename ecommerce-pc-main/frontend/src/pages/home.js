@@ -9,6 +9,7 @@ import { temModeloFiel } from '../viewer/modelo-produto.js';
 import { GRUPOS, grupoDaCategoria, marcaDoProduto } from '../grupos.js';
 import { esqueletoCartoes, observarAoRolar } from '../componentes/animacoes.js';
 import { montarCarrossel, tocarQuandoVisivel } from '../componentes/carrossel-destaque.js';
+import categoriasSalvas from '../../public/dados-offline/categorias.json';
 
 montarCabecalho();
 
@@ -38,7 +39,8 @@ const estado = {
 };
 
 let produtos = [];     // todos os produtos que vieram da API
-let categorias = [];   // [{ id, nome, total_produtos }]
+// Começa com a cópia salva, para os títulos e a trilha já saírem certos antes do servidor responder
+let categorias = categoriasSalvas;   // [{ id, nome, total_produtos }]
 
 const $ = (id) => document.getElementById(id);
 
@@ -223,12 +225,13 @@ function desenharAtalhos() {
 // =====================================================
 // Desenho geral
 // =====================================================
-function desenhar() {
+// Parte de cima da página: vitrine (só no início) ou título e trilha do departamento.
+// Roda já no começo, antes de os produtos chegarem: assim clicar em Hardware ou
+// Periféricos não mostra a página inicial enquanto o servidor responde.
+function desenharTopo() {
     const inicio = ehInicio();
     $('so-inicio').hidden = !inicio;
-    if (inicio) carrossel?.atualizar();
     $('area-compra').classList.toggle('inicio', inicio);
-    if (!inicio) abrirFiltros(false);
 
     const titulo = estado.categoria ? nomeDaCategoria(estado.categoria)
         : estado.busca ? `Resultados para "${estado.busca}"`
@@ -236,9 +239,16 @@ function desenhar() {
         : 'Destaques para você';
     $('titulo-lista').firstChild.textContent = `${titulo} `;
     document.title = inicio ? 'TechForAll' : `${titulo} - TechForAll`;
+    if (!inicio) desenharTrilha();
+    return inicio;
+}
+
+function desenhar() {
+    const inicio = desenharTopo();
+    if (inicio) carrossel?.atualizar();
+    if (!inicio) abrirFiltros(false);
 
     if (!inicio) {
-        desenharTrilha();
         desenharCategorias();
         desenharEspecificos();
         desenharMarcas();
@@ -433,6 +443,10 @@ function montarNumeros(lista) {
         .sort((a, b) => b.total_produtos - a.total_produtos).slice(0, 5)
         .map((c) => `<li><a href="/?grupo=${grupoDaCategoria(c.nome)}&categoria=${c.id}">${escapar(c.nome)}</a><span>${c.total_produtos}</span></li>`).join('');
 }
+
+// Topo certo desde o primeiro desenho (antes do carrossel começar a tocar)
+lerUrl();
+desenharTopo();
 
 // Carrossel gigante e vídeos da página inicial (não dependem do servidor)
 const carrossel = montarCarrossel($('carrossel'), { estaVisivel: () => !$('so-inicio').hidden });

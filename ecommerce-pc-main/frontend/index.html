@@ -104,6 +104,11 @@
                 </div>
             </section>
         </div>
+        <!-- Link de departamento, categoria ou busca: esconde a vitrine já no primeiro
+             desenho, antes do JavaScript da página carregar (senão ela pisca na tela) -->
+        <script>
+            if (/[?&](grupo|categoria|busca)=./.test(location.search)) document.getElementById('so-inicio').hidden = true;
+        </script>
 
         <!-- ===== Lista de produtos: filtros na lateral só fora da página inicial ===== -->
         <section id="area-compra" class="area-compra inicio">

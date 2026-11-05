@@ -5,17 +5,19 @@
 //  - no seu computador fica vazio e o Vite repassa /api para localhost:3000
 //  - online (Vercel), vem da variável VITE_API_URL, ex.: https://meu-backend.onrender.com
 //
-// MODO OFFLINE (catálogo salvo)
+// MODO OFFLINE (catálogo salvo) E TELA DE CARREGAMENTO
 // O backend grátis do Render "dorme" depois de 15 minutos sem uso e leva
-// até 1 minuto para acordar. Para o site não ficar travado nesse tempo,
-// as consultas do catálogo (produtos e categorias) têm um tempo limite:
-// se o servidor não responder, o site usa uma cópia salva do catálogo
-// (public/dados-offline/*.json) e mostra um aviso no topo. Enquanto isso,
-// o servidor continua acordando e o aviso avisa quando ele voltar.
+// até 1 minuto para acordar. Para o site não ficar vazio nesse tempo:
+//  - se o servidor não responder o catálogo (produtos e categorias) em
+//    ESPERA_CURTA, a página já é desenhada com a cópia salva
+//    (public/dados-offline/*.json), igual a uma foto do site;
+//  - uma faixa no topo mostra que o servidor está ligando, com o tempo
+//    passando, e avisa quando ele ligar.
 // Login, endereços e pedidos precisam do servidor de verdade.
 const BASE_API = (import.meta.env?.VITE_API_URL ?? '').replace(/\/$/, '');
 
-const TEMPO_LIMITE_CATALOGO = 6000;          // ms esperando o servidor antes de usar a cópia
+const ESPERA_CURTA = 1500;                   // ms esperando o servidor antes de mostrar a cópia
+const TEMPO_LIMITE_CATALOGO = 20000;         // ms até desistir da requisição que ficou rodando por trás
 const CHAVE_OFFLINE = 'modoOfflineDesde';    // sessionStorage: quando o servidor falhou
 const PAUSA_OFFLINE = 45000;                 // ms usando direto a cópia antes de tentar de novo
 
@@ -74,19 +76,35 @@ function ehCatalogo(caminho) {
 
 async function chamarCatalogo(caminho, opcoes) {
     // Se o servidor acabou de falhar, nem tenta: usa a cópia na hora
-    if (!emPausaOffline()) {
-        try {
-            return await chamarServidor(caminho, opcoes, TEMPO_LIMITE_CATALOGO);
-        } catch (erro) {
-            // Resposta normal do servidor (ex.: 404 produto não encontrado):
-            // o servidor está no ar, então o erro é de verdade
-            if (erro.status && erro.status < 500) throw erro;
-            // Senão (sem conexão, tempo esgotado, 502/503 do Render acordando): usa a cópia
-            entrarModoOffline();
-        }
-    } else {
+    if (emPausaOffline()) {
         mostrarAviso();
+        return lerCopia(caminho);
     }
+
+    // Corrida entre o servidor e um relógio curto: servidor acordado
+    // responde antes; dormindo, a página não fica esperando por ele
+    const servidor = chamarServidor(caminho, opcoes, TEMPO_LIMITE_CATALOGO);
+    const ESPEROU = Symbol('esperou');
+    const relogio = new Promise((ok) => setTimeout(() => ok(ESPEROU), ESPERA_CURTA));
+
+    try {
+        const resposta = await Promise.race([servidor, relogio]);
+        if (resposta !== ESPEROU) return resposta;
+    } catch (erro) {
+        // Resposta normal do servidor (ex.: 404 produto não encontrado):
+        // o servidor está no ar, então o erro é de verdade
+        if (erro.status && erro.status < 500) throw erro;
+        // Senão (sem conexão, 502/503 do Render acordando): usa a cópia
+        entrarModoOffline();
+        return lerCopia(caminho);
+    }
+
+    // Demorou: mostra a cópia já e deixa a requisição terminar por trás.
+    // A faixa do topo fica de olho no servidor e avisa quando ele ligar.
+    servidor.catch((erro) => {
+        if (!(erro.status && erro.status < 500)) entrarModoOffline();
+    });
+    mostrarAviso();
     return lerCopia(caminho);
 }
 
@@ -149,17 +167,29 @@ async function lerCopia(caminho) {
 let aviso = null;
 let esperandoServidor = false;
 
+// Faixa de carregamento: aparece quando a página está usando a cópia salva.
+// Mostra há quanto tempo o servidor está ligando, com uma barra andando.
 function mostrarAviso() {
     if (!aviso) {
         aviso = document.createElement('div');
         aviso.className = 'aviso-offline';
         aviso.setAttribute('role', 'status');
-        aviso.textContent =
-            'O servidor está acordando (leva até 1 minuto). Enquanto isso, você vê o catálogo salvo; login e pedidos voltam quando ele ligar.';
+        aviso.innerHTML = `
+            <span class="aviso-giro" aria-hidden="true"></span>
+            <span class="aviso-texto"><b>Ligando o servidor<span class="aviso-tempo"></span></b>
+                <span>Enquanto isso, você navega pelo catálogo salvo. Login e pedidos voltam quando ele ligar (leva até 1 minuto).</span></span>
+            <span class="aviso-barra" aria-hidden="true"></span>`;
         document.body.prepend(aviso);
+        const inicio = Date.now();
+        const tempo = aviso.querySelector('.aviso-tempo');
+        relogioAviso = setInterval(() => {
+            const s = Math.floor((Date.now() - inicio) / 1000);
+            tempo.textContent = ` · ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+        }, 1000);
     }
     esperarServidor();
 }
+let relogioAviso = null;
 
 // Fica chamando a rota de teste até o servidor responder
 async function esperarServidor() {
@@ -176,11 +206,13 @@ async function esperarServidor() {
     }
 
     try { sessionStorage.removeItem(CHAVE_OFFLINE); } catch { /* sem armazenamento */ }
+    clearInterval(relogioAviso);
     aviso.classList.add('online');
-    aviso.textContent = 'O servidor ligou! ';
+    aviso.innerHTML = `<span class="aviso-texto"><b>O servidor ligou!</b>
+        <span>Atualize para ver preços e estoque do momento e para entrar na sua conta.</span></span>`;
     const botao = document.createElement('button');
     botao.type = 'button';
-    botao.textContent = 'Recarregar a página';
+    botao.textContent = 'Atualizar a página';
     botao.addEventListener('click', () => location.reload());
     aviso.append(botao);
 }

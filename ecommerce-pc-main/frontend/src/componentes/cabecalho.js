@@ -4,6 +4,9 @@ import { escapar } from '../utils.js';
 import { api } from '../api/api.js';
 import { GRUPOS, grupoDaCategoria } from '../grupos.js';
 import { montarRodape } from './rodape.js';
+// Cópia salva das categorias, embutida no código na hora do build:
+// a barra de departamentos aparece completa na hora, sem esperar o servidor ligar
+import categoriasSalvas from '../../public/dados-offline/categorias.json';
 
 // Atalhos da barra de departamentos (só aparecem se a categoria existir no banco)
 const ATALHOS = ['Placas de vídeo', 'Processadores', 'Monitores', 'Teclados', 'Mouses'];
@@ -127,10 +130,9 @@ function montarDepartamentos(alvo) {
     document.addEventListener('click', (e) => { if (!e.target.closest('.deptos-botao, #menu-deptos')) abrirMenu(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') abrirMenu(false); });
 
-    menu.innerHTML = '<p class="menu-carregando">Carregando categorias...</p>';
-
-    // As categorias vêm do banco (o admin pode criar novas)
-    api('/categorias').then((categorias) => {
+    // Desenha o menu e os atalhos na hora com a cópia salva; quando o
+    // servidor responde, desenha de novo com os números atualizados
+    function desenharCategorias(categorias) {
         const colunas = ['hardware', 'perifericos'].map((g) => {
             const daColuna = categorias.filter((c) => grupoDaCategoria(c.nome) === g);
             const total = daColuna.reduce((soma, c) => soma + c.total_produtos, 0);
@@ -148,7 +150,9 @@ function montarDepartamentos(alvo) {
             .map((c) => `<a href="/?grupo=${grupoDaCategoria(c.nome)}&categoria=${c.id}" data-categoria="${c.id}">${escapar(c.nome)}</a>`)
             .join('');
         marcarAtivo(alvo);
-    }).catch(() => {
-        menu.innerHTML = '<p class="menu-carregando">Não foi possível carregar as categorias.</p>';
-    });
+    }
+
+    desenharCategorias(categoriasSalvas);
+    // As categorias vêm do banco (o admin pode criar novas). Se falhar, fica a cópia.
+    api('/categorias').then(desenharCategorias).catch(() => { /* continua com a cópia salva */ });
 }
