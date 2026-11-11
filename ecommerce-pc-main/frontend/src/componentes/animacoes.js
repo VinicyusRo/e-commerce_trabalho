@@ -85,16 +85,21 @@ export function mostrarAviso(html, duracao = 3500) {
 }
 
 /**
- * Aparecer e sumir ao rolar: o elemento aparece quando entra na tela e some
- * quando sai. Assim, ao subir a página, o que fica para baixo some, e volta
- * a aparecer quando você desce de novo. Use a classe "entra" no HTML.
+ * Aparecer ao rolar: o elemento aparece quando entra na tela. Ao subir a
+ * página, o que ficou para baixo some, e volta a aparecer quando você desce
+ * de novo. O que já passou para cima continua visível: assim nada pisca de
+ * novo quando você volta ao topo. Use a classe "entra" no HTML.
  */
 let observadorRolagem;
 export function observarAoRolar(elementos) {
     if (reduzirMovimento()) return;
     document.documentElement.classList.add('com-rolagem');
     observadorRolagem ??= new IntersectionObserver((entradas) => {
-        for (const e of entradas) e.target.classList.toggle('visivel', e.isIntersecting);
+        for (const e of entradas) {
+            if (e.isIntersecting) e.target.classList.add('visivel');
+            // só some o que saiu por baixo da tela (top > 0); o que saiu por cima fica
+            else if (e.boundingClientRect.top > 0) e.target.classList.remove('visivel');
+        }
     }, { threshold: 0.12 });
     for (const el of elementos) {
         el.classList.add('entra');
