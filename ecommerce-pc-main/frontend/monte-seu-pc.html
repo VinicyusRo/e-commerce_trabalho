@@ -149,6 +149,21 @@
         </div>
     </main>
 
+    <!-- Roda antes de a página ser pintada: decide qual tela mostrar sem esperar
+         o monte.js nem o servidor. Quem ainda não escolheu o modo já vê a tela
+         "Como você quer montar?"; quem já escolheu vê a montagem. Sem isto, a
+         página abria vazia e só depois trocava de tela. -->
+    <script>
+        (function () {
+            var modo = null;
+            try { modo = localStorage.getItem('montagem-modo'); } catch (e) { /* sem armazenamento */ }
+            if (modo === '3d' || modo === 'lista') return;
+            document.getElementById('escolha-modo').hidden = false;
+            document.querySelector('.montagem-topo').hidden = true;
+            document.getElementById('montagem-layout').hidden = true;
+            document.getElementById('passos').hidden = true;
+        })();
+    </script>
     <script type="module" src="/src/pages/monte.js"></script>
 </body>
 </html>

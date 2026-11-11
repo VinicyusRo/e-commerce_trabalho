@@ -2501,6 +2501,12 @@ body.sem-rolagem { overflow: hidden; }
 .linha-esq { display: block; height: 12px; border-radius: 6px; margin: 4px 0; }
 .linha-esq.curta { width: 40%; }
 .linha-esq.media { width: 55%; height: 18px; margin-top: 14px; }
+/* Esqueleto do Monte seu PC (peças e resumo enquanto os produtos carregam) */
+.opcao.esqueleto { pointer-events: none; cursor: default; }
+.opcao.esqueleto .opcao-imagem { height: 76px; margin: 0; }
+.opcao-esq-texto { flex: 1; min-width: 0; }
+.resumo-nome .linha-esq { width: 70%; }
+.linha-esq.esq-total { display: inline-block; width: 90px; height: 18px; margin: 0; vertical-align: middle; }
 @keyframes brilho-esqueleto { from { background-position: 100% 0; } to { background-position: -100% 0; } }
 
 /* 6. Aviso que sobe de baixo e some */
