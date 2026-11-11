@@ -19,6 +19,12 @@ const id = new URLSearchParams(window.location.search).get('id');
 const elMensagem = document.getElementById('mensagem');
 const elProduto = document.getElementById('produto');
 const elPagina = document.getElementById('pagina-produto');
+const elEsqueleto = document.getElementById('esqueleto-produto');
+
+// Dica embaixo do 3D: em tela de toque não existe "rolar" para aproximar
+const DICA_GIRAR = window.matchMedia('(hover: none)').matches
+    ? 'Arraste para girar · afaste dois dedos para aproximar'
+    : 'Arraste para girar · role para aproximar';
 
 function desenharProduto(p) {
     document.title = `${p.nome} - TechForAll`;
@@ -118,6 +124,7 @@ function desenharModelo3D(p) {
     const elInfo = document.getElementById('info-parte');
     const elLista = document.getElementById('lista-partes');
     const elDica = document.querySelector('.dica-3d');
+    elDica.textContent = DICA_GIRAR;
     let parteAtual = null;     // parte tocada (com brilho)
     let parteSozinha = null;   // parte isolada (as outras saíram da cena)
 
@@ -201,14 +208,15 @@ function desenharModelo3D(p) {
         if (!explodido && parteSozinha) verSozinha(null);   // juntar traz todas de volta
         visualizador.obterModelo()?.userData.explodir?.(explodido);
         visualizador.controles.autoRotate = !explodido;
-        btnExplodir.textContent = explodido ? 'Juntar as partes' : 'Ver por dentro';
+        btnExplodir.querySelector('span').textContent = explodido ? 'Juntar as partes' : 'Ver por dentro';
+        btnExplodir.setAttribute('aria-pressed', String(explodido));
         btnExplodir.classList.toggle('ligado', explodido);
         mostrarParte(null);
         if (explodido) montarListaDePartes();
         elLista.hidden = !explodido;
         elDica.textContent = explodido
             ? 'Toque numa parte ou escolha uma peça na lista'
-            : 'Arraste para girar · role para aproximar';
+            : DICA_GIRAR;
     });
     ativarAbaFoto(p, visualizador);
 }
@@ -280,20 +288,21 @@ async function carregarCarrosseis(atual) {
 
 async function iniciar() {
     if (!id) {
+        elEsqueleto.remove();
         elMensagem.textContent = 'Produto não informado.';
         return;
     }
 
-    elMensagem.textContent = 'Carregando...';
-
+    // Enquanto carrega, quem aparece é o esqueleto do produto.html
     try {
         const produto = await api(`/produtos/${encodeURIComponent(id)}`);
-        elMensagem.textContent = '';
+        elEsqueleto.remove();
         desenharProduto(produto);
         elPagina.hidden = false;      // mostra antes de criar o visualizador (precisa de tamanho)
         desenharModelo3D(produto);
         carregarCarrosseis(produto).catch((erro) => console.error('Carrosséis:', erro));
     } catch (erro) {
+        elEsqueleto.remove();
         elMensagem.textContent = erro.message;
     }
 }
