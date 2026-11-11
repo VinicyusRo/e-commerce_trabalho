@@ -39,6 +39,7 @@ const estado = {
 };
 
 let produtos = [];     // todos os produtos que vieram da API
+let idsEspecimes = new Set();   // produtos mostrados no bloco "Peças com 3D fiel" da página inicial
 // Começa com a cópia salva, para os títulos e a trilha já saírem certos antes do servidor responder
 let categorias = categoriasSalvas;   // [{ id, nome, total_produtos }]
 
@@ -83,7 +84,12 @@ function listaFiltrada() {
     if (estado.ordem === 'menor') lista.sort((a, b) => a.preco - b.preco);
     else if (estado.ordem === 'maior') lista.sort((a, b) => b.preco - a.preco);
     else if (estado.ordem === 'nome') lista.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-    // "relevantes" = a ordem que a API já manda (destaques e produtos com foto primeiro)
+    // "relevantes" = a ordem que a API já manda (destaques e produtos com foto primeiro).
+    // Na página inicial, as peças do bloco "Peças com 3D fiel" vão para o fim:
+    // elas acabaram de aparecer logo acima e não precisam abrir a lista de novo.
+    else if (ehInicio() && idsEspecimes.size) {
+        return [...lista.filter((p) => !idsEspecimes.has(p.id)), ...lista.filter((p) => idsEspecimes.has(p.id))];
+    }
     return lista;
 }
 
@@ -411,6 +417,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') abrirFiltr
 // Usa os produtos em destaque que têm foto; a 1ª e a 7ª ocupam um bloco duplo.
 function montarEspecimes(lista) {
     const fieis = lista.filter((p) => p.destaque && p.imagem && temModeloFiel(p.modelo_3d, p)).slice(0, 10);
+    idsEspecimes = new Set(fieis.map((p) => p.id));
     $('especimes').innerHTML = fieis.map((p, i) => `
         <a class="especime ${i === 0 || i === 6 ? 'dupla' : ''}" href="/produto.html?id=${p.id}">
             <div class="especime-bloco tem-foto">
@@ -425,20 +432,20 @@ function montarEspecimes(lista) {
     observarAoRolar($('especimes').children);
 }
 
-// Números de verdade, contados a partir do catálogo
+// Números de verdade, contados a partir do catálogo. Aparecem uma vez só na
+// página; o texto de baixo diz o que é cada número (toda peça tem prévia 3D,
+// e algumas têm o 3D feito a partir das fotos dela).
 function montarNumeros(lista) {
     const comCategoria = categorias.filter((c) => c.total_produtos > 0);
     const fieis = lista.filter((p) => temModeloFiel(p.modelo_3d, p)).length;
     $('faixa-numeros').innerHTML = [
-        [lista.length, 'produtos'],
-        [comCategoria.length, 'categorias'],
-        [fieis, 'peças com 3D fiel'],
-        ['100%', 'com prévia 3D'],
-    ].map(([n, t]) => `<div><strong>${n}</strong>${t}</div>`).join('');
+        [lista.length, 'produtos no catálogo'],
+        [comCategoria.length, 'categorias, do processador à cadeira'],
+        ['100%', 'dos produtos com prévia 3D'],
+        [fieis, 'peças com 3D fiel, modelado pelas fotos'],
+    ].map(([n, t]) => `<div><strong>${n}</strong><span>${t}</span></div>`).join('');
     observarAoRolar($('faixa-numeros').children);
 
-    $('pq-total').textContent = lista.length;
-    $('pq-total-texto').textContent = `produtos em ${comCategoria.length} categorias, de placas de vídeo a cadeiras`;
     $('pq-categorias').innerHTML = [...comCategoria]
         .sort((a, b) => b.total_produtos - a.total_produtos).slice(0, 5)
         .map((c) => `<li><a href="/?grupo=${grupoDaCategoria(c.nome)}&categoria=${c.id}">${escapar(c.nome)}</a><span>${c.total_produtos}</span></li>`).join('');

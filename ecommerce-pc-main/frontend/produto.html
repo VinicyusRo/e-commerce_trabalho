@@ -13,6 +13,20 @@
         <a class="botao-voltar" href="/" data-voltar>Voltar para a loja</a>
         <p id="mensagem"></p>
 
+        <!-- Blocos cinza no formato da página enquanto o produto carrega:
+             a tela não fica vazia e o rodapé não sobe e desce -->
+        <div id="esqueleto-produto" class="produto-layout esqueleto-produto" role="status" aria-label="Carregando o produto">
+            <div class="esq-palco"></div>
+            <div class="esq-texto">
+                <span class="linha-esq esq-titulo"></span>
+                <span class="linha-esq esq-titulo curta"></span>
+                <span class="linha-esq"></span>
+                <span class="linha-esq"></span>
+                <span class="linha-esq media"></span>
+                <span class="linha-esq esq-botao"></span>
+            </div>
+        </div>
+
         <div id="pagina-produto" class="produto-layout" hidden>
             <!-- Prévia 3D (o canvas é criado pelo viewer.js) -->
             <section class="produto-3d">
@@ -21,15 +35,28 @@
                     <figure id="foto-grande" class="foto-grande" hidden></figure>
                     <!-- Nome e função da parte tocada na vista explodida -->
                     <div id="info-parte" class="info-parte" hidden></div>
+                    <!-- Barra por cima do 3D: à esquerda o que está na tela, à direita os botões
+                         (escuros, no tom do palco; os de ícone têm nome em aria-label e title) -->
                     <div class="visualizador-acoes">
-                        <div id="abas-midia" class="abas-midia" role="tablist" hidden>
-                            <button type="button" role="tab" data-aba="3d" aria-selected="true">3D</button>
-                            <button type="button" role="tab" data-aba="foto" aria-selected="false">Foto</button>
+                        <div class="acoes-esquerda">
+                            <div id="abas-midia" class="abas-midia" role="tablist" hidden>
+                                <button type="button" role="tab" data-aba="3d" aria-selected="true">3D</button>
+                                <button type="button" role="tab" data-aba="foto" aria-selected="false">Foto</button>
+                            </div>
+                            <span id="selo-modelo" class="selo-3d" hidden></span>
                         </div>
-                        <span id="selo-modelo" class="selo-3d" hidden></span>
-                        <a id="btn-tela-cheia" class="botao pequeno" href="#">Tela cheia</a>
-                        <button id="btn-explodir" class="botao pequeno" type="button" hidden>Ver por dentro</button>
-                        <button id="btn-reset" class="botao pequeno" type="button">Resetar vista</button>
+                        <div class="acoes-direita">
+                            <a id="btn-tela-cheia" class="botao-palco" href="#" aria-label="Tela cheia" title="Tela cheia">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+                            </a>
+                            <button id="btn-explodir" class="botao-palco com-texto" type="button" hidden>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4-8 4-8-4 8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 17l8 4 8-4"/></svg>
+                                <span>Ver por dentro</span>
+                            </button>
+                            <button id="btn-reset" class="botao-palco" type="button" aria-label="Resetar vista" title="Resetar vista">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5v5h5"/><path d="M5.5 15a7 7 0 1 0 .6-6.2L4 10"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <!-- Peças do modelo na vista explodida: escolher uma mostra só ela -->

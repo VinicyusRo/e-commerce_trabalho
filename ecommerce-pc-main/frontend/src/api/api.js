@@ -11,7 +11,7 @@
 //  - se o servidor não responder o catálogo (produtos e categorias) em
 //    ESPERA_CURTA, a página já é desenhada com a cópia salva
 //    (public/dados-offline/*.json), igual a uma foto do site;
-//  - uma faixa no topo mostra que o servidor está ligando, com o tempo
+//  - uma faixa fina no topo mostra que o servidor está ligando, com o tempo
 //    passando, e avisa quando ele ligar.
 // Login, endereços e pedidos precisam do servidor de verdade.
 const BASE_API = (import.meta.env?.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -166,9 +166,13 @@ async function lerCopia(caminho) {
 // =====================================================
 let aviso = null;
 let esperandoServidor = false;
+let relogioAviso = null;
 
-// Faixa de carregamento: aparece quando a página está usando a cópia salva.
-// Mostra há quanto tempo o servidor está ligando, com uma barra andando.
+const BOTAO_FECHAR = '<button type="button" class="aviso-fechar" aria-label="Fechar aviso">×</button>';
+
+// Faixa fina de uma linha só, acima do cabeçalho: aparece quando a página está
+// usando a cópia salva. Mostra há quanto tempo o servidor está ligando, com uma
+// barra andando, e dá para fechar no "×". No celular fica só o texto curto.
 function mostrarAviso() {
     if (!aviso) {
         aviso = document.createElement('div');
@@ -177,8 +181,14 @@ function mostrarAviso() {
         aviso.innerHTML = `
             <span class="aviso-giro" aria-hidden="true"></span>
             <span class="aviso-texto"><b>Ligando o servidor<span class="aviso-tempo"></span></b>
-                <span>Enquanto isso, você navega pelo catálogo salvo. Login e pedidos voltam quando ele ligar (leva até 1 minuto).</span></span>
+                <span class="aviso-longo">Você está vendo o catálogo salvo. Login e pedidos voltam em até 1 minuto.</span>
+                <span class="aviso-curto">catálogo salvo</span></span>
+            ${BOTAO_FECHAR}
             <span class="aviso-barra" aria-hidden="true"></span>`;
+        // "×" esconde a faixa; ela volta sozinha quando o servidor ligar
+        aviso.addEventListener('click', (e) => {
+            if (e.target.closest('.aviso-fechar')) aviso.hidden = true;
+        });
         document.body.prepend(aviso);
         const inicio = Date.now();
         const tempo = aviso.querySelector('.aviso-tempo');
@@ -189,7 +199,6 @@ function mostrarAviso() {
     }
     esperarServidor();
 }
-let relogioAviso = null;
 
 // Fica chamando a rota de teste até o servidor responder
 async function esperarServidor() {
@@ -208,11 +217,10 @@ async function esperarServidor() {
     try { sessionStorage.removeItem(CHAVE_OFFLINE); } catch { /* sem armazenamento */ }
     clearInterval(relogioAviso);
     aviso.classList.add('online');
-    aviso.innerHTML = `<span class="aviso-texto"><b>O servidor ligou!</b>
-        <span>Atualize para ver preços e estoque do momento e para entrar na sua conta.</span></span>`;
-    const botao = document.createElement('button');
-    botao.type = 'button';
-    botao.textContent = 'Atualizar a página';
-    botao.addEventListener('click', () => location.reload());
-    aviso.append(botao);
+    aviso.innerHTML = `<span class="aviso-texto"><b>O servidor ligou</b>
+        <span class="aviso-longo">Atualize para ver preços e estoque do momento e entrar na sua conta.</span></span>
+        <button type="button" class="aviso-atualizar">Atualizar</button>
+        ${BOTAO_FECHAR}`;
+    aviso.querySelector('.aviso-atualizar').addEventListener('click', () => location.reload());
+    aviso.hidden = false;   // volta a aparecer mesmo se tinha sido fechada
 }

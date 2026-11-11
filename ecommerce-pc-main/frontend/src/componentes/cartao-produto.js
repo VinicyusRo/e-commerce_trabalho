@@ -8,8 +8,15 @@ import { fotoHTML } from './foto.js';
  * comBotao = true → card com um botão "Ver produto" embaixo.
  */
 export function cartaoProduto(p, { comBotao = false } = {}) {
+    // Marca de 3D ao lado da categoria (não em cima da foto, para não tapar a peça).
+    // O 3D genérico da categoria não ganha marca: só a página do produto explica a diferença.
+    const fiel = temModeloFiel(p.modelo_3d, p);
     const selo = textoSeloModelo(p.modelo_3d, p);
-    const generico = p.modelo_3d?.origem === 'categoria' && !temModeloFiel(p.modelo_3d, p);
+    const generico = p.modelo_3d?.origem === 'categoria' && !fiel;
+    const marca3d = selo && !generico
+        ? `<span class="marca-3d" title="${escapar(selo)}">${ICONES.cubo}<span>${fiel ? '3D fiel' : escapar(selo)}</span></span>`
+        : '';
+    const categoria = `<p class="categoria"><span>${escapar(p.categoria)}</span>${marca3d}</p>`;
     const estoque = p.estoque > 0
         ? `<span class="em-estoque">${p.estoque} em estoque</span>`
         : '<span class="sem-estoque">Esgotado</span>';
@@ -18,7 +25,6 @@ export function cartaoProduto(p, { comBotao = false } = {}) {
         <div class="cartao-imagem ${p.imagem ? 'tem-foto' : ''}">
             ${iconeDaCategoria(p.categoria)}
             ${fotoHTML(p)}
-            ${selo ? `<span class="selo-3d ${generico ? 'generico' : ''}">${ICONES.cubo}${selo}</span>` : ''}
         </div>`;
 
     // Card inteiro clicável (página inicial)
@@ -27,7 +33,7 @@ export function cartaoProduto(p, { comBotao = false } = {}) {
         <a class="cartao" href="/produto.html?id=${p.id}">
             ${imagem}
             <div class="cartao-corpo">
-                <p class="categoria">${escapar(p.categoria)}</p>
+                ${categoria}
                 <h3>${escapar(p.nome)}</h3>
                 <p class="preco">${formatarPreco(p.preco)}</p>
                 <div class="cartao-rodape">
@@ -44,7 +50,7 @@ export function cartaoProduto(p, { comBotao = false } = {}) {
         <a class="cartao" href="/produto.html?id=${p.id}">
             ${imagem}
             <div class="cartao-corpo">
-                <p class="categoria">${escapar(p.categoria)}</p>
+                ${categoria}
                 <h3>${escapar(p.nome)}</h3>
                 <p class="preco">${formatarPreco(p.preco)}</p>
                 <span class="botao pequeno-cheio botao-ver">Ver produto ${ICONES.seta}</span>

@@ -245,10 +245,13 @@ h2 { font-size: 22px; font-weight: 700; margin-top: 32px; }
 /* =====================================================
    Estrutura
    ===================================================== */
+/* Uma largura só para o site inteiro (cabeçalho, conteúdo e rodapé):
+   as bordas de tudo caem na mesma linha em qualquer página. */
+:root { --largura: 1320px; --margem: 32px; }
 main {
-    max-width: 1200px;
+    max-width: var(--largura);
     margin: 28px auto 64px;
-    padding: 0 32px;
+    padding: 0 var(--margem);
 }
 
 /* O rodapé de blocos fica no bloco "PÁGINA INICIAL NOVA", no fim do arquivo */
@@ -776,7 +779,8 @@ input, select, textarea { font: inherit; }
     #cabecalho .busca { order: 3; flex-basis: 100%; max-width: none; }
     .nav-link span:not(.contador-carrinho) { display: none; }   /* só ícones */
 
-    main { padding: 0 16px; margin-top: 20px; }
+    :root { --margem: 16px; }
+    main { margin-top: 20px; }
 
     .destaque { padding: 22px; border-radius: 16px; }
     .destaque p { font-size: 15px; }
@@ -2273,28 +2277,31 @@ body.sem-rolagem { overflow: hidden; }
 .lista-partes button:hover { border-color: var(--destaque); color: var(--destaque); }
 .lista-partes button[aria-pressed="true"] { border-color: var(--destaque); background: var(--destaque-fundo); color: var(--destaque); }
 
-/* Aviso de modo offline (src/api/api.js): servidor dormindo, catálogo salvo */
-/* Faixa de carregamento (api.js): o servidor está ligando e a página usa a cópia salva */
+/* Aviso de modo offline (src/api/api.js): o servidor está ligando e a página usa a
+   cópia salva. É uma faixa fina, de uma linha só, acima do cabeçalho: não tapa nada
+   da página e dá para fechar. No celular fica só o texto curto. */
 .aviso-offline {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px 14px;
-    flex-wrap: wrap;
-    padding: 10px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px));
+    gap: 10px;
+    min-height: 36px;
+    padding: 5px max(44px, env(safe-area-inset-right, 0px)) 7px max(44px, env(safe-area-inset-left, 0px));
     background: var(--topo-2);
     color: var(--topo-texto);
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.3;
     overflow: hidden;
 }
-.aviso-texto { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 2px 10px; text-align: center; }
+.aviso-texto { min-width: 0; display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
 .aviso-texto b { font-weight: 700; font-variant-numeric: tabular-nums; }
-.aviso-texto > span { color: var(--topo-texto-2); }
+.aviso-texto > span { overflow: hidden; text-overflow: ellipsis; color: var(--topo-texto-2); }
+.aviso-curto { display: none; }
 /* rodinha girando ao lado do texto */
 .aviso-giro {
     flex: none;
-    width: 16px; height: 16px;
+    width: 14px; height: 14px;
     border: 2px solid rgba(255, 255, 255, .25);
     border-top-color: var(--ciano);
     border-radius: 50%;
@@ -2302,27 +2309,43 @@ body.sem-rolagem { overflow: hidden; }
 }
 @keyframes aviso-girar { to { transform: rotate(360deg); } }
 /* barra fina andando na borda de baixo */
-.aviso-barra { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; overflow: hidden; }
+.aviso-barra { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; overflow: hidden; }
 .aviso-barra::before {
     content: ""; position: absolute; top: 0; bottom: 0; width: 30%;
     background: var(--ciano);
     animation: aviso-andar 1.6s ease-in-out infinite;
 }
 @keyframes aviso-andar { from { left: -30%; } to { left: 100%; } }
-.aviso-offline.online { background: #0d6b45; }
+.aviso-offline.online { padding-bottom: 5px; background: #0d6b45; }
 .aviso-offline.online .aviso-texto > span { color: rgba(255, 255, 255, .85); }
-.aviso-offline button {
-    padding: 6px 14px;
+.aviso-atualizar {
+    flex: none;
+    padding: 4px 12px;
     border: 0;
-    border-radius: var(--raio-peq);
+    border-radius: 999px;
     background: #fff;
     color: #0d6b45;
     font: inherit;
     font-weight: 700;
     cursor: pointer;
 }
-@media (max-width: 700px) {
-    .aviso-offline { font-size: 13px; padding-top: 8px; padding-bottom: 10px; }
+.aviso-fechar {
+    position: absolute; top: 50%; right: max(8px, env(safe-area-inset-right, 0px));
+    width: 28px; height: 28px; margin-top: -14px; padding: 0;
+    display: grid; place-items: center;
+    border: 0; border-radius: 50%;
+    background: transparent; color: inherit;
+    font: inherit; font-size: 19px; line-height: 1;
+    opacity: .7; cursor: pointer;
+}
+.aviso-fechar:hover, .aviso-fechar:focus-visible { opacity: 1; background: rgba(255, 255, 255, .14); }
+.aviso-atualizar:focus-visible, .aviso-fechar:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+@media (max-width: 760px) {
+    .aviso-offline { justify-content: flex-start; padding-left: max(16px, env(safe-area-inset-left, 0px)); font-size: 12.5px; }
+    .aviso-longo { display: none; }
+    .aviso-curto { display: inline; }
+    .aviso-curto::before { content: "· "; }
+    .aviso-atualizar { margin-left: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
     .aviso-giro, .aviso-barra::before { animation: none; }
@@ -2582,7 +2605,7 @@ body.sem-rolagem { overflow: hidden; }
    o clip evita a barra de rolagem lateral que o 100vw criaria */
 body { overflow-x: clip; }
 .sangria { width: 100vw; margin-left: calc(50% - 50vw); }
-.sangria-dentro { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+.sangria-dentro { max-width: var(--largura); margin: 0 auto; padding: 0 var(--margem); }
 
 /* botão branco, para usar em cima dos fundos de cor do carrossel */
 .botao.branco { background: #fff; border-color: transparent; color: var(--texto); }
@@ -2618,7 +2641,7 @@ body { overflow-x: clip; }
 }
 .slide-texto {
     position: relative; z-index: 2; width: 100%;
-    max-width: 1200px; margin: 0 auto;
+    max-width: var(--largura); margin: 0 auto;
     padding: 0 96px clamp(48px, 9svh, 96px);   /* 96px de lado: espaço para as setas */
 }
 .slide h1, .slide h2 {
@@ -2660,7 +2683,7 @@ body { overflow-x: clip; }
 /* tracinhos: mostram quantos slides há e quanto falta para o próximo (não pausam nada) */
 .carrossel-marcas {
     position: absolute; z-index: 5; bottom: 24px; left: 0; right: 0;
-    max-width: 1200px; margin: 0 auto; padding: 0 96px;
+    max-width: var(--largura); margin: 0 auto; padding: 0 96px;
     display: flex; gap: 8px; justify-content: flex-end; color: #fff;
 }
 .carrossel-grande[data-tom="claro"] .carrossel-marcas { color: var(--texto); }
@@ -2674,12 +2697,15 @@ body { overflow-x: clip; }
 @keyframes encher-marca { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 /* ---------- Números do catálogo ---------- */
-.faixa-numeros { display: flex; gap: 48px; flex-wrap: wrap; align-items: baseline; padding: 40px 0 0; }
-.faixa-numeros div { display: flex; align-items: baseline; gap: 10px; font-size: 16px; color: var(--texto-2); }
-.faixa-numeros strong { font-size: 40px; font-weight: 800; letter-spacing: -.03em; color: var(--texto); }
+/* quatro colunas na largura toda, separadas por uma linha: número em cima, o que ele conta embaixo */
+.faixa-numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 56px 0 0; }
+.faixa-numeros div { display: flex; flex-direction: column; gap: 6px; padding: 2px 24px; border-left: 1px solid var(--borda-forte); font-size: 15.5px; line-height: 1.35; color: var(--texto-2); }
+.faixa-numeros div:first-child { padding-left: 0; border-left: 0; }
+.faixa-numeros strong { font-size: 44px; font-weight: 800; line-height: 1; letter-spacing: -.03em; color: var(--texto); font-variant-numeric: tabular-nums; }
+.faixa-numeros span { max-width: 22ch; }
 
 /* ---------- Propaganda do Monte seu PC ---------- */
-.monte-anuncio { margin-top: 96px; background: var(--topo); color: var(--topo-texto); padding: 120px 0 0; overflow: hidden; }
+.monte-anuncio { margin-top: 64px; background: var(--topo); color: var(--topo-texto); padding: 120px 0 112px; overflow: hidden; }
 .monte-topo { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: end; margin-bottom: 48px; }
 .monte-topo h2 { margin: 0; font-size: clamp(40px, 5.4vw, 80px); font-weight: 900; line-height: 1.02; letter-spacing: -.045em; text-wrap: balance; }
 .monte-topo p { margin: 0; font-size: 19px; color: var(--topo-texto-2); max-width: 40ch; }
@@ -2688,17 +2714,17 @@ body { overflow-x: clip; }
 .monte-passos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding: 48px 0 0; }
 .monte-passos b { display: block; font-size: 22px; letter-spacing: -.02em; color: #fff; margin-bottom: 6px; }
 .monte-passos p { margin: 0; color: var(--topo-texto-2); font-size: 16px; }
-/* o convite é um cartão-resposta "sobre a mesa", cortado pela borda de baixo */
-.monte-convite { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: end; padding-top: 96px; min-height: 420px; }
-.monte-convite > p { margin: 0; padding-bottom: 96px; font-size: 22px; color: var(--topo-texto-2); max-width: 30ch; }
+/* o convite é um cartão-resposta "sobre a mesa": inclinado, mas inteiro dentro da seção */
+.monte-convite { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: center; padding-top: 96px; }
+.monte-convite > p { margin: 0; font-size: 22px; color: var(--topo-texto-2); max-width: 30ch; }
 .cartao-convite {
-    justify-self: end; width: min(100%, 600px); aspect-ratio: 7 / 5;
+    justify-self: end; width: min(100%, 560px);
     display: flex; flex-direction: column; justify-content: center; gap: 14px;
-    padding: 48px; border-radius: 4px; text-align: center;
+    padding: 56px 48px; border-radius: 4px; text-align: center;
     background: #fff; color: var(--texto);
-    transform: rotate(-2deg) translateY(60px); transform-origin: center bottom;
+    transform: rotate(-2deg);
 }
-.cartao-convite.entra.visivel { transform: rotate(-2deg) translateY(60px); }
+.cartao-convite.entra.visivel { transform: rotate(-2deg); }
 .cartao-convite h3 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -.03em; }
 .cartao-convite p { margin: 0; font-size: 17px; color: var(--texto-2); }
 .cartao-convite .botao { width: 100%; height: 58px; margin-top: 14px; background: var(--topo); border-color: transparent; color: #fff; font-size: 16px; font-weight: 700; }
@@ -2716,8 +2742,11 @@ body { overflow-x: clip; }
 .especime-bloco { position: relative; aspect-ratio: 4 / 5; border-radius: 12px; display: grid; place-items: center; overflow: hidden; background: var(--campo-1); }
 .especime:nth-child(3n+2) .especime-bloco { background: var(--campo-2); }
 .especime:nth-child(3n) .especime-bloco { background: var(--campo-3); }
-/* multiply apaga o fundo branco da foto e deixa a peça "pousada" na cor do bloco */
-.especime-bloco img { width: 78%; height: 78%; object-fit: contain; mix-blend-mode: multiply; transition: transform .5s var(--saida); }
+/* multiply apaga o fundo branco da foto e deixa a peça "pousada" na cor do bloco.
+   inset + margin auto centralizam a foto (ela é absoluta, por causa do .foto-produto);
+   o brightness leva a branco puro os fundos quase brancos, que apareciam como um quadrado. */
+.especime-bloco img { inset: 0; margin: auto; width: 78%; height: 78%; object-fit: contain; mix-blend-mode: multiply; filter: brightness(1.03); transition: transform .5s var(--saida); }
+.especime.dupla .especime-bloco img { width: 70%; height: 70%; }
 .especime:hover .especime-bloco img { transform: scale(1.04); }
 .especime.dupla { grid-column: span 2; grid-row: span 2; }
 .especime.dupla .especime-bloco { aspect-ratio: auto; flex: 1; min-height: 0; }
@@ -2730,28 +2759,31 @@ body { overflow-x: clip; }
 .especime.dupla .especime-nome b { font-size: 24px; }
 .especime.dupla .especime-nome em { font-size: 26px; }
 
-/* ---------- Por que comprar aqui: mosaico de blocos diferentes ---------- */
+/* ---------- Por que comprar aqui: motivos com ícone ao lado do vídeo ---------- */
 .porque { padding: 0 0 96px; }
-.porque-mosaico { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-rows: 96px; gap: 10px; }
-.porque-mosaico > * { position: relative; overflow: hidden; border-radius: 12px; padding: 28px; }
-.pq-titulo { grid-column: 1 / 7; grid-row: span 3; background: var(--superficie); }
-.pq-titulo h2 { margin: 0; font-size: clamp(40px, 4.6vw, 68px); font-weight: 900; line-height: 1.02; letter-spacing: -.045em; }
-.pq-video { grid-column: 7 / 13; grid-row: span 5; padding: 0; background: var(--topo); }
-.pq-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.pq-video p { position: absolute; left: 28px; right: 28px; bottom: 24px; margin: 0; max-width: 30ch; color: #fff; font-size: 20px; font-weight: 600; }
-.pq-numero { grid-column: 1 / 4; grid-row: span 3; background: var(--campo-2); }
-.pq-numero strong { display: block; font-size: clamp(56px, 6vw, 96px); font-weight: 900; line-height: .95; letter-spacing: -.05em; }
-.pq-numero span { font-size: 16px; color: var(--texto-2); }
-.pq-lista { grid-column: 4 / 7; grid-row: span 3; background: var(--campo-1); }
-.pq-lista ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 18px; }
+.porque-mosaico { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.pq-beneficios { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pq-beneficio, .pq-lista { display: flex; flex-direction: column; gap: 8px; min-height: 230px; padding: 28px; border-radius: 12px; background: var(--superficie); color: var(--texto); }
+.pq-beneficio > svg { width: 34px; height: 34px; margin-bottom: auto; color: var(--destaque); }
+.pq-beneficio h3, .pq-lista h3 { margin: 16px 0 0; font-size: 22px; font-weight: 800; line-height: 1.15; letter-spacing: -.025em; }
+.pq-beneficio p { margin: 0; font-size: 16px; color: var(--texto-2); }
+.pq-beneficio.claro { background: var(--campo-2); }
+.pq-beneficio.ciano { background: var(--ciano); color: var(--topo); transition: background .2s; }
+.pq-beneficio.ciano > svg, .pq-beneficio.ciano p { color: var(--topo); }
+.pq-beneficio.ciano:hover { background: #5fd3ff; text-decoration: none; }
+.pq-lista { background: var(--campo-1); }
+.pq-lista h3 { margin: 0 0 auto; padding-bottom: 16px; }
+.pq-lista ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 16px; }
 .pq-lista li { display: flex; justify-content: space-between; gap: 12px; }
 .pq-lista a { color: var(--texto); }
-.pq-lista li span { color: var(--texto-2); }
-.pq-frase { grid-column: 1 / 7; grid-row: span 2; background: var(--superficie); font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
-.pq-frase.destaque-ciano { grid-column: 7 / 13; background: var(--ciano); color: var(--topo); }
+.pq-lista li span { color: var(--texto-2); font-variant-numeric: tabular-nums; }
+.pq-video { position: relative; overflow: hidden; min-height: 360px; border-radius: 12px; background: var(--topo); }
+.pq-video video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.pq-video p { position: absolute; left: 28px; right: 28px; bottom: 24px; margin: 0; max-width: 30ch; color: #fff; font-size: 20px; font-weight: 600; }
 
 /* ---------- Rodapé de blocos (todas as páginas) ---------- */
-#rodape { padding: 0 10px 10px; }
+/* mesma largura e mesma margem do resto da loja (cabeçalho e conteúdo) */
+#rodape { max-width: var(--largura); margin: 0 auto; padding: 0 var(--margem) var(--margem); }
 .rodape-tabua { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; }
 .rodape-tabua > * { min-height: 220px; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
 .r-frase { grid-column: 1 / 5; background: var(--superficie); font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.25; }
@@ -2794,17 +2826,16 @@ body { overflow-x: clip; }
     .monte-topo, .monte-convite { grid-template-columns: 1fr; }
     .monte-anuncio { padding-top: 88px; }
     .monte-passos { grid-template-columns: 1fr; gap: 20px; }
-    .monte-convite { padding-top: 56px; gap: 24px; min-height: 0; }
-    .monte-convite > p { padding-bottom: 0; }
+    .monte-anuncio { padding-bottom: 80px; }
+    .monte-convite { padding-top: 56px; gap: 32px; }
     .cartao-convite,
     .cartao-convite.entra.visivel,
-    .com-rolagem .cartao-convite.entra.visivel { justify-self: center; width: 92%; aspect-ratio: auto; padding: 32px 24px; transform: rotate(-1deg) translateY(48px); }
+    .com-rolagem .cartao-convite.entra.visivel { justify-self: center; width: 94%; padding: 36px 24px; transform: rotate(-1deg); }
     .cartao-convite h3 { font-size: 26px; }
     .especimes { padding: 120px 0 88px; }
     .especimes-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .porque-mosaico { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: auto; }
-    .porque-mosaico > * { grid-column: span 2 !important; grid-row: auto !important; min-height: 120px; }
-    .pq-video { aspect-ratio: 1 / 1; }
+    .porque-mosaico { grid-template-columns: 1fr; }
+    .pq-video { min-height: 0; aspect-ratio: 4 / 3; }
     .rodape-tabua { grid-template-columns: 1fr 1fr; }
     .rodape-tabua > * { grid-column: span 2 !important; min-height: 160px; }
     .r-nav, .r-time { grid-column: span 1 !important; }
@@ -2813,7 +2844,7 @@ body { overflow-x: clip; }
 @media (max-width: 820px) {
     /* no celular: vídeo em cima, texto embaixo */
     .carrossel-grande { margin-top: -20px; height: max(560px, calc(100svh - 170px)); }
-    .slide-texto { padding: 0 16px 56px; }
+    .slide-texto { padding: 0 20px 72px; }
     .slide-texto > *, .slide-texto > p { max-width: none; }
     .slide-peca { top: 0; bottom: auto; right: 50%; transform: translateX(50%); height: 42%; max-width: none; }
     .slide.escuro .slide-cena { height: 48%; bottom: auto; }
@@ -2823,22 +2854,29 @@ body { overflow-x: clip; }
     .slide-preco { margin-top: 10px; font-size: 16px; }
     .slide-acoes { margin-top: 16px; }
     .slide-acoes .botao { flex: 1; padding: 14px 18px; }
-    .carrossel-seta { width: 44px; height: 44px; margin-top: 0; top: 18%; }
+    /* setas embaixo, à direita, na linha dos tracinhos: não ficam mais em cima da peça */
+    .carrossel-seta { width: 44px; height: 44px; margin-top: 0; top: auto; bottom: 12px; opacity: .8; }
     .carrossel-seta svg { width: 20px; height: 20px; }
-    .carrossel-marcas { bottom: 22px; padding: 0 16px; justify-content: flex-start; }
+    .carrossel-seta.ant  { left: auto; right: calc(max(20px, env(safe-area-inset-right, 0px)) + 52px); }
+    .carrossel-seta.prox { right: max(20px, env(safe-area-inset-right, 0px)); }
+    .carrossel-marcas { bottom: 32px; padding: 0 20px; justify-content: flex-start; }
     .carrossel-marcas span { width: 32px; }
-    .faixa-numeros { gap: 16px 28px; padding-top: 28px; }
-    .faixa-numeros strong { font-size: 30px; }
-    .faixa-numeros div { font-size: 14px; }
-    .sangria-dentro { padding: 0 16px; }
-    .monte-anuncio { margin-top: 64px; }
+    .faixa-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 0; padding-top: 32px; }
+    .faixa-numeros div { padding: 0 16px; font-size: 14px; }
+    .faixa-numeros div:nth-child(odd) { padding-left: 0; border-left: 0; }
+    .faixa-numeros strong { font-size: 32px; }
+    .monte-anuncio { margin-top: 48px; }
 }
 @media (max-width: 640px) {
     .especime-nome { flex-direction: column; gap: 2px; }
     .especime-nome b { font-size: 15px; }
     .especime-nome em { font-size: 16px; }
     .especime.dupla .especime-nome b { font-size: 18px; }
-    .pq-frase { font-size: 20px; }
+    .pq-beneficios { grid-template-columns: 1fr; }
+    .pq-beneficio, .pq-lista { min-height: 0; padding: 22px; }
+    .pq-beneficio > svg { margin-bottom: 4px; }
+    .pq-beneficio h3 { margin-top: 6px; }
+    .pq-video p { left: 22px; right: 22px; bottom: 18px; font-size: 17px; }
     .r-acao { font-size: 24px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -3022,3 +3060,83 @@ body { overflow-x: clip; }
     .especime-bloco img, .prateleira-foto .foto-produto { transition: none; transform: none !important; }
     .filtros { transition: none; }
 }
+
+/* =====================================================
+   REVISÃO ESTÉTICA (novembro/2026, terceira passada)
+   Barra do visualizador 3D, marca de 3D fora da foto do cartão
+   e esqueleto da página do produto. (Os ajustes da página inicial,
+   do rodapé e do aviso do servidor foram feitos nos próprios blocos.)
+   ===================================================== */
+
+/* ---------- Barra por cima do 3D (página do produto) ----------
+   Esquerda: abas 3D/Foto e o selo. Direita: botões escuros, no tom do palco.
+   Se não couber numa linha, os botões descem para a linha de baixo. */
+.visualizador-acoes { justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px; }
+.acoes-esquerda, .acoes-direita { display: flex; align-items: center; gap: 8px; min-width: 0; pointer-events: none; }
+.acoes-esquerda > *, .acoes-direita > * { pointer-events: auto; }
+.acoes-direita { margin-left: auto; }
+.visualizador-acoes .selo-3d { margin: 0; background: rgba(11, 13, 18, 0.85); color: var(--ciano); }
+.visualizador-acoes .selo-3d.generico { color: var(--palco-texto-2); }
+.botao-palco {
+    flex: none;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    min-width: 38px; height: 38px; padding: 0;
+    border: 1px solid #36404f; border-radius: 999px;
+    background: rgba(11, 13, 18, 0.85); color: var(--palco-texto);
+    font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap;
+    cursor: pointer;
+    transition: border-color .15s, color .15s, background .15s, transform .16s var(--saida);
+}
+.botao-palco.com-texto { padding: 0 14px 0 11px; }
+.botao-palco svg { flex: none; width: 18px; height: 18px; }
+.botao-palco:hover { border-color: var(--ciano); color: var(--ciano); text-decoration: none; }
+.botao-palco:active { transform: scale(.95); }
+.botao-palco:focus-visible { outline: 2px solid var(--ciano); outline-offset: 2px; }
+#btn-explodir.ligado { border-color: transparent; background: var(--ciano); color: var(--topo); }
+/* aba Foto: os botões que só valem para o 3D saem da barra (antes só ficavam invisíveis) */
+.botao-palco.escondido-foto, .visualizador-acoes .selo-3d.escondido-foto { display: none; }
+/* o nome da parte tocada fica por cima do selo, quando os dois estão embaixo */
+.info-parte { z-index: 3; }
+/* botão de dentro do aviso da parte: escuro também, com o texto em ciano */
+.info-parte .botao.pequeno { background: transparent; border-color: #36404f; color: var(--ciano); }
+.info-parte .botao.pequeno:hover { background: rgba(43, 195, 255, .12); border-color: var(--ciano); }
+/* aba Foto: fundo branco liso, igual ao da foto (o degradê deixava um quadrado branco no meio) */
+.foto-grande { background: #fff; }
+@media (max-width: 700px) {
+    /* a barra passa a cobrir o palco inteiro (sem pegar o toque): assim o selo pode
+       descer para o canto de baixo, e na linha de cima ficam só as abas e os botões */
+    .visualizador-acoes { inset: 10px; align-content: flex-start; }
+    .visualizador-acoes, .acoes-esquerda, .acoes-direita { gap: 6px; }
+    .abas-midia button { padding: 8px 11px; }
+    /* "Ver por dentro" sem o ícone: com ele a barra não cabia numa linha só */
+    .botao-palco.com-texto { padding: 0 11px; font-size: 12.5px; }
+    .botao-palco.com-texto svg { display: none; }
+    .visualizador-acoes .selo-3d { position: absolute; left: 0; bottom: 0; }
+}
+
+/* ---------- Marca de 3D no cartão: ao lado da categoria, fora da foto ---------- */
+.cartao .categoria { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cartao .categoria > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.marca-3d { position: relative; flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--destaque); white-space: nowrap; }
+.marca-3d svg { width: 14px; height: 14px; transition: transform .5s var(--saida); }
+.cartao:hover .marca-3d svg { transform: rotateY(180deg) rotateX(20deg); }
+@media (max-width: 700px) {
+    /* cartão estreito: fica só o cubo (o texto continua lá para o leitor de tela) */
+    .marca-3d span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+@media (hover: none) { .cartao:hover .marca-3d svg { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .marca-3d svg { transition: none; transform: none !important; } }
+
+/* ---------- Esqueleto da página do produto (produto.html) ---------- */
+.esq-palco, .esqueleto-produto .linha-esq { background: linear-gradient(90deg, #e3e9f1 0%, #f4f7fb 50%, #e3e9f1 100%); background-size: 200% 100%; animation: brilho-esqueleto 1.3s linear infinite; }
+.esq-palco { height: 480px; border-radius: 12px; }
+.esq-texto { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
+.esqueleto-produto .linha-esq { margin: 0; height: 14px; }
+.esqueleto-produto .esq-titulo { height: 38px; border-radius: 8px; }
+.esqueleto-produto .esq-titulo.curta { width: 55%; margin-bottom: 18px; }
+.esqueleto-produto .linha-esq.media { width: 45%; height: 36px; margin-top: 22px; }
+.esqueleto-produto .esq-botao { width: 100%; height: 52px; margin-top: 22px; border-radius: var(--raio-peq); }
+/* a página guarda a altura de uma tela: o rodapé não sobe enquanto o produto carrega */
+main:has(#esqueleto-produto) { min-height: 100vh; }
+@media (max-width: 700px) { .esq-palco { height: 340px; } }
+@media (prefers-reduced-motion: reduce) { .esq-palco, .esqueleto-produto .linha-esq { animation: none; } }

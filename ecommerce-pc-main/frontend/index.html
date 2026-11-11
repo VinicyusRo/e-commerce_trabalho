@@ -56,7 +56,7 @@
                 <div class="carrossel-marcas" id="carrossel-marcas" aria-hidden="true"></div>
             </section>
 
-            <!-- Números do catálogo (preenchidos pelo home.js com os dados de verdade) -->
+            <!-- Números do catálogo, uma vez só na página (preenchidos pelo home.js com os dados de verdade) -->
             <div class="faixa-numeros" id="faixa-numeros"></div>
 
             <!-- Propaganda do Monte seu PC -->
@@ -75,7 +75,7 @@
                     <div class="monte-convite">
                         <p class="entra">Não sabe por onde começar? Comece pelo processador. O resto a loja vai filtrando para você.</p>
                         <div class="cartao-convite entra" style="--i:1">
-                            <h3>Seu PC, peça por peça</h3>
+                            <h3>Pronto para montar o seu?</h3>
                             <p>Dá para pular qualquer passo e voltar depois.</p>
                             <a class="botao" href="/monte-seu-pc.html">Começar a montagem</a>
                         </div>
@@ -92,15 +92,36 @@
                 <div class="especimes-grade" id="especimes"></div>
             </section>
 
-            <!-- Por que comprar aqui: blocos de tipos diferentes -->
+            <!-- Por que comprar aqui: três motivos com ícone, as categorias com mais
+                 opções e o vídeo da vista explodida -->
             <section class="porque" aria-labelledby="t-porque">
+                <div class="secao-cabeca">
+                    <h2 id="t-porque" class="entra">Por que comprar aqui</h2>
+                    <p class="entra" style="--i:1">Você vê a peça por dentro, sabe se tem em estoque e monta um PC em que tudo combina.</p>
+                </div>
                 <div class="porque-mosaico">
-                    <div class="pq-titulo entra"><h2 id="t-porque">Por que comprar aqui</h2></div>
-                    <div class="pq-video entra" style="--i:1"><video id="video-explodida" src="/videos/explodida.mp4" poster="/videos/explodida.jpg" muted loop playsinline preload="metadata" aria-label="A placa de vídeo se abre em partes na vista explodida"></video><p>Ver por dentro: a peça se abre em partes e cada uma diz o nome e para que serve.</p></div>
-                    <div class="pq-numero entra" style="--i:2"><strong id="pq-total">238</strong><span id="pq-total-texto">produtos em 15 categorias, de placas de vídeo a cadeiras</span></div>
-                    <div class="pq-lista entra" style="--i:3"><ul id="pq-categorias"></ul></div>
-                    <div class="pq-frase entra">O estoque aparece em cada produto, antes de você clicar.</div>
-                    <div class="pq-frase destaque-ciano entra" style="--i:1">Servidor dormindo? O catálogo continua aberto com a cópia salva.</div>
+                    <div class="pq-beneficios">
+                        <div class="pq-beneficio entra">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>
+                            <h3>Veja por dentro em 3D</h3>
+                            <p>Gire, aproxime e abra a peça em partes antes de comprar.</p>
+                        </div>
+                        <div class="pq-beneficio claro entra" style="--i:1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8l8-4 8 4v8l-8 4-8-4V8z"/><path d="M8.5 12.2l2.4 2.4 4.8-4.8"/></svg>
+                            <h3>Estoque à vista</h3>
+                            <p>A quantidade disponível aparece no cartão de cada produto, antes do clique.</p>
+                        </div>
+                        <a class="pq-beneficio ciano entra" href="/monte-seu-pc.html">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6v4h4v6h-4v6H9v-6H5V8h4V4z"/></svg>
+                            <h3>Compatibilidade conferida</h3>
+                            <p>No Monte seu PC, soquete, memória, gabinete e fonte são conferidos a cada passo.</p>
+                        </a>
+                        <div class="pq-lista entra" style="--i:1">
+                            <h3>Onde tem mais opção</h3>
+                            <ul id="pq-categorias"></ul>
+                        </div>
+                    </div>
+                    <div class="pq-video entra" style="--i:2"><video id="video-explodida" src="/videos/explodida.mp4" poster="/videos/explodida.jpg" muted loop playsinline preload="metadata" aria-label="A placa de vídeo se abre em partes na vista explodida"></video><p>A peça se abre em partes, e cada uma diz o nome e para que serve.</p></div>
                 </div>
             </section>
         </div>
