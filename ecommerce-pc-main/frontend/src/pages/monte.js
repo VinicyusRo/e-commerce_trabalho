@@ -103,6 +103,7 @@ let alcancada = 0;        // até onde a pessoa já chegou (libera os passos do 
 let sel = {};             // { cpu: { produto, qtd }, ... } ; null = pulou
 let ordem = 'menor';
 let aviso = '';
+let carregado = false;    // vira true quando a lista de produtos chega
 
 const CHAVE = 'montagem';
 const elPassos = document.getElementById('passos');
@@ -111,11 +112,31 @@ const elResumo = document.getElementById('resumo-montagem');
 const elMensagem = document.getElementById('mensagem');
 
 function salvar() {
+    // Enquanto os produtos não chegam, "sel" ainda está vazio: guarda só o
+    // passo e mantém as peças que já estavam salvas, para não apagá-las
+    if (!carregado) {
+        try {
+            const antes = JSON.parse(localStorage.getItem(CHAVE)) ?? {};
+            localStorage.setItem(CHAVE, JSON.stringify({ ...antes, atual, alcancada, sel: antes.sel ?? {} }));
+        } catch { /* sem armazenamento */ }
+        return;
+    }
     const dados = { atual, alcancada, sel: {} };
     for (const [id, item] of Object.entries(sel)) {
         dados.sel[id] = item ? { id: item.produto.id, qtd: item.qtd } : null;
     }
     try { localStorage.setItem(CHAVE, JSON.stringify(dados)); } catch { /* sem armazenamento */ }
+}
+
+// Lê só em que passo a pessoa estava. Não precisa dos produtos, então dá
+// para desenhar o passo certo na hora, antes de o servidor responder.
+function restaurarPasso() {
+    try {
+        const dados = JSON.parse(localStorage.getItem(CHAVE));
+        if (!dados) return;
+        alcancada = Math.min(dados.alcancada ?? 0, ETAPAS.length - 1);
+        atual = Math.min(dados.atual ?? 0, alcancada);
+    } catch { /* começa do zero */ }
 }
 
 function restaurar() {
@@ -572,9 +593,44 @@ for (const botao of document.querySelectorAll('[data-modo]')) {
     botao.addEventListener('click', () => definirModo(botao.dataset.modo));
 }
 
+// Enquanto os produtos carregam: a página já aparece montada (passos,
+// título do passo e a coluna "Sua montagem"), com blocos cinza piscando
+// no lugar das peças. Assim a tela nunca fica vazia.
+function desenharEsqueleto() {
+    const etapa = ETAPAS[atual];
+    const cabeca = etapa.id === 'revisao'
+        ? '<h2>Revisão</h2>'
+        : `<div class="etapa-cabeca">
+            <span class="etapa-icone">${iconeDaCategoria(etapa.categoria)}</span>
+            <div>
+                <p class="etapa-passo">Passo ${atual + 1} de ${ETAPAS.length - 1} · opcional</p>
+                <h2>${escapar(etapa.titulo)}</h2>
+                <p class="etapa-texto">${escapar(etapa.texto)}</p>
+            </div>
+        </div>`;
+    const opcao = `<div class="opcao esqueleto">
+            <span class="opcao-imagem linha-esq"></span>
+            <span class="opcao-esq-texto"><span class="linha-esq"></span><span class="linha-esq curta"></span><span class="linha-esq media"></span></span>
+        </div>`;
+    elEtapa.innerHTML = `${cabeca}
+        <p class="etapa-contagem" role="status">Carregando peças...</p>
+        <div class="opcoes" aria-hidden="true">${opcao.repeat(6)}</div>`;
+
+    const linhas = ETAPAS.slice(0, -1).map((e, i) => `<li class="${i === atual ? 'resumo-atual' : ''}">
+            <span class="resumo-etapa">${escapar(e.titulo)}</span>
+            <span class="resumo-nome"><span class="linha-esq"></span></span>
+            <span class="resumo-valor"></span>
+        </li>`).join('');
+    elResumo.innerHTML = `
+        <h2>Sua montagem</h2>
+        <ul class="resumo-lista" aria-hidden="true">${linhas}</ul>
+        <div class="nota-total"><span>Total</span><strong><span class="linha-esq esq-total"></span></strong></div>`;
+}
+
 function desenhar() {
     atualizar3D();
     desenharPassos();
+    if (!carregado) { desenharEsqueleto(); return; }
     const etapa = ETAPAS[atual];
     if (etapa.id === 'revisao') desenharRevisao();
     else desenharEscolha(etapa);
@@ -597,6 +653,8 @@ document.getElementById('btn-sair').addEventListener('click', async () => {
 });
 
 document.getElementById('btn-recomecar').addEventListener('click', () => {
+    // Se os produtos ainda não chegaram, apaga direto a montagem salva
+    if (!carregado) { try { localStorage.removeItem(CHAVE); } catch { /* ok */ } }
     sel = {};
     atual = 0;
     alcancada = 0;
@@ -604,27 +662,37 @@ document.getElementById('btn-recomecar').addEventListener('click', () => {
     desenhar();
 });
 
+// A página aparece na hora, sem esperar o servidor:
+//  - primeira vez: a tela "Como você quer montar?" é texto fixo do HTML;
+//  - quem já escolheu o modo: passos + esqueleto das peças (desenharEsqueleto).
+// Os produtos são buscados ao mesmo tempo e entram quando chegarem.
+// (O HTML já mostra a tela certa antes mesmo deste arquivo carregar:
+//  veja o <script> pequeno no fim do monte-seu-pc.html.)
 async function iniciar() {
-    elMensagem.textContent = 'Carregando peças...';
+    restaurarPasso();
+    const salvo = lerModo();
+    if (salvo === '3d' || salvo === 'lista') {
+        definirModo(salvo);
+    } else {
+        // Primeira vez: pergunta como a pessoa quer montar
+        // (a tela de escolha tem o próprio título grande, então o topo da montagem some)
+        document.getElementById('escolha-modo').hidden = false;
+        elTopo.hidden = true;
+        elLayout.hidden = true;
+        document.getElementById('passos').hidden = true;
+        document.querySelectorAll('.modo-video').forEach(tocarQuandoVisivel);
+        observarAoRolar(document.querySelectorAll('#escolha-modo .entra'));
+    }
+
     try {
         produtos = await api('/produtos');
-        elMensagem.textContent = '';
+        carregado = true;
         restaurar();
-        const salvo = lerModo();
-        if (salvo === '3d' || salvo === 'lista') {
-            definirModo(salvo);
-        } else {
-            // Primeira vez: pergunta como a pessoa quer montar
-            // (a tela de escolha tem o próprio título grande, então o topo da montagem some)
-            document.getElementById('escolha-modo').hidden = false;
-            elTopo.hidden = true;
-            elLayout.hidden = true;
-            document.querySelectorAll('.modo-video').forEach(tocarQuandoVisivel);
-            observarAoRolar(document.querySelectorAll('#escolha-modo .entra'));
-            document.getElementById('passos').hidden = true;
-        }
+        // Só redesenha se a pessoa já está na montagem (na tela de escolha não há o que trocar)
+        if (modo) desenhar();
     } catch (erro) {
-        elMensagem.textContent = `Erro ao carregar: ${erro.message}`;
+        elMensagem.textContent = `Erro ao carregar as peças: ${erro.message}`;
+        if (modo) elEtapa.querySelector('.opcoes')?.remove();
     }
 }
 
