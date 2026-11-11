@@ -852,7 +852,7 @@ input, select, textarea { font: inherit; }
     background: var(--superficie);
     color: var(--texto);
     box-shadow: 0 24px 60px rgba(11, 42, 82, 0.25);
-    animation: janela-entra .16s ease-out;
+    animation: janela-entra .22s var(--saida);
 }
 
 .janela-confirmacao::backdrop {
@@ -863,10 +863,11 @@ input, select, textarea { font: inherit; }
 .janela-confirmacao h2 { margin: 0 0 8px; font-size: 20px; }
 .janela-confirmacao p { margin: 0 0 22px; color: var(--texto-2); }
 .janela-acoes { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
-.janela-confirmacao.saindo { opacity: 0; transform: scale(.97); transition: all .12s; }
+/* a saída é mais curta e mais discreta que a entrada */
+.janela-confirmacao.saindo { opacity: 0; transform: scale(.98); transition: opacity .12s, transform .12s; }
 
 @keyframes janela-entra {
-    from { opacity: 0; transform: translateY(8px) scale(.97); }
+    from { opacity: 0; transform: translateY(8px) scale(.96); }
     to   { opacity: 1; transform: none; }
 }
 
@@ -1409,7 +1410,7 @@ article.cartao .preco { margin-bottom: 12px; }
 /* sobre a foto clara o selo fica escuro, para dar para ler */
 .cartao-imagem.tem-foto .selo-3d { background: var(--topo); color: var(--topo-texto); border-color: transparent; }
 .cartao-imagem.tem-foto .foto-produto { transition: transform .25s ease; }
-.cartao:hover .cartao-imagem.tem-foto .foto-produto { transform: scale(1.05); }
+.cartao:hover .cartao-imagem.tem-foto .foto-produto { transform: scale(1.03); }
 
 .linha-icone.tem-foto { background: #eef1f5; }
 
@@ -2016,8 +2017,8 @@ a.prateleira-titulo:hover h3 { color: var(--destaque); }
     --folga-foto: 10px;
 }
 .prateleira-foto > svg { width: 44px; height: 44px; }
-.prateleira-foto .foto-produto { transition: transform .25s ease; }
-.prateleira-foto:hover .foto-produto { transform: scale(1.06); }
+.prateleira-foto .foto-produto { transition: transform .35s var(--saida); }
+.prateleira-foto:hover .foto-produto { transform: scale(1.04); }
 .prateleira-lista { display: flex; flex-direction: column; gap: 6px; }
 .prateleira-lista a {
     display: flex;
@@ -2206,7 +2207,7 @@ body.sem-rolagem { overflow: hidden; }
         max-height: none;
         border-radius: 0;
         transform: translateX(-105%);
-        transition: transform .2s ease;
+        transition: transform .3s var(--saida);
     }
     .filtros.aberto { transform: none; }
     .veu-filtros.visivel { display: block; position: fixed; inset: 0; z-index: 35; background: rgba(11, 42, 82, 0.45); }
@@ -2526,11 +2527,19 @@ body.sem-rolagem { overflow: hidden; }
     font-size: 15px;
     font-weight: 600;
     box-shadow: 0 12px 30px rgba(11, 42, 82, 0.3);
-    transform: translate(-50%, 160%);
+    /* escondido: um pouco abaixo e menor. A saída é rápida e curta;
+       a entrada (em .mostrar) é mais longa e freia no fim. */
+    transform: translate(-50%, 10px) scale(.97);
     opacity: 0;
-    transition: transform .4s var(--saida), opacity .3s;
+    visibility: hidden;                /* escondido, o link de dentro não recebe clique nem Tab */
+    transition: transform .18s ease-in, opacity .18s linear, visibility 0s .18s;
 }
-.aviso-flutuante.mostrar { transform: translate(-50%, 0); opacity: 1; }
+.aviso-flutuante.mostrar {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    visibility: visible;
+    transition: transform .45s var(--saida), opacity .25s linear, visibility 0s;
+}
 .aviso-flutuante a { color: var(--ciano); }
 .aviso-check { color: var(--ciano); }
 
@@ -2545,14 +2554,15 @@ body.sem-rolagem { overflow: hidden; }
 }
 
 /* 8. O cubo do selo 3D dá meia-volta */
-.selo-3d svg { transition: transform .6s var(--saida); }
+.selo-3d svg { transition: transform .5s var(--saida); }
 .cartao:hover .selo-3d svg { transform: rotateY(180deg) rotateX(20deg); }
 
 /* Quem pediu "reduzir movimento" no sistema vê tudo parado */
 @media (prefers-reduced-motion: reduce) {
     .entrando, .contador-carrinho.pula, .cartao.esqueleto .cartao-imagem, .linha-esq { animation: none; }
     .cartao, .cartao:hover, .ver-3d i, .selo-3d svg, .foto-produto, .botao, .progresso-montagem > div { transition: none; transform: none !important; }
-    .aviso-flutuante { transition: opacity .2s; transform: translate(-50%, 0); }
+    .aviso-flutuante, .aviso-flutuante.mostrar { transition: opacity .2s, visibility 0s; transform: translate(-50%, 0); }
+    .aviso-flutuante:not(.mostrar) { transition: opacity .2s, visibility 0s .2s; }
 }
 
 /* =====================================================
@@ -2622,12 +2632,14 @@ body { overflow-x: clip; }
 .slide-acoes { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
 .slide-acoes .botao { padding: 15px 26px; font-size: 16px; font-weight: 700; }
 .slide.marinho .botao.primario, .slide.escuro .botao.primario { background: var(--ciano); color: var(--topo); }
-/* o texto do slide entra em sequência quando o slide chega */
-.slide-texto > * { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--saida), transform .7s var(--saida); }
-.slide.atual .slide-texto > * { opacity: 1; transform: none; }
-.slide.atual .slide-texto > :nth-child(2) { transition-delay: .12s; }
-.slide.atual .slide-texto > :nth-child(3) { transition-delay: .22s; }
-.slide.atual .slide-texto > :nth-child(4) { transition-delay: .32s; }
+/* o texto do slide entra em sequência quando o slide chega (depois que ele
+   já andou um pouco). Na saída só apaga, rápido e sem se mexer: quem sai não
+   disputa atenção com quem entra. */
+.slide-texto > * { opacity: 0; transform: translateY(20px); transition: opacity .25s linear, transform 0s .25s; }
+.slide.atual .slide-texto > * { opacity: 1; transform: none; transition: opacity .6s var(--saida) .18s, transform .7s var(--saida) .18s; }
+.slide.atual .slide-texto > :nth-child(2) { transition-delay: .26s; }
+.slide.atual .slide-texto > :nth-child(3) { transition-delay: .33s; }
+.slide.atual .slide-texto > :nth-child(4) { transition-delay: .40s; }
 
 /* setas quase transparentes nos cantos; ficam fortes só com o mouse em cima */
 .carrossel-seta {
@@ -2706,7 +2718,7 @@ body { overflow-x: clip; }
 .especime:nth-child(3n) .especime-bloco { background: var(--campo-3); }
 /* multiply apaga o fundo branco da foto e deixa a peça "pousada" na cor do bloco */
 .especime-bloco img { width: 78%; height: 78%; object-fit: contain; mix-blend-mode: multiply; transition: transform .5s var(--saida); }
-.especime:hover .especime-bloco img { transform: scale(1.06); }
+.especime:hover .especime-bloco img { transform: scale(1.04); }
 .especime.dupla { grid-column: span 2; grid-row: span 2; }
 .especime.dupla .especime-bloco { aspect-ratio: auto; flex: 1; min-height: 0; }
 .especime-selo { position: absolute; top: 14px; left: 14px; z-index: 1; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--topo); }
@@ -2763,14 +2775,19 @@ body { overflow-x: clip; }
 
 /* ---------- Aparece ao descer, some ao subir ----------
    A classe com-rolagem só entra pelo JavaScript; sem ele, tudo aparece. */
-.com-rolagem .entra {
-    opacity: 0; transform: translateY(28px);
-    transition: opacity .7s var(--saida), transform .7s var(--saida);
-    transition-delay: calc(var(--i, 0) * 70ms);
+.com-rolagem .entra:not(.visivel) { opacity: 0; }
+/* A entrada é uma animação (não uma transição) e usa "translate" em vez de
+   "transform". Assim ela não briga com o transform de cada elemento: o cartão
+   continua subindo rápido no mouse e o convite continua inclinado.
+   "backwards" só segura o começo enquanto espera a vez; no fim não sobra nada. */
+.com-rolagem .entra.visivel {
+    animation: surgir .6s var(--saida) backwards;
+    animation-delay: calc(var(--i, 0) * 70ms);
 }
-.com-rolagem .entra.visivel { opacity: 1; transform: none; }
-.com-rolagem .cartao-convite.entra { transform: rotate(-2deg) translateY(100px); }
-.com-rolagem .cartao-convite.entra.visivel { transform: rotate(-2deg) translateY(60px); }
+@keyframes surgir { from { opacity: 0; translate: 0 var(--subida, 20px); } }
+/* peças pequenas e repetidas andam menos e mais rápido que um título */
+.com-rolagem .cartao.entra, .com-rolagem .especime.entra { --subida: 12px; }
+.com-rolagem .cartao.entra.visivel { animation-duration: .4s; }
 
 /* ---------- Tablet e celular ---------- */
 @media (max-width: 980px) {
@@ -2782,7 +2799,6 @@ body { overflow-x: clip; }
     .cartao-convite,
     .cartao-convite.entra.visivel,
     .com-rolagem .cartao-convite.entra.visivel { justify-self: center; width: 92%; aspect-ratio: auto; padding: 32px 24px; transform: rotate(-1deg) translateY(48px); }
-    .com-rolagem .cartao-convite.entra { transform: rotate(-1deg) translateY(80px); }
     .cartao-convite h3 { font-size: 26px; }
     .especimes { padding: 120px 0 88px; }
     .especimes-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2829,7 +2845,7 @@ body { overflow-x: clip; }
     .carrossel-trilho { transition: none; }
     .slide-texto > * { opacity: 1; transform: none; transition: none; }
     .carrossel-marcas span.ligada i { animation: none; transform: none; }
-    .com-rolagem .entra { opacity: 1; transform: none; transition: none; }
+    .com-rolagem .entra, .com-rolagem .entra.visivel { opacity: 1; animation: none; }
 }
 
 /* =====================================================
@@ -2960,4 +2976,49 @@ body { overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) {
     .modo { transition: none; }
     .modo:hover { transform: none; }
+}
+
+/* =====================================================
+   REVISÃO DE MOVIMENTO (novembro/2026, segunda passada)
+   Botão de pausar dos vídeos e ajustes para tela de toque.
+   ===================================================== */
+/* Botão de pausar/tocar no canto dos vídeos soltos (componentes/carrossel-destaque.js).
+   Fica discreto e ganha força com o mouse em cima do vídeo ou com o foco do teclado. */
+.video-caixa { position: relative; }
+.video-controle {
+    position: absolute; z-index: 2; right: 12px; bottom: 12px;
+    width: 40px; height: 40px; padding: 0;
+    display: grid; place-items: center;
+    border: 0; border-radius: 50%; cursor: pointer;
+    background: rgba(16, 20, 28, .55); color: #fff;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22);   /* aro claro: aparece também em vídeo escuro */
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    opacity: .75;
+    transition: opacity .2s, background .2s, transform .16s var(--saida);
+}
+.video-controle svg { width: 18px; height: 18px; }
+.video-caixa:hover .video-controle, .video-controle:focus-visible { opacity: 1; }
+.video-controle:hover { background: rgba(16, 20, 28, .8); }
+.video-controle:active { transform: scale(.94); }
+.video-controle:focus-visible { outline: 3px solid var(--ciano); outline-offset: 2px; }
+/* no bloco "Ver por dentro" a legenda ocupa a parte de baixo: o botão sobe */
+.pq-video .video-controle { top: 12px; bottom: auto; }
+/* em cima da área de toque do botão, para o dedo acertar (44px) */
+.video-controle::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; }
+
+/* Tela de toque não tem mouse "em cima": sem isto o cartão ficava levantado
+   depois do toque, até tocar em outro lugar. */
+@media (hover: none) {
+    .cartao:hover, .carrossel .cartao:hover, .modo:hover { transform: none; box-shadow: none; }
+    .cartao:hover .cartao-imagem.tem-foto .foto-produto,
+    .cartao:hover .cartao-imagem > svg,
+    .cartao:hover .selo-3d svg,
+    .prateleira-foto:hover .foto-produto,
+    .especime:hover .especime-bloco img { transform: none; }
+    .video-controle { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .video-controle, .janela-confirmacao, .janela-confirmacao.saindo { transition: none; animation: none; }
+    .especime-bloco img, .prateleira-foto .foto-produto { transition: none; transform: none !important; }
+    .filtros { transition: none; }
 }
