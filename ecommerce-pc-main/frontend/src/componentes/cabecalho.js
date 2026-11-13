@@ -44,6 +44,8 @@ export function montarCabecalho() {
         </a>
 
         <form class="busca" action="/" method="get" role="search">
+            <!-- A busca sempre abre a página "Todos os produtos", com os filtros na lateral -->
+            <input type="hidden" name="grupo" value="todos">
             <span class="busca-icone" aria-hidden="true">${ICONES.busca}</span>
             <input type="search" name="busca" placeholder="Buscar placas de vídeo, processadores..."
                    aria-label="Buscar produtos">
@@ -75,9 +77,10 @@ export function montarCabecalho() {
         <nav class="deptos" aria-label="Departamentos">
             <button class="deptos-botao" type="button" aria-expanded="false" aria-controls="menu-deptos" aria-label="Departamentos">☰<span class="deptos-rotulo"> Departamentos</span></button>
             <a href="/" data-inicio>⌂ Início</a>
+            <a class="deptos-todos" href="/?grupo=todos" data-grupo="todos">Todos<span class="deptos-longo"> os produtos</span></a>
             <a href="/?grupo=hardware" data-grupo="hardware">Hardware</a>
             <a href="/?grupo=perifericos" data-grupo="perifericos">Periféricos</a>
-            <a class="deptos-3d" href="/?grupo=3d" data-grupo="3d">${ICONES.cubo}<span><span class="deptos-3d-longo">Peças com </span>3D próprio</span></a>
+            <a class="deptos-3d" href="/?grupo=3d" data-grupo="3d">${ICONES.cubo}<span><span class="deptos-longo">Peças com </span>3D próprio</span></a>
             <!-- Frases curtas sobre o que o site tem de diferente: preenchem o espaço
                  da barra no computador e somem no celular (ver estilo.css) -->
             <div class="deptos-vantagens" aria-hidden="true">
@@ -93,7 +96,7 @@ export function montarCabecalho() {
     // Usamos .value (e não innerHTML) de propósito: o texto vem da URL
     // e não deve virar HTML (evita XSS).
     const termo = new URLSearchParams(window.location.search).get('busca');
-    if (termo) alvo.querySelector('input').value = termo;
+    if (termo) alvo.querySelector('input[type="search"]').value = termo;
 
     montarDepartamentos(alvo);
 
@@ -148,7 +151,9 @@ function montarDepartamentos(alvo) {
                 ${daColuna.map((c) => `<a href="/?grupo=${g}&categoria=${c.id}">${escapar(c.nome)} <span>${c.total_produtos}</span></a>`).join('')}
             </div>`;
         });
-        menu.innerHTML = colunas.join('');
+        const total = categorias.reduce((soma, c) => soma + c.total_produtos, 0);
+        menu.innerHTML = `<a class="menu-todos menu-tudo" href="/?grupo=todos">Ver todos os produtos <span>${total}</span></a>`
+            + colunas.join('');
     }
 
     desenharCategorias(categoriasSalvas);

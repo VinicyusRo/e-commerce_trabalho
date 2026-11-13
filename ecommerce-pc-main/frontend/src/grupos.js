@@ -7,6 +7,8 @@
 const PERIFERICOS = ['Monitores', 'Teclados', 'Mouses', 'Headsets e fones', 'Controles', 'Cadeiras'];
 
 export const GRUPOS = {
+    // Página com o catálogo inteiro: é para ela que a busca do cabeçalho leva
+    todos:       { nome: 'Todos os produtos',    contem: () => true },
     hardware:    { nome: 'Hardware',             contem: (p) => !PERIFERICOS.includes(p.categoria) },
     perifericos: { nome: 'Periféricos',          contem: (p) => PERIFERICOS.includes(p.categoria) },
     '3d':        { nome: 'Peças com 3D próprio', contem: (p) => p.destaque === true },
