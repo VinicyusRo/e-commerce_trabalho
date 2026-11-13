@@ -116,7 +116,7 @@ function desenharCategorias() {
     const contagem = {};
     base.forEach((p) => { contagem[p.categoria_id] = (contagem[p.categoria_id] ?? 0) + 1; });
 
-    const titulo = estado.grupo ? `Todos em ${GRUPOS[estado.grupo].nome}` : 'Todas';
+    const titulo = estado.grupo && estado.grupo !== 'todos' ? `Todos em ${GRUPOS[estado.grupo].nome}` : 'Todas';
     const linhas = [`<button type="button" class="opcao-categoria ${!estado.categoria ? 'ativa' : ''}" data-categoria="">
         ${escapar(titulo)}<span>${base.length}</span></button>`];
     for (const c of categorias) {
@@ -191,6 +191,7 @@ function desenharFaixas() {
 // Filtros ligados, cada um com um "x" para tirar
 function desenharChips() {
     const chips = [];
+    if (estado.busca) chips.push(['busca', `Busca: "${estado.busca}"`]);
     if (estado.categoria) chips.push(['categoria', nomeDaCategoria(estado.categoria)]);
     if (estado.min !== null || estado.max !== null) {
         chips.push(['preco', estado.max === null ? `Acima de ${formatarPreco(estado.min)}`
@@ -212,7 +213,8 @@ function desenharChips() {
 function desenharTrilha() {
     const partes = ['<a href="/">Início</a>'];
     if (estado.grupo) {
-        partes.push(estado.categoria
+        // vira link quando há algo depois dele (categoria ou busca), para voltar à lista completa
+        partes.push(estado.categoria || estado.busca
             ? `<a href="/?grupo=${estado.grupo}">${GRUPOS[estado.grupo].nome}</a>`
             : `<span>${GRUPOS[estado.grupo].nome}</span>`);
     }
@@ -380,6 +382,8 @@ $('chips').addEventListener('click', (e) => {
     if (!chip) return;
     const chave = chip.dataset.chip;
     if (chave === 'categoria') { escolherCategoria(null); return; }
+    // Tirar a busca recarrega a lista completa (a busca é feita no servidor)
+    if (chave === 'busca') { location.href = `/?grupo=${estado.grupo ?? 'todos'}`; return; }
     if (chave === 'preco') {
         estado.min = estado.max = null;
         $('preco-min').value = $('preco-max').value = '';
