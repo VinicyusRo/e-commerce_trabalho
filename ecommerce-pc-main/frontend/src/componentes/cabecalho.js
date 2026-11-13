@@ -77,6 +77,13 @@ export function montarCabecalho() {
             <a href="/" data-inicio>⌂ Início</a>
             <a href="/?grupo=hardware" data-grupo="hardware">Hardware</a>
             <a href="/?grupo=perifericos" data-grupo="perifericos">Periféricos</a>
+            <a class="deptos-3d" href="/?grupo=3d" data-grupo="3d">${ICONES.cubo}<span><span class="deptos-3d-longo">Peças com </span>3D próprio</span></a>
+            <!-- Frases curtas sobre o que o site tem de diferente: preenchem o espaço
+                 da barra no computador e somem no celular (ver estilo.css) -->
+            <div class="deptos-vantagens" aria-hidden="true">
+                <span>${ICONES.cubo}<b>Cada peça em 3D</b></span>
+                <span>${ICONES.montar}Compatibilidade checada</span>
+            </div>
             <a class="deptos-monte" href="/monte-seu-pc.html">Monte seu PC completo ›</a>
         </nav>
         <div class="menu-deptos" id="menu-deptos" hidden></div>
