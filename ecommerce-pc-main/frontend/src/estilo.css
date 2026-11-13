@@ -185,6 +185,30 @@ h2 { font-size: 22px; font-weight: 700; margin-top: 32px; }
 .deptos-botao { border: 1px solid rgba(255, 255, 255, 0.35); color: var(--topo-texto); font-weight: 600; margin-right: 4px; }
 .deptos-botao:hover, .deptos-botao[aria-expanded="true"] { background: var(--topo-2); }
 .deptos a.deptos-monte { margin-left: auto; background: var(--ciano); color: var(--topo); font-weight: 700; }
+/* Link do departamento "Peças com 3D próprio" (o diferencial de Computação Gráfica) */
+.deptos a.deptos-3d { display: inline-flex; align-items: center; gap: 6px; color: var(--topo-texto); }
+.deptos a.deptos-3d svg { width: 16px; height: 16px; color: var(--ciano); flex: none; }
+/* Frases de vantagens no meio da barra: ocupam o espaço que sobra e
+   escondem o que não couber (overflow: hidden), sem empurrar o botão */
+.deptos-vantagens {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    color: var(--topo-texto-2);
+    font-size: 13px;
+    white-space: nowrap;
+}
+.deptos-vantagens span { display: inline-flex; align-items: center; gap: 6px; }
+.deptos-vantagens svg { width: 15px; height: 15px; color: var(--ciano); flex: none; }
+.deptos-vantagens b { color: var(--topo-texto); font-weight: 600; }
+.deptos-vantagens + a.deptos-monte { margin-left: 0; }
+/* Em telas médias (tablet) as frases não cabem: some tudo junto */
+@media (max-width: 1100px) { .deptos-vantagens { display: none; } .deptos a.deptos-monte { margin-left: auto; } }
+/* No tablet o link do 3D fica mais curto ("3D próprio") para tudo caber numa linha */
+@media (max-width: 960px) { .deptos-3d-longo { display: none; } }
 .deptos a.deptos-monte:hover { background: #7ad8ff; color: var(--topo); }
 
 .menu-deptos {
@@ -779,7 +803,7 @@ input, select, textarea { font: inherit; }
     .deptos { display: grid; grid-template-columns: auto 1fr 1fr; gap: 6px; overflow: visible; }
     .deptos a, .deptos-botao { padding: 6px 8px; text-align: center; }
     .deptos-botao { margin-right: 0; }
-    .deptos a[data-inicio] { display: none; }
+    .deptos a[data-inicio], .deptos a.deptos-3d { display: none; }
     .deptos a.deptos-monte { margin-left: 0; grid-column: 1 / -1; }
     #cabecalho .busca { order: 3; flex-basis: 100%; max-width: none; }
     .nav-link span:not(.contador-carrinho) { display: none; }   /* só ícones */
