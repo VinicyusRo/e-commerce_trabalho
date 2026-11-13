@@ -8,9 +8,6 @@ import { montarRodape } from './rodape.js';
 // a barra de departamentos aparece completa na hora, sem esperar o servidor ligar
 import categoriasSalvas from '../../public/dados-offline/categorias.json';
 
-// Atalhos da barra de departamentos (só aparecem se a categoria existir no banco)
-const ATALHOS = ['Placas de vídeo', 'Processadores', 'Monitores', 'Teclados', 'Mouses'];
-
 // Primeiro nome do usuário logado (salvo no login), ex.: "Vinicyus"
 function primeiroNome() {
     try {
@@ -76,11 +73,10 @@ export function montarCabecalho() {
       </div>
       <div class="deptos-linha">
         <nav class="deptos" aria-label="Departamentos">
-            <button class="deptos-botao" type="button" aria-expanded="false" aria-controls="menu-deptos">☰ Departamentos</button>
+            <button class="deptos-botao" type="button" aria-expanded="false" aria-controls="menu-deptos" aria-label="Departamentos">☰<span class="deptos-rotulo"> Departamentos</span></button>
             <a href="/" data-inicio>⌂ Início</a>
             <a href="/?grupo=hardware" data-grupo="hardware">Hardware</a>
             <a href="/?grupo=perifericos" data-grupo="perifericos">Periféricos</a>
-            <span class="deptos-atalhos"></span>
             <a class="deptos-monte" href="/monte-seu-pc.html">Monte seu PC completo ›</a>
         </nav>
         <div class="menu-deptos" id="menu-deptos" hidden></div>
@@ -130,7 +126,10 @@ function montarDepartamentos(alvo) {
     document.addEventListener('click', (e) => { if (!e.target.closest('.deptos-botao, #menu-deptos')) abrirMenu(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') abrirMenu(false); });
 
-    // Desenha o menu e os atalhos na hora com a cópia salva; quando o
+    // A barra mostra só os departamentos principais (Início, Hardware, Periféricos).
+    // As categorias específicas ficam dentro do menu "Departamentos", para a barra
+    // não ficar comprida demais e não "vazar" para o lado no celular.
+    // Desenha o menu na hora com a cópia salva; quando o
     // servidor responde, desenha de novo com os números atualizados
     function desenharCategorias(categorias) {
         const colunas = ['hardware', 'perifericos'].map((g) => {
@@ -143,13 +142,6 @@ function montarDepartamentos(alvo) {
             </div>`;
         });
         menu.innerHTML = colunas.join('');
-
-        alvo.querySelector('.deptos-atalhos').innerHTML = ATALHOS
-            .map((nome) => categorias.find((c) => c.nome === nome))
-            .filter(Boolean)
-            .map((c) => `<a href="/?grupo=${grupoDaCategoria(c.nome)}&categoria=${c.id}" data-categoria="${c.id}">${escapar(c.nome)}</a>`)
-            .join('');
-        marcarAtivo(alvo);
     }
 
     desenharCategorias(categoriasSalvas);

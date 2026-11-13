@@ -168,7 +168,7 @@ h2 { font-size: 22px; font-weight: 700; margin-top: 32px; }
 .deptos-linha { position: relative; max-width: 1320px; margin: 0 auto; padding: 0 32px 10px; }
 .deptos { display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; }
 .deptos::-webkit-scrollbar { display: none; }
-.deptos a, .deptos-botao, .deptos-atalhos a {
+.deptos a, .deptos-botao {
     flex: none;
     padding: 6px 12px;
     border: 0;
@@ -180,7 +180,6 @@ h2 { font-size: 22px; font-weight: 700; margin-top: 32px; }
     white-space: nowrap;
     cursor: pointer;
 }
-.deptos-atalhos { display: contents; }
 .deptos a:hover { background: var(--topo-2); color: var(--topo-texto); text-decoration: none; }
 .deptos a.ativo { background: var(--topo-2); color: var(--topo-texto); box-shadow: inset 0 -2px 0 var(--ciano); }
 .deptos-botao { border: 1px solid rgba(255, 255, 255, 0.35); color: var(--topo-texto); font-weight: 600; margin-right: 4px; }
@@ -775,7 +774,13 @@ input, select, textarea { font: inherit; }
     .cabecalho-linha > nav { margin-left: auto; }
     .deptos-linha { padding: 0 16px 8px; }
     .menu-deptos { left: 16px; grid-template-columns: 1fr; }
-    .deptos a.deptos-monte { margin-left: 0; }
+    /* No celular a barra não rola para o lado: "Início" some (a logo já leva
+       ao início) e o "Monte seu PC" desce para uma linha própria, inteira */
+    .deptos { display: grid; grid-template-columns: auto 1fr 1fr; gap: 6px; overflow: visible; }
+    .deptos a, .deptos-botao { padding: 6px 8px; text-align: center; }
+    .deptos-botao { margin-right: 0; }
+    .deptos a[data-inicio] { display: none; }
+    .deptos a.deptos-monte { margin-left: 0; grid-column: 1 / -1; }
     #cabecalho .busca { order: 3; flex-basis: 100%; max-width: none; }
     .nav-link span:not(.contador-carrinho) { display: none; }   /* só ícones */
 
@@ -3140,3 +3145,9 @@ body { overflow-x: clip; }
 main:has(#esqueleto-produto) { min-height: 100vh; }
 @media (max-width: 700px) { .esq-palco { height: 340px; } }
 @media (prefers-reduced-motion: reduce) { .esq-palco, .esqueleto-produto .linha-esq { animation: none; } }
+
+/* Celular bem estreito (até 360px): o botão do menu vira só "☰" para caber */
+@media (max-width: 360px) {
+    .deptos-rotulo { display: none; }
+    .deptos-botao { padding: 6px 14px; }
+}
